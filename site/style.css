@@ -1,0 +1,733 @@
+/* ==========================================================
+   Observatoire Kati Thanda – Lake Eyre
+   Palette minérale : croûte de sel, eau de crue, halite rose
+   ========================================================== */
+
+:root {
+  --salt: #F5F2EC;          /* fond — croûte de sel */
+  --panel: #FFFFFF;
+  --panel-edge: #E4DDD0;
+  --basin: #241F1A;         /* encre — sédiment du fond */
+  --dune: #7C7466;          /* texte secondaire */
+  --grid: #E9E3D6;
+  --flood: #1E5F6B;         /* eau de crue — données */
+  --flood-deep: #134450;
+  --halite: #C4536B;        /* rose halobactéries — observation courante */
+  --ochre: #A8702D;
+
+  --font-display: "Bricolage Grotesque", system-ui, sans-serif;
+  --font-body: "Archivo", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  --radius: 10px;
+  --gap: 20px;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  * { animation: none !important; transition: none !important; }
+}
+
+body {
+  margin: 0;
+  background: var(--salt);
+  color: var(--basin);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+.mono { font-family: var(--font-mono); }
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+  background: var(--grid);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--flood);
+  outline-offset: 2px;
+}
+
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+}
+
+/* ── Bandeau démo ─────────────────────────────────────────── */
+
+.demo-banner {
+  background: var(--ochre);
+  color: #FFF;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  padding: 8px 28px;
+}
+.demo-banner code { background: rgba(255,255,255,.18); color: #FFF; }
+
+/* ── En-tête ──────────────────────────────────────────────── */
+
+.site-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--gap);
+  padding: 34px 28px 22px;
+  border-bottom: 1px solid var(--panel-edge);
+}
+
+.eyebrow {
+  margin: 0 0 4px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--dune);
+}
+
+.site-header h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(1.7rem, 3.4vw, 2.5rem);
+  letter-spacing: -0.015em;
+  line-height: 1.05;
+}
+
+.header-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  font-size: 12.5px;
+  color: var(--dune);
+  padding-bottom: 4px;
+}
+.header-label {
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+#generated-at { color: var(--basin); }
+
+.header-update {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.refresh-btn {
+  margin-top: 8px;
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #FFF;
+  background: var(--flood);
+  border: none;
+  border-radius: 6px;
+  padding: 7px 14px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+.refresh-btn:hover { background: var(--flood-deep); }
+.refresh-btn:disabled {
+  background: var(--dune);
+  cursor: progress;
+}
+
+.refresh-status {
+  margin: 6px 0 0;
+  font-size: 11px;
+  color: var(--dune);
+  text-align: right;
+  max-width: 300px;
+}
+.refresh-status.error { color: var(--ochre); }
+
+/* ── Structure générale ───────────────────────────────────── */
+
+main {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: var(--gap) 28px 40px;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--panel-edge);
+  border-radius: var(--radius);
+}
+
+.panel-head { padding: 18px 22px 0; }
+.panel-head h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.25rem;
+  letter-spacing: -0.01em;
+}
+
+/* ── État vide ────────────────────────────────────────────── */
+
+.empty-state {
+  padding: 48px 32px;
+  text-align: center;
+}
+.empty-state h2 {
+  font-family: var(--font-display);
+  margin: 0 0 8px;
+}
+.empty-state p { margin: 6px 0; color: var(--dune); }
+.empty-state .mono { color: var(--basin); font-size: 13px; }
+
+/* ── Volet 1 : niveau + carte ─────────────────────────────── */
+
+/* La carte occupe toute la largeur : c'est la piece maitresse */
+.map-card { margin-bottom: var(--gap); }
+
+/* Niveau d'eau et chronique dans un meme panneau */
+.level-series {
+  display: grid;
+  grid-template-columns: minmax(300px, 4fr) 8fr;
+  gap: 0;
+  margin-bottom: var(--gap);
+  overflow: hidden;
+}
+.level-series .level-card { border-right: 1px solid var(--panel-edge); }
+.level-series .chart-card { margin-bottom: 0; }
+
+.level-card { padding: 20px 22px; display: flex; flex-direction: column; }
+
+.level-card-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.site-select {
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--basin);
+  background: var(--salt);
+  border: 1px solid var(--panel-edge);
+  border-radius: 6px;
+  padding: 5px 8px;
+}
+
+.level-reading {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  flex: 1;
+  align-items: stretch;
+}
+
+.level-value {
+  margin: 6px 0 2px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(3.1rem, 6vw, 4.4rem);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  color: var(--flood-deep);
+}
+.level-unit {
+  font-size: 0.42em;
+  font-weight: 600;
+  color: var(--dune);
+  letter-spacing: 0;
+}
+
+.level-datum {
+  margin: 0 0 16px;
+  font-size: 11.5px;
+  color: var(--dune);
+}
+
+.level-meta {
+  margin: 0;
+  display: grid;
+  gap: 9px;
+  font-size: 12.5px;
+}
+.level-meta div { display: flex; justify-content: space-between; gap: 12px; }
+.level-meta dt {
+  color: var(--dune);
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding-top: 2px;
+}
+.level-meta dd { margin: 0; text-align: right; }
+
+/* Échelle limnimétrique — élément signature */
+.gauge-wrap {
+  margin: 0;
+  display: flex;
+  align-items: stretch;
+}
+#gauge { height: 100%; min-height: 260px; width: 120px; }
+
+.gauge-axis   { stroke: var(--basin); stroke-width: 1.4; }
+.gauge-tick   { stroke: var(--basin); stroke-width: 1.1; }
+.gauge-tick-minor { stroke: var(--dune); stroke-width: 0.7; }
+.gauge-label  { font-family: var(--font-mono); font-size: 10px; fill: var(--dune); }
+.gauge-range  { fill: var(--flood); opacity: 0.13; }
+.gauge-now    { stroke: var(--halite); stroke-width: 2; }
+.gauge-now-marker { fill: var(--halite); }
+.gauge-now-label {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  fill: var(--halite);
+}
+
+.map-card {
+  overflow: hidden;
+  min-height: 700px;
+  display: flex;
+  flex-direction: column;
+}
+.map-wrap { position: relative; flex: 1; min-height: 620px; display: flex; }
+#map { width: 100%; flex: 1; min-height: 620px; }
+
+/* Message d'état du modèle, posé sur la carte */
+.map-message {
+  position: absolute;
+  left: 50%; top: 14px;
+  transform: translateX(-50%);
+  z-index: 600;
+  max-width: 82%;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid var(--ochre);
+  border-left: 3px solid var(--ochre);
+  border-radius: 6px;
+  padding: 7px 12px;
+  font-size: 11.5px;
+  color: var(--basin);
+  box-shadow: 0 1px 6px rgba(0,0,0,.14);
+}
+
+/* Légende du modèle, posée sur la carte */
+.map-legend {
+  position: absolute;
+  left: 12px; bottom: 22px;
+  z-index: 500;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas: "title bar bar" "min bar bar";
+  align-items: center;
+  gap: 2px 8px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--panel-edge);
+  border-radius: 7px;
+  padding: 7px 10px;
+  font-size: 10.5px;
+  color: var(--basin);
+  box-shadow: 0 1px 6px rgba(0,0,0,.12);
+}
+.map-legend > span:first-child { grid-area: title; font-weight: 600; }
+.legend-bar {
+  grid-area: bar;
+  display: block;
+  width: 110px; height: 9px;
+  border-radius: 2px;
+  background: linear-gradient(to right, #30123b, #4145ab, #4675ed,
+    #39a2fc, #1bcfd4, #62fc6b, #d2e935, #fe9b2d, #ea4a13, #7a0403);
+}
+#legend-min { grid-area: min; }
+#legend-max { grid-area: min; justify-self: end; }
+.map-legend { grid-template-areas: "title title" "bar bar" "min max";
+              grid-template-columns: 1fr 1fr; }
+.legend-bar { width: 100%; }
+
+/* Barre fond de carte / imagerie */
+.map-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--panel-edge);
+  background: var(--panel);
+}
+
+.seg {
+  display: inline-flex;
+  border: 1px solid var(--panel-edge);
+  border-radius: 7px;
+  overflow: hidden;
+}
+.seg-btn {
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--dune);
+  background: var(--panel);
+  border: none;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+.seg-btn + .seg-btn { border-left: 1px solid var(--panel-edge); }
+.seg-btn.active { background: var(--flood); color: #FFF; }
+.seg-btn:not(.active):hover { color: var(--basin); background: var(--salt); }
+
+.imagery-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+.arrow-size-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--dune);
+}
+.arrow-size-wrap input[type="range"] { width: 78px; accent-color: var(--flood); }
+
+.imagery-controls input[type="date"] {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--basin);
+  background: var(--salt);
+  border: 1px solid var(--panel-edge);
+  border-radius: 6px;
+  padding: 4px 6px;
+}
+.date-btn {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--basin);
+  background: var(--salt);
+  border: 1px solid var(--panel-edge);
+  border-radius: 6px;
+  padding: 4px 9px;
+  cursor: pointer;
+}
+.date-btn:hover { background: var(--grid); }
+.date-btn:disabled { color: var(--dune); cursor: default; background: var(--salt); }
+.date-btn-latest.active { background: var(--halite); border-color: var(--halite); color: #FFF; }
+
+.leaflet-container { font-family: var(--font-body); }
+.marker-halo { background: transparent; border: none; }
+.marker-dot {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: var(--flood);
+  border: 2.5px solid #FFF;
+  box-shadow: 0 1px 4px rgba(0,0,0,.35);
+}
+.marker-dot.selected { background: var(--halite); }
+
+/* Stations meteo : losange ocre */
+.marker-wx {
+  width: 11px; height: 11px;
+  background: var(--ochre);
+  border: 2px solid #FFF;
+  box-shadow: 0 1px 3px rgba(0,0,0,.35);
+  transform: rotate(45deg);
+}
+
+/* ── Volet 2 : météo BOM ──────────────────────────────────── */
+
+.weather-card { margin-bottom: var(--gap); }
+.weather-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.weather-updated { margin: 0; font-size: 11.5px; color: var(--dune); }
+.weather-updated.warn { color: var(--ochre); }
+
+.weather-history { padding: 4px 16px 14px; }
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--basin);
+  background: var(--salt);
+  border: 1px solid var(--panel-edge);
+  border-radius: 6px;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+.toggle input { margin: 0; accent-color: var(--flood); }
+
+.field-note {
+  margin: 0;
+  padding: 6px 22px 0;
+  font-size: 12px;
+  color: var(--dune);
+}
+.field-note.warn { color: var(--ochre); }
+
+.weather-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 14px;
+  padding: 16px 22px 20px;
+}
+.weather-empty { color: var(--dune); font-size: 12.5px; margin: 0; }
+
+.wx-card {
+  border: 1px solid var(--panel-edge);
+  border-radius: 8px;
+  padding: 12px 14px;
+  background: var(--salt);
+}
+.wx-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.wx-name { font-weight: 600; font-size: 14px; }
+.wx-age { font-size: 10.5px; color: var(--dune); }
+.wx-age.warn { color: var(--ochre); }
+
+.wx-wind {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.wx-arrow {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  background: var(--panel);
+  border: 1px solid var(--panel-edge);
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+.wx-arrow svg { display: block; }
+.wx-arrow .arr { fill: var(--flood-deep); }
+.wx-wind-main { font-weight: 600; font-size: 14.5px; display: block; }
+.wx-gust { font-size: 11px; color: var(--dune); display: block; }
+
+.wx-meta {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  font-size: 11.5px;
+  color: var(--dune);
+}
+.wx-meta b { color: var(--basin); font-weight: 500; }
+.wx-error { font-size: 11.5px; color: var(--ochre); margin: 6px 0 0; }
+
+/* ── Volet 2 : série temporelle ───────────────────────────── */
+
+.chart-card { margin-bottom: var(--gap); }
+.chart { width: 100%; height: 330px; padding: 4px 10px 0; }
+.chart-note {
+  margin: 0;
+  padding: 0 22px 16px;
+  font-size: 12.5px;
+  color: var(--dune);
+}
+
+/* ── Volet 4 : scénario Delft3D ───────────────────────────── */
+
+.model-card { padding-bottom: 20px; margin-bottom: var(--gap); }
+
+.scenario-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.scenario-actions { display: flex; gap: 8px; align-items: center; }
+
+.timeline {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-top: 1px solid var(--panel-edge);
+  background: var(--panel);
+  font-size: 11.5px;
+  color: var(--dune);
+}
+.timeline input[type="range"] {
+  flex: 1;
+  accent-color: var(--flood);
+  height: 3px;
+}
+#tl-label {
+  min-width: 132px;
+  text-align: right;
+  color: var(--basin);
+  font-variant-numeric: tabular-nums;
+}
+#tl-play { min-width: 34px; }
+
+.scenario-empty, .scenario-error {
+  margin: 0;
+  padding: 18px 22px;
+  font-size: 12.5px;
+  color: var(--dune);
+}
+.scenario-error { color: var(--ochre); }
+.scenario-error code { background: var(--grid); color: var(--basin); }
+
+/* Conditions -> paramètres du scénario */
+.match-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 12px;
+  padding: 16px 22px 4px;
+}
+.match-item {
+  border: 1px solid var(--panel-edge);
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: var(--salt);
+}
+.match-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--dune);
+  display: block;
+  margin-bottom: 5px;
+}
+.match-values {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  font-variant-numeric: tabular-nums;
+}
+.match-obs { font-size: 15px; font-weight: 600; }
+.match-arrow { color: var(--dune); font-size: 12px; }
+.match-sim { font-size: 15px; font-weight: 600; color: var(--flood-deep); }
+.match-delta {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--dune);
+  display: block;
+  margin-top: 3px;
+}
+.match-item.out { border-color: var(--ochre); }
+.match-item.out .match-delta { color: var(--ochre); }
+
+.alt-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 12px 22px 2px;
+}
+.alt-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--dune);
+  margin-right: 4px;
+}
+.alt-chip {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--basin);
+  background: var(--salt);
+  border: 1px solid var(--panel-edge);
+  border-radius: 6px;
+  padding: 4px 8px;
+  cursor: pointer;
+  display: inline-flex;
+  gap: 6px;
+  align-items: baseline;
+}
+.alt-chip:hover { background: var(--grid); }
+.alt-chip.active {
+  background: var(--flood);
+  border-color: var(--flood);
+  color: #FFF;
+}
+.alt-d { opacity: 0.65; font-size: 10px; }
+
+.scenario-file {
+  margin: 10px 22px 0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--dune);
+  word-break: break-all;
+}
+.scenario-warnings {
+  margin: 10px 22px 0;
+  padding: 9px 12px;
+  border-left: 3px solid var(--ochre);
+  background: rgba(168, 112, 45, 0.07);
+  font-size: 12px;
+  color: var(--basin);
+  list-style: none;
+}
+.scenario-warnings li + li { margin-top: 4px; }
+
+
+.field-note {
+  margin: 0;
+  padding: 6px 22px 0;
+  font-size: 12px;
+  color: var(--dune);
+}
+
+/* ── Pied de page ─────────────────────────────────────────── */
+
+.site-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 24px;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 28px 32px;
+  font-size: 11.5px;
+  color: var(--dune);
+}
+
+/* ── Réactif ──────────────────────────────────────────────── */
+
+@media (max-width: 940px) {
+  .level-series { grid-template-columns: 1fr; }
+  .level-series .level-card {
+    border-right: none;
+    border-bottom: 1px solid var(--panel-edge);
+  }
+  .map-card { min-height: 520px; }
+  .map-wrap, #map { min-height: 440px; }
+  .site-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .header-right { align-items: flex-start; }
+}
+
+@media (max-width: 560px) {
+  main, .site-header, .site-footer { padding-left: 16px; padding-right: 16px; }
+  .level-reading { grid-template-columns: 1fr; }
+  .gauge-wrap { justify-content: center; }
+  #gauge { min-height: 220px; }
+}

@@ -1,0 +1,148 @@
+{
+ "generated_at": "2026-08-12T02:30:46Z",
+ "n_scenarios": 790,
+ "bounds": {
+  "flow": [
+   [
+    -29.089337,
+    136.814697
+   ],
+   [
+    -27.844066,
+    137.890005
+   ]
+  ],
+  "wave": [
+   [
+    -29.091645,
+    136.812109
+   ],
+   [
+    -27.841764,
+    137.892643
+   ]
+  ]
+ },
+ "extent": {
+  "flow": [
+   [
+    -29.086942,
+    136.816765
+   ],
+   [
+    -27.846461,
+    137.887937
+   ]
+  ],
+  "wave": [
+   [
+    -29.089241,
+    136.814187
+   ],
+   [
+    -27.844168,
+    137.890565
+   ]
+  ]
+ },
+ "n_arrows": 30,
+ "scales": {
+  "currents_0": [
+   0.0,
+   0.5
+  ],
+  "currents_1": [
+   0.0,
+   0.5
+  ],
+  "hsign": [
+   0.0,
+   2.989629999999999
+  ],
+  "wlength": [
+   0.0,
+   27.48665999999999
+  ],
+  "period": [
+   0.0,
+   5.03284
+  ]
+ },
+ "layer_indices": [
+  1,
+  10
+ ],
+ "n_layers_source": 10,
+ "layers": [
+  {
+   "id": "currents",
+   "label": "Current speed",
+   "units": "m/s",
+   "source": "flow",
+   "mode": "vector"
+  },
+  {
+   "id": "hsign",
+   "label": "Wave height",
+   "units": "m",
+   "source": "wave",
+   "mode": "scalar"
+  },
+  {
+   "id": "wlength",
+   "label": "Wavelength",
+   "units": "m",
+   "source": "wave",
+   "mode": "scalar"
+  },
+  {
+   "id": "period",
+   "label": "Wave period",
+   "units": "s",
+   "source": "wave",
+   "mode": "scalar"
+  }
+ ],
+ "matching": {
+  "weights": {
+   "wind_speed": 1.0,
+   "wind_dir": 1.0,
+   "wlvl": 0.8,
+   "salinity": 0.3
+  },
+  "normalize": "range",
+  "wind_station": "Marree Airport",
+  "wind_dir_convention": "from",
+  "wlvl_offset": 0.0,
+  "wlvl_site": "Belt Bay",
+  "salinity": 250.0
+ },
+ "imagery": {
+  "matrix": "GoogleMapsCompatible_Level9",
+  "max_native_zoom": 9,
+  "format": "jpg",
+  "layers": [
+   {
+    "label": "MODIS 7-2-1",
+    "layer": "MODIS_Terra_CorrectedReflectance_Bands721"
+   },
+   {
+    "label": "MODIS couleur",
+    "layer": "MODIS_Terra_CorrectedReflectance_TrueColor"
+   },
+   {
+    "label": "VIIRS 7-2-1",
+    "layer": "VIIRS_SNPP_CorrectedReflectance_BandsM11-I2-I1"
+   }
+  ]
+ },
+ "lake": {
+  "name": "Kati Thanda – Lake Eyre",
+  "center": {
+   "lat": -28.9,
+   "lon": 137.35
+  },
+  "zoom": 8
+ },
+ "datum_label": "WSE (m, géoïde EGM2008)"
+}
