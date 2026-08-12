@@ -1,0 +1,38 @@
+# Publie le site statique sur GitHub Pages.
+#
+# Le site est produit en local (python pipeline/export_static.py), car
+# la generation lit les 790 simulations, qui ne sont pas dans le depot.
+# Ce workflow ne fait que publier le contenu de site/.
+#
+# A activer une fois dans Settings > Pages > Source : GitHub Actions.
+name: Deploy site
+
+on:
+  push:
+    branches: [main]
+    paths: ["site/**"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deployment
+        uses: actions/deploy-pages@v4

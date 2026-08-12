@@ -1,0 +1,260 @@
+# ============================================================
+# Configuration — Observatoire Kati Thanda – Lake Eyre
+# ============================================================
+
+# Serveur
+server:
+  # Le bouton « Check for new data » lance le pipeline (sous-processus
+  # + telechargements). A laisser true en local ; passer a false — ou
+  # definir LKE_ALLOW_REFRESH=0 — sur un site accessible publiquement.
+  allow_refresh: true
+
+lake:
+  name: "Kati Thanda – Lake Eyre"
+  center: { lat: -28.9, lon: 137.35 }
+  zoom: 8
+
+paths:
+  # Repertoire contenant les granules SWOT NetCDF (parcouru recursivement)
+  swot_data: "/Volumes/tfaraon_PhD/Data/SWOT/download"
+  # Fichier JSON produit par le pipeline et servi au site
+  output_json: "data/swot_wse.json"
+  # Cache d'extraction incrementale (un enregistrement par fichier et par site)
+  cache: "data/extraction_cache.json"
+
+# Parametres d'extraction — repris de SWOT_WSE_work.ipynb (Belt Bay)
+extraction:
+  buffer_size: 6            # moyenne sur (2n+1)^2 pixels
+  wse_qual_filter: [0, 1, 2]
+  filter_outliers: true     # methode IQR par groupe
+  filter_bound: true        # bornes [-16, 6] m
+  filter_resolution: null   # ex. "100" ou "250" pour filtrer par nom de fichier
+  date_min: "2025-01-01"    # null pour conserver toute la serie
+  date_max: null
+  n_workers: null           # null = coeurs - 1 ; 1 = sequentiel (debogage)
+
+# Points d'extraction. datum_offset (m) est AJOUTE a la valeur WSE
+# (ex. conversion geoide -> repere local) ; laisser 0.0 pour la valeur brute.
+sites:
+  # Belt Bay : point bas du lac, reference naturelle pour le niveau.
+  - name: "Belt Bay"
+    lon: 137.028098
+    lat: -28.893022
+    datum_offset: 0.0
+
+  # Le point extrait jusqu'ici sous le nom « Belt Bay » est en realite
+  # dans Madigan Gulf, environ 52 km plus a l'est. Il est conserve sous
+  # son vrai nom : la serie deja extraite reste valable.
+  - name: "Madigan Gulf"
+    lon: 137.56
+    lat: -28.893
+    datum_offset: 0.0
+
+  # Transect ouest (SWOT_WSE_work.py) — decommenter pour activer :
+  # - { name: "point1", lon: 137.051, lat: -28.752, datum_offset: 0.0 }
+  # - { name: "point2", lon: 137.040, lat: -28.801, datum_offset: 0.0 }
+  # - { name: "point3", lon: 137.030, lat: -28.850, datum_offset: 0.0 }
+  # - { name: "point4", lon: 137.019, lat: -28.948, datum_offset: 0.0 }
+  # - { name: "point5", lon: 137.009, lat: -28.948, datum_offset: 0.0 }
+  # - { name: "point6", lon: 136.998, lat: -28.997, datum_offset: 0.0 }
+
+# Telechargement earthaccess (option --download du pipeline).
+# La recherche est incrementale : fenetre [dernier granule local -
+# lookback_days ; aujourd'hui], puis seuls les fichiers absents du
+# disque sont telecharges. start_date sert de borne basse quand le
+# repertoire est vide (premiere execution).
+# Identifiants Earthdata : via earthaccess.login(persist=True)
+# (invite interactive ou fichier ~/.netrc) — jamais en dur dans le code.
+download:
+  # Collections a interroger. Depuis le 3 mai 2025, la Version C
+  # (SWOT_L2_HR_Raster_2.0) est figee : les nouvelles acquisitions et le
+  # retraitement de tout l'historique sont publies en Version D.
+  short_names:
+    - "SWOT_L2_HR_Raster_D"
+    # - "SWOT_L2_HR_Raster_2.0"   # Version C, figee au 2025-05-03 (historique)
+  start_date: "2025-01-01"
+  lookback_days: 45         # marge pour les granules livres en retard
+  granule_patterns:
+    - "*394_102F*"
+    - "*394_103F*"
+    - "*435_052F*"
+    - "*435_053F*"
+  # Pour ne recuperer que le raster 100 m (volume ~2x moindre) :
+  # granule_patterns: ["*Raster_100m*394_102F*", "*Raster_100m*394_103F*",
+  #                    "*Raster_100m*435_052F*", "*Raster_100m*435_053F*"]
+  target_dir: "/Volumes/tfaraon_PhD/Data/SWOT/download"
+
+# ============================================================
+# Scenarios Delft3D (base de simulations pre-calculees)
+# ============================================================
+# Convention de nommage (separateur decimal = underscore) :
+#   Output/Wave/wave_wind-sp1_0_wind-dir0_0_wlvl-7_0_sal250_0.nc
+#   Output/Flow/     wind-sp1_0_wind-dir0_0_wlvl-7_0_sal250_0.nc
+# Les deux sorties d'un meme run sont regroupees automatiquement.
+scenarios:
+  # Racine parcourue recursivement (contient Output/Wave et Output/Flow)
+  directory: "/Volumes/tfaraon_PhD/Delft3d/KTLE_LS_V2_tirages/FW/Output/"
+
+  # Plan d'experience, pour signaler les runs prevus mais absents.
+  # null pour desactiver.
+  design_csv: "/Volumes/tfaraon_PhD/Delft3d/KTLE_LS_V2_tirages/FW/lhs_all.csv"
+
+  # Verifie l'entete de chaque fichier a l'indexation (ecarte les
+  # fichiers tronques ou les metadonnees macOS ._*). Mettre a false
+  # seulement si l'indexation devient trop lente sur un disque reseau.
+  verify_format: true
+
+  # Lecture du niveau dans le nom : "negative" -> wlvl-7_0 vaut -7.0 m
+  # (le tiret fait partie de la valeur) ; "positive" -> 7.0 m.
+  wlvl_sign: "negative"
+
+  # --- Conversion des conditions observees vers les parametres du modele ---
+
+  # Station BOM fournissant le vent (doit figurer dans weather.stations).
+  wind_station: "Marree Airport"
+
+  # Convention de direction du vent des simulations :
+  #   "from" (nautique, comme le BOM : 90 = vent d'est)
+  #   "to"   (vectorielle : 90 = vent soufflant vers l'est)
+  # ATTENTION : une erreur ici inverse le schema de surcote sans erreur
+  # visible. A verifier dans le .mdw / .mdf des simulations.
+  wind_dir_convention: "from"
+
+  # Site SWOT fournissant le niveau d'eau pour l'appariement.
+  # null = premier site de la liste disposant d'une observation.
+  wlvl_site: "Belt Bay"
+
+  # Decalage AJOUTE a la WSE SWOT pour obtenir le niveau du modele
+  # (0.0 si les deux sont dans le meme datum).
+  wlvl_offset: 0.0
+
+  # Salinite retenue pour l'appariement (non observee en temps reel).
+  # null = ignorer ce parametre dans la recherche.
+  salinity: 250.0
+
+  # Normalisation de la distance entre parametres :
+  #   "range" : etendue du plan — adapte a un tirage LHS lacunaire
+  #   "step"  : pas de grille — adapte a un plan factoriel complet
+  normalize: "range"
+
+  # Poids relatifs dans la recherche du scenario le plus proche.
+  # Le plan LHS etant lacunaire, ces poids arbitrent quel parametre
+  # sacrifier : vent et direction pilotent la generation des vagues,
+  # la salinite n'agit que par la masse volumique.
+  weights:
+    wind_speed: 1.0
+    wind_dir: 1.0
+    wlvl: 0.8
+    salinity: 0.3
+
+  # Sortie affichee par defaut : "wave" (vagues) ou "flow" (hydrodynamique)
+  default_source: "wave"
+
+  # Indices reduits a la lecture : dernier pas de temps, premiere couche.
+  # ATTENTION : verifier l'ordre des couches (surface ou fond) avec
+  # `python pipeline/scenario_field.py --inspect fichier.nc`.
+  time_index: -1
+  layer_index: 0
+
+  # Champs proposes sur le site. null = tous les champs 2D detectes.
+  # Noms confirmes par --inspect sur les sorties KTLE_LS_V2 :
+  #   WAVE : hsign, setup, period, dir, wlength, depth
+  #   FLOW : S1, U1, V1, TAUKSI, TAUETA, TAUMAX, RHO, R1
+  # Pour restreindre la liste (les champs non listes restent lisibles
+  # via l'API mais ne sont pas proposes dans le menu) :
+  # variables: ["hsign", "setup", "period", "dir", "S1", "TAUMAX"]
+  variables: null
+
+  # Resolution maximale du trace (points par axe apres re-echantillonnage)
+  max_points: 180
+
+  # Masquage des valeurs exactement nulles : dans les cellules seches,
+  # Delft3D ecrit 0 plutot qu'une valeur manquante.
+  #   "auto"  : seulement U1, V1, TAUKSI, TAUETA, TAUMAX (defaut)
+  #   true    : tous les champs      false : aucun
+  mask_zero: "auto"
+
+  # Carte des courants (methode du lecteur de reference) :
+  #   arrow_density     nombre de fleches par axe
+  #   current_grid_res  finesse du champ d'intensite en fond
+  #   current_smooth    sigma du lissage gaussien (0 = desactive ;
+  #                     ~1-2 leger, ~3-5 fort)
+  #   rotate_vectors    U1/V1 sont exprimes dans le repere de la grille
+  #                     (ksi, eta) ; la rotation vers x/y est estimee a
+  #                     partir de la geometrie de la grille.
+  arrow_density: 30
+  current_grid_res: 250
+  current_smooth: 2.0
+  rotate_vectors: true
+
+  # Bornes de l'echelle de couleur (m/s). Les fixer permet de comparer
+  # les scenarios entre eux et evite que l'echelle saute en parcourant
+  # la frise temporelle. null = ajustement automatique.
+  current_vmin: 0.0
+  current_vmax: 0.5
+
+  # Emprise du trace [xmin, xmax, ymin, ymax] en coordonnees projetees.
+  # null = tout le domaine du modele.
+  current_bounds: null
+
+  # --- Superposition sur la carte ---
+  # Le modele est en metres projetes (MGA), Leaflet attend du WGS84.
+  # utm_zone null = deduit de la position du lac (137.5 E -> zone 53) ;
+  # le serveur verifie que le domaine reprojete retombe bien sur le lac.
+  utm_zone: null
+  southern_hemisphere: true
+  map_grid_res: 260
+
+  # Convention de direction des vagues (variable `dir`) :
+  #   "from" (nautique, SWAN par defaut) ou "to" (direction de propagation)
+  wave_dir_convention: "from"
+
+  # Bornes de couleur par couche [min, max] ; null = automatique.
+  layer_scales:
+    currents: [0.0, 0.5]
+    hsign: [0.0, null]
+    wlength: [0.0, null]
+    period: [0.0, null]
+  # Emprise du lac utilisee dans les figures de reference :
+  # current_bounds: [673229, 797654, 6778805, 6924813]
+
+display:
+  datum_label: "WSE (m, géoïde EGM2008)"
+
+# Imagerie satellite NASA GIBS proposee sur la carte (EPSG:3857).
+# L'ordre de la liste = l'ordre des boutons ; la premiere couche est
+# celle proposee en premier apres le fond topographique.
+# Catalogue des identifiants :
+#   https://nasa-gibs.github.io/gibs-api-docs/available-visualizations/
+# Autres couches utiles ici :
+#   MODIS_Aqua_CorrectedReflectance_Bands721        (passage ~13h30 local)
+#   MODIS_Terra_CorrectedReflectance_Bands367       (neige/nuages)
+#   VIIRS_NOAA20_CorrectedReflectance_BandsM11-I2-I1
+imagery:
+  matrix: "GoogleMapsCompatible_Level9"
+  max_native_zoom: 9        # resolution native 250 m : au-dela, tuiles etirees
+  format: "jpg"
+  layers:
+    - label: "MODIS 7-2-1"
+      layer: "MODIS_Terra_CorrectedReflectance_Bands721"
+    - label: "MODIS couleur"
+      layer: "MODIS_Terra_CorrectedReflectance_TrueColor"
+    - label: "VIIRS 7-2-1"
+      layer: "VIIRS_SNPP_CorrectedReflectance_BandsM11-I2-I1"
+
+# Observations meteo BOM (dernieres 72 h par station, rafraichies cote
+# serveur — le pare-feu du BOM exige un User-Agent de navigateur).
+# Pour ajouter une station : ouvrir sa page "Latest Weather Observations"
+# sur bom.gov.au et copier le lien JSON en bas de page (produit + n° WMO).
+# Ex. Birdsville (Qld) : produit IDQ60801 + n° indique sur la page.
+weather:
+  cache_minutes: 15
+  # Fenetre d'archive conservee. Le BOM publie 72 h glissantes ; les
+  # releves deja vus sont fusionnes, ce qui maintient l'historique meme
+  # si le flux est tronque ou si une recuperation echoue.
+  history_hours: 48
+  user_agent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36"
+  stations:
+    - { name: "Marree Airport",  product: "IDS60801", wmo: "95480", lat: -29.660, lon: 138.065 }
+    - { name: "Oodnadatta",      product: "IDS60801", wmo: "94476", lat: -27.556, lon: 135.447 }
+    - { name: "Moomba Airport",  product: "IDS60801", wmo: "95481", lat: -28.099, lon: 140.197 }

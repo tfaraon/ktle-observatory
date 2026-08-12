@@ -1,0 +1,46 @@
+# ── Donnees generees ────────────────────────────────────────
+# Le depot ne contient que du code : les sorties du pipeline sont
+# regenerables et les granules/simulations pesent des dizaines de Go.
+data/*.json
+data/*.log
+data/compact.nc
+!data/.gitkeep
+
+# Site statique exporte : ~86 Mo regeneres a chaque fois. A publier
+# via le workflow Pages plutot qu'a versionner (retirer cette ligne si
+# vous preferez le commiter sur une branche orpheline).
+site/
+
+# ── Donnees sources (jamais dans Git) ───────────────────────
+*.nc
+*.nc.md5
+Output/
+granules/
+scenarios/
+
+# ── Identifiants ────────────────────────────────────────────
+# earthaccess memorise les identifiants Earthdata dans ~/.netrc ;
+# rien ne doit atterrir ici.
+.netrc
+_netrc
+*.env
+.env
+secrets.yaml
+config.local.yaml
+
+# ── Python ──────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+*.egg-info/
+.pytest_cache/
+
+# ── Systeme ─────────────────────────────────────────────────
+.DS_Store
+._*
+__MACOSX/
+Thumbs.db
+.idea/
+.vscode/

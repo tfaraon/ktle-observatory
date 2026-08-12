@@ -1,0 +1,15 @@
+# Serveur + pipeline
+flask
+PyYAML
+numpy
+pandas
+
+# Extraction SWOT (SWOT_toolbox)
+netCDF4
+tqdm
+rasterio        # utilise par SWOT_tools (fonctions MNT)
+
+# Telechargement des granules (option --download uniquement)
+earthaccess
+scipy           # re-echantillonnage des grilles curvilignes (scenarios)
+Pillow          # export statique : ecriture des images pre-calculees

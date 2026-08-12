@@ -1,0 +1,41 @@
+# Rafraichit data/weather.json toutes les heures et le publie.
+# Utile UNIQUEMENT pour une vitrine statique (GitHub Pages), ou aucun
+# serveur ne peut interroger le BOM a la demande.
+#
+# A savoir avant d'activer :
+#  - le BOM peut refuser les adresses des runners GitHub ; verifier la
+#    sortie du job apres la premiere execution ;
+#  - une execution par heure reste courtoise, ne pas descendre plus bas ;
+#  - chaque execution produit un commit : l'historique du depot grossit.
+name: Refresh BOM weather
+
+on:
+  schedule:
+    - cron: "7 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install PyYAML
+      - name: Fetch BOM observations
+        run: |
+          python pipeline/fetch_weather.py
+          # Le site statique lit sa propre copie
+          if [ -d site/data ]; then cp data/weather.json site/data/; fi
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -f data/weather.json
+          [ -f site/data/weather.json ] && git add -f site/data/weather.json
+          git diff --staged --quiet || git commit -m "Weather refresh"
+          git push

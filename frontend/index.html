@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kati Thanda – Lake Eyre · Observatory</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;600;700&family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div id="demo-banner" class="demo-banner" hidden>
+    Demonstration data — run <code>python pipeline/update_swot.py</code> to show real SWOT observations.
+  </div>
+
+  <header class="site-header">
+    <div class="header-left">
+      <p class="eyebrow">Hydrodynamic observatory</p>
+      <h1>Kati Thanda – Lake Eyre</h1>
+    </div>
+    <div class="header-right">
+      <div class="header-update mono">
+        <span class="header-label">Last updated</span>
+        <span id="generated-at">—</span>
+      </div>
+      <button id="refresh-btn" class="refresh-btn" hidden>Check for new data</button>
+      <p id="refresh-status" class="refresh-status mono" hidden></p>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- Empty state: shown until the JSON exists -->
+    <section id="empty-state" class="panel empty-state" hidden>
+      <h2>No data to display</h2>
+      <p>The file <code>data/swot_wse.json</code> has not been generated yet.</p>
+      <p class="mono">python pipeline/update_swot.py&nbsp;&nbsp;·&nbsp;&nbsp;or&nbsp;&nbsp;·&nbsp;&nbsp;python pipeline/update_swot.py --demo</p>
+    </section>
+
+    <section id="dashboard" hidden>
+
+      <!-- Panel 1: map with model layers -->
+        <article class="panel map-card">
+          <div class="map-bar">
+            <div class="seg" id="base-seg" role="group" aria-label="Base map">
+              <button type="button" class="seg-btn active" data-base="topo">Map</button>
+            </div>
+            <div class="seg" id="model-seg" role="group" aria-label="Model layer">
+              <button type="button" class="seg-btn active" data-model="none">No model</button>
+            </div>
+            <div id="model-controls" class="imagery-controls mono" hidden>
+              <select id="model-layer-idx" class="site-select" aria-label="Vertical layer"></select>
+              <select id="model-time" class="site-select" aria-label="Time step"></select>
+              <label class="arrow-size-wrap">Arrows
+                <input type="range" id="arrow-size" min="6" max="42" step="2"
+                       value="16" aria-label="Arrow size">
+              </label>
+            </div>
+            <div id="imagery-controls" class="imagery-controls mono" hidden>
+              <button type="button" id="imagery-prev" class="date-btn" aria-label="Previous day">◀</button>
+              <input type="date" id="imagery-date" aria-label="Imagery date">
+              <button type="button" id="imagery-next" class="date-btn" aria-label="Next day">▶</button>
+              <button type="button" id="imagery-latest" class="date-btn date-btn-latest active">Latest</button>
+            </div>
+          </div>
+          <div class="map-wrap">
+            <div id="map" aria-label="Map of SWOT extraction sites"></div>
+            <div id="map-message" class="map-message mono" hidden></div>
+            <div id="map-legend" class="map-legend mono" hidden>
+              <span id="legend-title"></span>
+              <span class="legend-bar"><i></i></span>
+              <span id="legend-min"></span><span id="legend-max"></span>
+            </div>
+          </div>
+        <div class="timeline mono" id="timeline" hidden>
+          <button type="button" id="tl-play" class="date-btn" aria-label="Play through time">▶</button>
+          <input type="range" id="tl-range" min="0" max="0" step="1" value="0"
+                 aria-label="Time of the observed conditions">
+          <span id="tl-label">now</span>
+          <button type="button" id="tl-now" class="date-btn active">Now</button>
+        </div>
+
+        </article>
+
+
+
+      <!-- Panel 2: water level and time series -->
+      <article class="panel level-series">
+        <div class="level-card">
+          <div class="level-card-head">
+            <p class="eyebrow">Current water level</p>
+            <label class="site-select-wrap">
+              <span class="visually-hidden">Extraction site</span>
+              <select id="site-select" class="site-select"></select>
+            </label>
+          </div>
+
+          <div class="level-reading">
+            <div class="level-value-block">
+              <p class="level-value"><span id="wse-value">—</span><span class="level-unit"> m</span></p>
+              <p id="datum-label" class="level-datum mono">—</p>
+              <dl class="level-meta mono">
+                <div><dt>Observed</dt><dd id="latest-date">—</dd></div>
+                <div><dt>Age</dt><dd id="latest-age">—</dd></div>
+                <div><dt>Coordinates</dt><dd id="site-coords">—</dd></div>
+                <div><dt>Series</dt><dd id="series-span">—</dd></div>
+                <div id="last-granule-row" hidden><dt>Latest granule</dt><dd id="last-granule">—</dd></div>
+              </dl>
+            </div>
+            <figure class="gauge-wrap" aria-label="Staff gauge">
+              <svg id="gauge" viewBox="0 0 120 300" role="img"></svg>
+            </figure>
+          </div>
+        </div>
+
+      <div class="chart-card">
+        <div class="panel-head">
+          <p class="eyebrow">Time series</p>
+          <h2 id="chart-title">SWOT water surface elevation</h2>
+        </div>
+        <div id="chart" class="chart"></div>
+        <p class="chart-note">Each point is a SWOT observation (L2 HR Raster) extracted at the selected site — no observation, no point: sampling follows the satellite pass cycle.</p>
+      </div>
+
+      </article>
+
+      <!-- Panel 2: BOM weather -->
+      <article class="panel weather-card">
+        <div class="panel-head weather-head">
+          <div>
+            <p class="eyebrow">Conditions around the lake</p>
+            <h2>BOM weather stations</h2>
+          </div>
+          <p id="weather-updated" class="weather-updated mono"></p>
+        </div>
+        <div id="weather-strip" class="weather-strip">
+          <p class="weather-empty mono">Loading observations…</p>
+        </div>
+        <div id="weather-history" class="weather-history" hidden></div>
+      </article>
+
+
+      <!-- Panel 4: matched Delft3D scenario -->
+      <article class="panel model-card">
+        <div class="panel-head scenario-head">
+          <div>
+            <p class="eyebrow">Modelling</p>
+            <h2>Matching Delft3D scenario</h2>
+          </div>
+          <div class="scenario-actions">
+            <button type="button" id="scenario-reset" class="date-btn" hidden>Observed conditions</button>
+          </div>
+        </div>
+
+        <div id="scenario-body">
+          <p class="scenario-empty mono">Loading scenarios…</p>
+        </div>
+      </article>
+
+    </section>
+
+    <section id="dashboard" hidden>
+
+      <!-- Panel 1: current level + map -->
+      
+        <article class="panel level-card">
+          <div class="level-card-head">
+            <p class="eyebrow">Current water level</p>
+            <label class="site-select-wrap">
+              <span class="visually-hidden">Extraction site</span>
+              <select id="site-select" class="site-select"></select>
+            </label>
+          </div>
+
+          <div class="level-reading">
+            <div class="level-value-block">
+              <p class="level-value"><span id="wse-value">—</span><span class="level-unit"> m</span></p>
+              <p id="datum-label" class="level-datum mono">—</p>
+              <dl class="level-meta mono">
+                <div><dt>Observed</dt><dd id="latest-date">—</dd></div>
+                <div><dt>Age</dt><dd id="latest-age">—</dd></div>
+                <div><dt>Coordinates</dt><dd id="site-coords">—</dd></div>
+                <div><dt>Series</dt><dd id="series-span">—</dd></div>
+                <div id="last-granule-row" hidden><dt>Latest granule</dt><dd id="last-granule">—</dd></div>
+              </dl>
+            </div>
+            <figure class="gauge-wrap" aria-label="Staff gauge">
+              <svg id="gauge" viewBox="0 0 120 300" role="img"></svg>
+            </figure>
+          </div>
+        </article>
+
+        <article class="panel map-card">
+          <div class="map-bar">
+            <div class="seg" id="base-seg" role="group" aria-label="Base map">
+              <button type="button" class="seg-btn active" data-base="topo">Map</button>
+            </div>
+            <div class="seg" id="model-seg" role="group" aria-label="Model layer">
+              <button type="button" class="seg-btn active" data-model="none">No model</button>
+            </div>
+            <div id="model-controls" class="imagery-controls mono" hidden>
+              <select id="model-layer-idx" class="site-select" aria-label="Vertical layer"></select>
+              <select id="model-time" class="site-select" aria-label="Time step"></select>
+              <label class="arrow-size-wrap">Arrows
+                <input type="range" id="arrow-size" min="6" max="42" step="2"
+                       value="16" aria-label="Arrow size">
+              </label>
+            </div>
+            <div id="imagery-controls" class="imagery-controls mono" hidden>
+              <button type="button" id="imagery-prev" class="date-btn" aria-label="Previous day">◀</button>
+              <input type="date" id="imagery-date" aria-label="Imagery date">
+              <button type="button" id="imagery-next" class="date-btn" aria-label="Next day">▶</button>
+              <button type="button" id="imagery-latest" class="date-btn date-btn-latest active">Latest</button>
+            </div>
+          </div>
+          <div class="map-wrap">
+            <div id="map" aria-label="Map of SWOT extraction sites"></div>
+            <div id="map-message" class="map-message mono" hidden></div>
+            <div id="map-legend" class="map-legend mono" hidden>
+              <span id="legend-title"></span>
+              <span class="legend-bar"><i></i></span>
+              <span id="legend-min"></span><span id="legend-max"></span>
+            </div>
+          </div>
+        </article>
+
+      <!-- Panel 2: BOM weather -->
+      <article class="panel weather-card">
+        <div class="panel-head weather-head">
+          <div>
+            <p class="eyebrow">Conditions around the lake</p>
+            <h2>BOM weather stations</h2>
+          </div>
+          <p id="weather-updated" class="weather-updated mono"></p>
+        </div>
+        <div id="weather-strip" class="weather-strip">
+          <p class="weather-empty mono">Loading observations…</p>
+        </div>
+        <div id="weather-history" class="weather-history" hidden></div>
+      </article>
+
+      <!-- Panel 3: time series -->
+      <article class="panel chart-card">
+        <div class="panel-head">
+          <p class="eyebrow">Time series</p>
+          <h2 id="chart-title">SWOT water surface elevation</h2>
+        </div>
+        <div id="chart" class="chart"></div>
+        <p class="chart-note">Each point is a SWOT observation (L2 HR Raster) extracted at the selected site — no observation, no point: sampling follows the satellite pass cycle.</p>
+      </article>
+
+      <!-- Panel 4: matched Delft3D scenario -->
+      <article class="panel model-card">
+        <div class="panel-head scenario-head">
+          <div>
+            <p class="eyebrow">Modelling</p>
+            <h2>Matching Delft3D scenario</h2>
+          </div>
+          <div class="scenario-actions">
+            <button type="button" id="scenario-reset" class="date-btn" hidden>Observed conditions</button>
+          </div>
+        </div>
+
+        <div class="timeline mono" id="timeline" hidden>
+          <button type="button" id="tl-play" class="date-btn" aria-label="Play through time">▶</button>
+          <input type="range" id="tl-range" min="0" max="0" step="1" value="0"
+                 aria-label="Time of the observed conditions">
+          <span id="tl-label">now</span>
+          <button type="button" id="tl-now" class="date-btn active">Now</button>
+        </div>
+
+        <div id="scenario-body">
+          <p class="scenario-empty mono">Loading scenarios…</p>
+        </div>
+      </article>
+
+    </section>
+  </main>
+
+  <footer class="site-footer mono">
+    <span>Data: SWOT L2 HR Raster (NASA / CNES) · Weather © Bureau of Meteorology · Imagery NASA EOSDIS GIBS / Worldview</span>
+    <span>Base map: © OpenTopoMap (CC-BY-SA) · © OpenStreetMap</span>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
