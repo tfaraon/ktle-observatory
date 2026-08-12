@@ -9,7 +9,6 @@ data/compact.nc
 # Site statique exporte : ~86 Mo regeneres a chaque fois. A publier
 # via le workflow Pages plutot qu'a versionner (retirer cette ligne si
 # vous preferez le commiter sur une branche orpheline).
-site/
 
 # ── Donnees sources (jamais dans Git) ───────────────────────
 *.nc
