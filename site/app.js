@@ -25,6 +25,7 @@
     staticMode: false, // no server: pre-rendered layers
     manifest: null, staticIndex: null, paramGrid: null,
     staticArrows: null, staticArrowsKey: null,
+    methodsLoaded: false,
     canvasRenderer: null,
     timeline: [],      // BOM timestamps available for time travel
     timeIdx: 0,
@@ -1308,6 +1309,49 @@
     $("scenario-reset").addEventListener("click", () => loadScenario(null));
   }
 
+  // ── Tabs ─────────────────────────────────────────────────
+
+  function showTab(name) {
+    document.querySelectorAll(".tab").forEach((b) => {
+      const on = b.dataset.tab === name;
+      b.classList.toggle("active", on);
+      b.setAttribute("aria-selected", on ? "true" : "false");
+    });
+    document.querySelectorAll(".tab-panel").forEach((p) => {
+      p.hidden = p.id !== "tab-" + name;
+    });
+
+    if (name === "methods" && !state.methodsLoaded) {
+      const box = $("tab-methods");
+      // METHODS_HTML vient de methods.js, chargé avant ce fichier
+      box.innerHTML = typeof METHODS_HTML === "string" ? METHODS_HTML
+        : '<article class="panel"><div class="prose-body">'
+          + "<p>Methods documentation unavailable.</p></div></article>";
+      state.methodsLoaded = true;
+    }
+
+    // Leaflet et Plotly calculent leurs dimensions au moment du rendu :
+    // masqués, ils mesurent zéro et restent figés au retour.
+    if (name === "observatory") {
+      requestAnimationFrame(() => {
+        if (state.map) state.map.invalidateSize();
+        ["chart", "weather-history"].forEach((id) => {
+          const el = $(id);
+          if (el && el.data) Plotly.Plots.resize(el);
+        });
+      });
+    }
+
+    try { history.replaceState(null, "", "#" + name); } catch (_) { /* ignore */ }
+  }
+
+  function wireTabs() {
+    document.querySelectorAll(".tab").forEach((b) =>
+      b.addEventListener("click", () => showTab(b.dataset.tab)));
+    const initial = (location.hash || "").replace("#", "");
+    if (["methods", "publications"].includes(initial)) showTab(initial);
+  }
+
   // ── Initialisation ───────────────────────────────────────
 
   async function init() {
@@ -1389,5 +1433,9 @@
     loadWeather().then(() => loadScenario(null));
   }
 
-  document.addEventListener("DOMContentLoaded", init);
+  document.addEventListener("DOMContentLoaded", () => {
+    // Les onglets fonctionnent même si les données manquent
+    wireTabs();
+    init();
+  });
 })();

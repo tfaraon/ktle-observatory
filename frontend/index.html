@@ -38,7 +38,18 @@
     </div>
   </header>
 
+  <nav class="tabs" role="tablist" aria-label="Sections">
+    <button class="tab active" role="tab" data-tab="observatory"
+            aria-selected="true">Observatory</button>
+    <button class="tab" role="tab" data-tab="methods"
+            aria-selected="false">Methods</button>
+    <button class="tab" role="tab" data-tab="publications"
+            aria-selected="false">Publications</button>
+  </nav>
+
   <main>
+
+    <section id="tab-observatory" class="tab-panel" role="tabpanel">
 
     <!-- Empty state: shown until the JSON exists -->
     <section id="empty-state" class="panel empty-state" hidden>
@@ -285,6 +296,22 @@
       </article>
 
     </section>
+    </section>
+
+    <section id="tab-methods" class="tab-panel prose" role="tabpanel" hidden></section>
+
+    <section id="tab-publications" class="tab-panel prose" role="tabpanel" hidden>
+      <article class="panel">
+        <div class="panel-head">
+          <p class="eyebrow">Outputs</p>
+          <h2>Publications</h2>
+        </div>
+        <div class="prose-body">
+          <p>Papers, conference contributions and datasets arising from
+          this work will be listed here.</p>
+        </div>
+      </article>
+    </section>
   </main>
 
   <footer class="site-footer mono">
@@ -292,6 +319,7 @@
     <span>Base map: © OpenTopoMap (CC-BY-SA) · © OpenStreetMap</span>
   </footer>
 
+  <script src="methods.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

@@ -215,3 +215,62 @@ print("OK — parsing BOM, valeurs manquantes, rose des vents, flux vide, "
       "isolation des echecs et mode demo valides.")
 print("OK — archive glissante de 48 h : fusion, dedoublonnage, purge "
       "au-dela de la fenetre et survie aux pannes validees.")
+
+# ══════════════════════════════════════════════════════════════
+# Démo et réel ne doivent jamais se mélanger.
+#
+# Le générateur de démonstration tire un bruit blanc gaussien (moyenne
+# 22 km/h, écart-type 6) : fusionné avec des observations réelles, il
+# produit une série qui saute de 15–25 km/h d'un relevé au suivant,
+# là où le vent réel varie continûment.
+# ══════════════════════════════════════════════════════════════
+
+with tempfile.TemporaryDirectory() as td:
+    fw.WEATHER_FILE = Path(td) / "weather.json"
+    cfg_one = {"weather": {"user_agent": "UA", "history_hours": 48,
+                           "stations": [{"name": "Marree Airport",
+                                         "product": "IDS60801",
+                                         "wmo": "95480"}]}}
+
+    # 1. Un passage en mode démo remplit l'archive de bruit
+    demo_payload = fw.update(cfg_one, demo=True)
+    assert demo_payload["demo"] is True
+    n_demo = len(demo_payload["stations"][0]["history"])
+    assert n_demo == 96
+    assert all(r.get("src") == "demo"
+               for r in demo_payload["stations"][0]["history"])
+
+    # 2. Une récupération réelle ne doit RIEN en reprendre
+    def real_fetch(product, wmo, user_agent, timeout=12):
+        base = datetime.now(timezone.utc)
+        return {"observations": {"data": [
+            {"aifstime_utc": (base - timedelta(minutes=30 * k)).strftime(
+                "%Y%m%d%H%M%S"),
+             "air_temp": 15.0, "wind_dir": "SE", "wind_spd_kmh": 20,
+             "gust_kmh": 28, "rain_trace": "0.0", "press_qnh": 1015.0,
+             "rel_hum": 50}
+            for k in range(6)]}}
+
+    fw.fetch_station_json = real_fetch
+    real_payload = fw.update(cfg_one, demo=False)
+    hist = real_payload["stations"][0]["history"]
+    assert real_payload["demo"] is False
+    assert len(hist) == 6, f"{len(hist)} relevés : l'archive démo a fui"
+    assert all(r.get("src") == "bom" for r in hist)
+    # Toutes les vitesses viennent du flux réel
+    assert {r["wind_spd_kmh"] for r in hist} == {20.0}
+
+    # 3. Symétrique : un passage démo ne reprend pas le réel
+    demo_again = fw.update(cfg_one, demo=True)
+    assert all(r.get("src") == "demo"
+               for r in demo_again["stations"][0]["history"])
+
+# 4. merge_history écarte toute provenance étrangère
+now2 = datetime.now(timezone.utc).replace(second=0, microsecond=0)
+mixed_prev = [dict(rec(now2 - timedelta(hours=2), spd=99.0), src="demo")]
+fresh_real = [dict(rec(now2 - timedelta(hours=1), spd=18.0), src="bom")]
+merged3 = fw.merge_history(mixed_prev, fresh_real, hours=48)
+assert len(merged3) == 1 and merged3[0]["wind_spd_kmh"] == 18.0, merged3
+
+print("OK — les observations réelles et les données de démonstration ne "
+      "peuvent plus se mélanger dans l'archive.")

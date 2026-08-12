@@ -718,17 +718,81 @@ calculées au 95ᵉ centile sur un échantillon : les couleurs deviennent
 comparables d'un scénario à l'autre, ce qui est plus juste pour
 parcourir la frise.
 
-Deux workflows accompagnent ce mode :
-`.github/workflows/pages.yml` publie le contenu de `site/`, et
-`weather.yml` rafraîchit la météo toutes les heures — sous réserve que
-le BOM accepte les adresses des runners GitHub. Les deux se règlent
-dans l'onglet Actions du dépôt.
+### Publier le site statique
 
-Publier ~86 Mo à chaque régénération alourdirait l'historique Git :
-mieux vaut pousser `site/` sur une branche orpheline en force, ou
-laisser le workflow publier l'artefact sans le versionner. Évitez Git
-LFS, dont le quota de bande passante gratuit est plus contraignant que
-Pages lui-même.
+**1. Vérifier en local.** Les `fetch` ne fonctionnent pas depuis
+`file://`, il faut un petit serveur :
+
+```bash
+cd site && python -m http.server 8080     # http://localhost:8080
+```
+
+**2. Créer le dépôt** (une seule fois). Depuis la **racine du projet**,
+pas depuis `site/` :
+
+```bash
+cd ~/Desktop/lake-eyre-dashboard
+git init -b main
+git add -A
+git status --short | head -20      # vérifier avant de valider
+git commit -m "Lake Eyre observatory"
+```
+
+Créer ensuite un dépôt vide sur github.com, puis :
+
+```bash
+git remote add origin https://github.com/VOTRE-COMPTE/lake-eyre-dashboard.git
+git push -u origin main
+```
+
+Le `.gitignore` fourni écarte les granules, les sorties Delft3D, le
+fichier compact et `~/.netrc` ; il conserve `site/img/`,
+`site/layers/` et `site/data/`, dont Pages a besoin. Un
+`git status --short` avant le premier commit reste la meilleure
+vérification.
+
+**3. Publier les mises à jour suivantes.**
+
+```bash
+git add site && git commit -m "Publish static site" && git push
+```
+
+Puis, une seule fois, dans *Settings → Pages*, choisir comme source
+**GitHub Actions** : le workflow `.github/workflows/pages.yml` prend le
+relais à chaque poussée touchant `site/`.
+
+**4. Tenir à jour.** Le workflow `weather.yml` rafraîchit la météo
+toutes les heures et met à jour `site/data/weather.json` — le scénario
+affiché suit donc les conditions réelles, sans intervention. Pour une
+nouvelle passe SWOT, il suffit de relancer le pipeline puis de recopier
+le JSON, sans tout ré-exporter :
+
+```bash
+python pipeline/update_swot.py --download
+cp data/swot_wse.json site/data/ && git add site && git commit && git push
+```
+
+Un ré-export complet n'est nécessaire que si les **simulations**
+changent.
+
+**Coût en historique.** Chaque ré-export ajoute ~86 Mo à l'historique
+Git. C'est acceptable pour quelques régénérations (limite conseillée
+par GitHub : 1 Go de dépôt), mais si vous ré-exportez souvent, poussez
+plutôt `site/` sur une branche orpheline en force :
+
+```bash
+git push -f origin `git subtree split --prefix site main`:gh-pages
+```
+
+en réglant alors *Settings → Pages* sur cette branche. La contrepartie
+est que le rafraîchissement horaire de la météo ne suit plus, puisqu'il
+publie sur `main`. Évitez Git LFS, dont le quota de bande passante
+gratuit est plus contraignant que Pages lui-même.
+
+**Ce que télécharge un visiteur** : jamais les 86 Mo. Le site charge
+l'index, la météo, la série SWOT, puis les seules images du scénario
+affiché — de l'ordre de 300 Ko, plus 15 Ko par changement de couche ou
+de position sur la frise.
 
 ### Recommandation : une petite machine virtuelle
 

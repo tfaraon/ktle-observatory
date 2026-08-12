@@ -46,10 +46,11 @@ def _num(v):
         return None
 
 
-def slim_obs(o):
+def slim_obs(o, source="bom"):
     """Reduit une observation BOM aux champs utilises par le site."""
     wind_dir = o.get("wind_dir") or None
     return {
+        "src": source,
         "utc": o.get("aifstime_utc"),
         "air_temp": _num(o.get("air_temp")),
         "rel_hum": _num(o.get("rel_hum")),
@@ -81,10 +82,21 @@ def merge_history(previous, fresh, hours=48):
     deja vus permet de tenir 48 h meme si le flux est tronque ou si une
     recuperation echoue. Retourne une liste chronologique.
     """
+    expected = None
+    for rec in list(fresh or []):
+        if rec.get("src"):
+            expected = rec["src"]
+            break
+
     by_time = {}
     for rec in list(previous or []) + list(fresh or []):
-        if rec.get("utc"):
-            by_time[rec["utc"]] = rec       # le flux frais ecrase l'ancien
+        if not rec.get("utc"):
+            continue
+        # Filet supplementaire : un releve d'une autre provenance ne
+        # doit jamais entrer dans la serie.
+        if expected and rec.get("src", expected) != expected:
+            continue
+        by_time[rec["utc"]] = rec           # le flux frais ecrase l'ancien
 
     cutoff = datetime.now(timezone.utc) - timedelta(hours=hours)
     kept = [r for r in by_time.values()
@@ -115,13 +127,26 @@ def fetch_station_json(product, wmo, user_agent, timeout=12):
         return json.loads(resp.read().decode("utf-8"))
 
 
-def load_previous():
-    """Dernier releve ecrit, indexe par nom de station (ou {})."""
+def load_previous(demo=False):
+    """Dernier releve ecrit, indexe par nom de station (ou {}).
+
+    L'archive n'est reprise que si elle est de MEME nature que le
+    releve en cours. Melanger des observations reelles avec les
+    donnees synthetiques du mode --demo produirait une serie
+    incoherente : le generateur tire un bruit blanc sans correlation
+    temporelle, la ou le vent reel varie continument.
+    """
     if not WEATHER_FILE.exists():
         return {}
     try:
         with open(WEATHER_FILE, "r", encoding="utf-8") as f:
-            return {s["name"]: s for s in json.load(f).get("stations", [])}
+            payload = json.load(f)
+        if bool(payload.get("demo")) != bool(demo):
+            kind = "de démonstration" if payload.get("demo") else "réelle"
+            print(f"  archive {kind} ignorée : elle ne correspond pas au "
+                  "mode en cours")
+            return {}
+        return {s["name"]: s for s in payload.get("stations", [])}
     except (json.JSONDecodeError, OSError, KeyError):
         return {}
 
@@ -135,7 +160,7 @@ def update(cfg, demo=False, write=True):
     wcfg = cfg.get("weather") or {}
     ua = wcfg.get("user_agent", "Mozilla/5.0")
     hours = wcfg.get("history_hours", 48)
-    previous = load_previous()
+    previous = load_previous(demo)
     stations_out = []
     any_stale = False
 
@@ -198,6 +223,7 @@ def make_demo_station(name):
         spd = round(max(4, rng.gauss(22, 6)))
         history.append({
             "utc": t.strftime("%Y%m%d%H%M%S"),
+            "src": "demo",
             "air_temp": round(rng.gauss(16, 3), 1),
             "rel_hum": round(max(10, min(95, rng.gauss(45, 12)))),
             "wind_dir": d,

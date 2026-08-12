@@ -153,6 +153,70 @@ code {
 }
 .refresh-status.error { color: var(--ochre); }
 
+/* ── Onglets ──────────────────────────────────────────────── */
+
+.tabs {
+  display: flex;
+  gap: 2px;
+  padding: 0 28px;
+  border-bottom: 1px solid var(--panel-edge);
+  background: var(--salt);
+}
+
+.tab {
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--dune);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 12px 16px;
+  margin-bottom: -1px;
+  cursor: pointer;
+}
+.tab:hover { color: var(--basin); }
+.tab.active {
+  color: var(--basin);
+  border-bottom-color: var(--flood);
+}
+
+/* ── Pages de texte (Methods, Publications) ───────────────── */
+
+.prose .panel { padding-bottom: 8px; }
+
+.prose-body {
+  padding: 4px 28px 26px;
+  max-width: 74ch;
+}
+.prose-body p { margin: 0 0 14px; }
+.prose-body .lede {
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--basin);
+  margin-bottom: 22px;
+}
+.prose-body h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.05rem;
+  margin: 26px 0 10px;
+  padding-top: 16px;
+  border-top: 1px solid var(--grid);
+}
+.prose-body h3:first-of-type { border-top: none; padding-top: 0; }
+.prose-body strong { font-weight: 600; }
+.prose-body em { font-style: italic; }
+
+/* Les réserves méthodologiques sont signalées, pas noyées */
+.prose-body .caveat {
+  border-left: 3px solid var(--ochre);
+  background: rgba(168, 112, 45, 0.06);
+  padding: 10px 14px;
+  margin: 16px 0;
+  font-size: 14px;
+}
+
 /* ── Structure générale ───────────────────────────────────── */
 
 main {
@@ -726,7 +790,9 @@ main {
 }
 
 @media (max-width: 560px) {
-  main, .site-header, .site-footer { padding-left: 16px; padding-right: 16px; }
+  main, .site-header, .site-footer, .tabs { padding-left: 16px; padding-right: 16px; }
+  .prose-body { padding-left: 18px; padding-right: 18px; }
+  .tab { padding: 11px 10px; font-size: 12.5px; }
   .level-reading { grid-template-columns: 1fr; }
   .gauge-wrap { justify-content: center; }
   #gauge { min-height: 220px; }

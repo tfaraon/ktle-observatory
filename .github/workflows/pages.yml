@@ -5,6 +5,11 @@
 # Ce workflow ne fait que publier le contenu de site/.
 #
 # A activer une fois dans Settings > Pages > Source : GitHub Actions.
+#
+# Versions d'actions : Node 20 est retire des runners le 16 septembre
+# 2026, d'ou les majeures ci-dessous, qui tournent sous Node 24.
+# actions/configure-pages est volontairement omis : il ne sert qu'aux
+# generateurs de site (base_path), inutile pour un dossier statique.
 name: Deploy site
 
 on:
@@ -29,10 +34,9 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/checkout@v5
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: site
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5

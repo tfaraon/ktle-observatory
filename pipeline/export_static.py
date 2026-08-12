@@ -325,7 +325,7 @@ def build(cfg, out_dir=SITE, colors=64, limit=None, sample=40):
         if src_file.exists():
             shutil.copy(src_file, data_dir / name)
 
-    for name in ("index.html", "style.css", "app.js"):
+    for name in ("index.html", "style.css", "app.js", "methods.js"):
         shutil.copy(ROOT / "frontend" / name, out_dir / name)
     (out_dir / ".nojekyll").write_text("", encoding="utf-8")
 
