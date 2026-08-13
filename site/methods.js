@@ -154,6 +154,20 @@ const METHODS_HTML = `
     shallow turbid water and salt are easily confused. Native
     resolution is 250&nbsp;m.</p>
 
+    <h3>Downloading the data</h3>
+
+    <p>Each panel offers a CSV export: the full SWOT series for both
+    sites, the local weather archive for all three stations, and the
+    model field currently displayed. Files are written in the browser
+    and carry a commented header giving the source, the datum and the
+    processing applied, so a downloaded series remains interpretable
+    on its own.</p>
+
+    <p>For the model layer, the full grid is exported where the field
+    values are available; on the static site only the pre-rendered
+    image is held, so the arrows are exported instead &mdash; coarser,
+    but they carry direction as well as magnitude.</p>
+
     <h3>Reproducibility</h3>
 
     <p>Every figure on this site is regenerated from the raw data by a

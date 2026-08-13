@@ -232,6 +232,34 @@ main {
 }
 
 .panel-head { padding: 18px 22px 0; }
+.head-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.head-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.dl-btn {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--flood-deep);
+  background: var(--salt);
+  border: 1px solid var(--panel-edge);
+  border-radius: 6px;
+  padding: 5px 11px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.dl-btn:hover { background: var(--grid); border-color: var(--flood); }
+.dl-btn:disabled { color: var(--dune); cursor: default; }
 .panel-head h2 {
   margin: 0;
   font-family: var(--font-display);

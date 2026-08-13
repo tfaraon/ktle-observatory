@@ -135,9 +135,13 @@
         </div>
 
       <div class="chart-card">
-        <div class="panel-head">
-          <p class="eyebrow">Time series</p>
-          <h2 id="chart-title">SWOT water surface elevation</h2>
+        <div class="panel-head head-row">
+          <div>
+            <p class="eyebrow">Time series</p>
+            <h2 id="chart-title">SWOT water surface elevation</h2>
+          </div>
+          <button type="button" id="dl-wse" class="dl-btn"
+                  title="All sites, all observations, as CSV">Download CSV</button>
         </div>
         <div id="chart" class="chart"></div>
         <p class="chart-note">Each point is a SWOT observation (L2 HR Raster) extracted at the selected site — no observation, no point: sampling follows the satellite pass cycle.</p>
@@ -152,7 +156,11 @@
             <p class="eyebrow">Conditions around the lake</p>
             <h2>BOM weather stations</h2>
           </div>
-          <p id="weather-updated" class="weather-updated mono"></p>
+          <div class="head-actions">
+            <button type="button" id="dl-weather" class="dl-btn"
+                    title="Full local archive for every station, as CSV">Download CSV</button>
+            <p id="weather-updated" class="weather-updated mono"></p>
+          </div>
         </div>
         <div id="weather-strip" class="weather-strip">
           <p class="weather-empty mono">Loading observations…</p>
@@ -179,6 +187,7 @@
             <h2>Matching Delft3D scenario</h2>
           </div>
           <div class="scenario-actions">
+            <button type="button" id="dl-layer" class="dl-btn" hidden>Download layer</button>
             <button type="button" id="scenario-reset" class="date-btn" hidden>Observed conditions</button>
           </div>
         </div>
@@ -262,7 +271,11 @@
             <p class="eyebrow">Conditions around the lake</p>
             <h2>BOM weather stations</h2>
           </div>
-          <p id="weather-updated" class="weather-updated mono"></p>
+          <div class="head-actions">
+            <button type="button" id="dl-weather" class="dl-btn"
+                    title="Full local archive for every station, as CSV">Download CSV</button>
+            <p id="weather-updated" class="weather-updated mono"></p>
+          </div>
         </div>
         <div id="weather-strip" class="weather-strip">
           <p class="weather-empty mono">Loading observations…</p>
@@ -282,9 +295,13 @@
 
       <!-- Panel 3: time series -->
       <article class="panel chart-card">
-        <div class="panel-head">
-          <p class="eyebrow">Time series</p>
-          <h2 id="chart-title">SWOT water surface elevation</h2>
+        <div class="panel-head head-row">
+          <div>
+            <p class="eyebrow">Time series</p>
+            <h2 id="chart-title">SWOT water surface elevation</h2>
+          </div>
+          <button type="button" id="dl-wse" class="dl-btn"
+                  title="All sites, all observations, as CSV">Download CSV</button>
         </div>
         <div id="chart" class="chart"></div>
         <p class="chart-note">Each point is a SWOT observation (L2 HR Raster) extracted at the selected site — no observation, no point: sampling follows the satellite pass cycle.</p>
@@ -298,6 +315,7 @@
             <h2>Matching Delft3D scenario</h2>
           </div>
           <div class="scenario-actions">
+            <button type="button" id="dl-layer" class="dl-btn" hidden>Download layer</button>
             <button type="button" id="scenario-reset" class="date-btn" hidden>Observed conditions</button>
           </div>
         </div>
@@ -340,6 +358,7 @@
   </footer>
 
   <script src="windrose.js"></script>
+  <script src="download.js"></script>
   <script src="methods.js"></script>
   <script src="app.js"></script>
 </body>

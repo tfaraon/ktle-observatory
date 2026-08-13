@@ -749,6 +749,7 @@
     }
 
     state.weather = wx;
+    refreshDownloadButtons();
     strip.innerHTML = wx.stations.map(stationCard).join("");
 
     const note = $("weather-updated");
@@ -1090,6 +1091,7 @@
 
   function clearModelLayer() {
     state.modelData = null;
+    refreshDownloadButtons();
     ["modelRaster", "modelShafts", "modelHeads"].forEach((k) => {
       if (state[k]) { state.map.removeLayer(state[k]); state[k] = null; }
     });
@@ -1142,6 +1144,7 @@
     ).addTo(state.map);
 
     state.modelData = d;
+    refreshDownloadButtons();
     drawArrows(d, hi);
     showLegend(d, lo, hi);
     buildModelSelectors(d);
@@ -1484,6 +1487,55 @@
     $("scenario-reset").addEventListener("click", () => loadScenario(null));
   }
 
+  // ── CSV downloads ────────────────────────────────────────
+  //
+  // Files are built in the browser from data already loaded, so the
+  // buttons behave identically behind Flask and on the static site.
+
+  function wireDownloads() {
+    const bind = (id, build, ready) => {
+      const btn = $(id);
+      if (!btn) return;
+      btn.addEventListener("click", () => {
+        if (!ready()) return;
+        try {
+          Download.save(build());
+        } catch (e) {
+          btn.textContent = "Export failed";
+          setTimeout(() => { btn.textContent = "Download CSV"; }, 2500);
+        }
+      });
+    };
+
+    bind("dl-wse", () => Download.wseCSV(state.data), () => Boolean(state.data));
+    bind("dl-weather", () => Download.weatherCSV(state.weather),
+         () => Boolean(state.weather));
+
+    const layerBtn = $("dl-layer");
+    if (layerBtn) {
+      layerBtn.addEventListener("click", () => {
+        if (!state.modelData) return;
+        Download.save(Download.layerCSV(state.modelData,
+          state.scenario ? state.scenario.match.scenario : null));
+      });
+    }
+  }
+
+  function refreshDownloadButtons() {
+    const wse = $("dl-wse");
+    if (wse) wse.disabled = !state.data;
+    const wx = $("dl-weather");
+    if (wx) wx.disabled = !state.weather;
+    const layer = $("dl-layer");
+    if (layer) {
+      layer.hidden = !state.modelData;
+      // La grille complète n'est disponible que derrière Flask ; le site
+      // statique n'a que l'image, d'où l'export des flèches.
+      layer.textContent = state.modelData && state.modelData.z
+        ? "Download grid" : "Download arrows";
+    }
+  }
+
   // ── Tabs ─────────────────────────────────────────────────
 
   function showTab(name) {
@@ -1541,6 +1593,7 @@
     }
 
     state.data = data;
+    refreshDownloadButtons();
     $("dashboard").hidden = false;
     $("generated-at").textContent = fmtDate(data.generated_at.replace("Z", ""));
     $("datum-label").textContent = data.datum_label || "WSE (m)";
@@ -1614,6 +1667,7 @@
   document.addEventListener("DOMContentLoaded", () => {
     // Les onglets fonctionnent même si les données manquent
     wireTabs();
+    wireDownloads();
     init();
   });
 })();
