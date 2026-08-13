@@ -57,7 +57,9 @@ const METHODS_HTML = `
 
     <p>Water area follows the method of <strong>Rai, Cohen, Armon and
     Marx (2026)</strong>, <em>Volumetric analysis of a playa lake using
-    SWOT data</em>, Journal of Hydrology 676, 135652 &mdash; the same
+    SWOT data: an improved understanding of the inflows to Kati
+    Thanda&ndash;Lake Eyre</em>, Journal of Hydrology 676, 135652,
+    <a href="https://doi.org/10.1016/j.jhydrol.2026.135652">doi:10.1016/j.jhydrol.2026.135652</a> &mdash; the same
     lake, and the first study to estimate its storage from SWOT without
     a hypsometric curve. Cells are retained where the water fraction
     falls between 0.1 and 0.99 and the area quality flag is good or
@@ -143,6 +145,15 @@ const METHODS_HTML = `
     to true bearings. Wave arrows follow the SWAN convention, in which
     <code>dir</code> is the direction waves come <em>from</em>; the
     arrows drawn show propagation.</p>
+
+    <p>Colour bounds are fitted to each scenario by default, using the
+    99th percentile rather than the maximum: a few edge cells, often
+    interpolation artefacts along the shore, would otherwise compress
+    the whole palette and leave a calm lake uniformly dark. The
+    <em>Fixed scale</em> button switches to bounds shared by every
+    scenario, which makes colours comparable along the timeline at the
+    cost of legibility on quiet days. Hovering the map reads the value
+    under the cursor.</p>
 
     <p>The wet extent of the lake is taken from a field that vanishes
     only outside water &mdash; water level for flow, depth for waves

@@ -216,7 +216,15 @@ scenarios:
   #   "from" (nautique, SWAN par defaut) ou "to" (direction de propagation)
   wave_dir_convention: "from"
 
-  # Bornes de couleur par couche [min, max] ; null = automatique.
+  # Echelle de couleur des couches :
+  #   "auto"  : bornes adaptees a chaque scenario (99e centile) — un
+  #             regime calme reste lisible, mais les couleurs ne sont
+  #             plus comparables d'un scenario a l'autre
+  #   "fixed" : bornes de layer_scales ci-dessous, comparables
+  # Le bouton de la carte permet de basculer sans changer ce reglage.
+  colour_scale: "auto"
+
+  # Bornes utilisees en mode "fixed" [min, max] ; null = automatique.
   layer_scales:
     currents: [0.0, 0.5]
     hsign: [0.0, null]

@@ -253,9 +253,14 @@ def build(cfg, out_dir=SITE, colors=64, limit=None, sample=40):
         per_scenario = {}
         for file_id, layer, lidx in jobs:
             try:
-                lo, hi = scales[file_id]
+                fixed = (cfg.get("scenarios") or {}).get(
+                    "colour_scale", "auto") == "fixed"
+                lo, hi = scales[file_id] if fixed else (None, None)
                 out = render(store, cfg, key, entry, layer, lidx,
                              dict(common, vmin=lo, vmax=hi))
+                # assemble_map renvoie les bornes retenues, adaptees au
+                # scenario quand elles ne sont pas imposees.
+                lo, hi = out["vmin"], out["vmax"]
             except Exception as e:
                 failures.append((key, file_id, f"{type(e).__name__}: {e}"[:90]))
                 continue
@@ -267,6 +272,12 @@ def build(cfg, out_dir=SITE, colors=64, limit=None, sample=40):
                                       colors=colors)
             per_scenario[file_id] = pack_arrows(out, n_arrows)
             per_scenario[file_id]["zmax"] = out.get("zmax")
+            # Bornes reellement utilisees pour colorer CETTE image, et
+            # grille allegee pour la lecture au survol.
+            per_scenario[file_id]["vmin"] = lo
+            per_scenario[file_id]["vmax"] = hi
+            per_scenario[file_id]["coarse"] = sfield.coarse_grid(
+                out, cfg.get("scenarios", {}).get("hover_res", 48))
 
         with open(arr_dir / f"{key}.json", "w", encoding="utf-8") as f:
             json.dump(per_scenario, f, separators=(",", ":"))

@@ -126,13 +126,22 @@ python pipeline/lake_area.py
 python pipeline/lake_area.py --limit 5    # quick check
 ```
 
-Water area is computed from the SWOT granules already on disk, following
-Rai et al. (2026), *Volumetric analysis of a playa lake using SWOT data*,
-J. Hydrol. 676, 135652. Cells are kept where the water fraction lies between
+Water area is computed from the SWOT granules already on disk, following:
+
+> Rai, A.K., Cohen, T.J., Armon, M. & Marx, S.K. (2026). Volumetric analysis of
+> a playa lake using SWOT data: an improved understanding of the inflows to
+> Kati Thanda–Lake Eyre. *Journal of Hydrology* **676**, 135652.
+> https://doi.org/10.1016/j.jhydrol.2026.135652 Cells are kept where the water fraction lies between
 0.1 and 0.99 and the quality flag is good or suspect; a 5×5 median filter
 removes isolated detections; retained cell areas are summed and uncertainties
 combined in quadrature. The series is written to `data/lake_area.json` and
-drawn on the right-hand axis of the time-series chart.
+drawn on the right-hand axis of the time-series chart, and can be downloaded
+as CSV with the reference in its header.
+
+> Rai, A.K., Cohen, T.J., Armon, M. & Marx, S.K. (2026). Volumetric analysis of
+> a playa lake using SWOT data: an improved understanding of the inflows to
+> Kati Thanda–Lake Eyre. *Journal of Hydrology* **676**, 135652.
+> <https://doi.org/10.1016/j.jhydrol.2026.135652> — open access, CC BY.
 
 Two departures from the published method are worth knowing. The paper works on
 the PIXC point cloud, whereas this uses the Raster product already downloaded.
@@ -231,6 +240,7 @@ The main conversion settings are:
 | `wind_station` | BOM station used for the wind conditions |
 | `wind_dir_convention` | wind direction expressed as `from` or `to` |
 | `wlvl_offset` | offset between the SWOT and model vertical datums |
+| `colour_scale` | `auto` fits the palette to each scenario; `fixed` uses `layer_scales` |
 | `wlvl_rounding` | `down` restricts the match to levels at or below the observed one; `nearest` allows either side |
 
 `wlvl_rounding` defaults to `down`. Selecting a scenario above the observed
@@ -242,6 +252,13 @@ different steady-state scenario; it does not move through time within a single
 simulation.
 
 ### Displayed fields
+
+The colour scale defaults to `auto`: bounds are fitted to each scenario using
+the 99th percentile, so a calm regime stays legible and a handful of edge
+artefacts cannot flatten the palette. The map has an **Auto scale / Fixed
+scale** button; fixed bounds make colours comparable between scenarios but
+often leave quiet scenarios almost uniform. Hovering the map reads out the
+value under the cursor.
 
 The map can display:
 

@@ -152,3 +152,47 @@ assert(!/[^a-z0-9._-]/.test(wf.name), wf.name);
 
 console.log("OK — échappement, en-têtes de métadonnées, niveaux d'eau, météo, "
   + "grille et flèches, noms de fichiers validés.");
+
+// ── Surface en eau : la citation doit accompagner les données ─
+
+const area = {
+  note: "Spatial constraint from the Delft3D domain",
+  series: [
+    { date: "2026-07-25", area_km2: 910.4, uncert_km2: 12.1,
+      coverage: 0.82, partial: false, n_scenes: 3 },
+    { date: "2026-08-05", area_km2: 120.0, uncert_km2: null,
+      coverage: 0.09, partial: true, n_scenes: 1 },
+  ],
+};
+
+const af2 = D.areaCSV(area);
+assert(/^ktle_water_area_\d{4}-\d{2}-\d{2}\.csv$/.test(af2.name), af2.name);
+
+const aHead = af2.text.split("\n").filter((l) => l.startsWith("#"));
+// La méthode n'est pas de nous : la référence voyage avec le fichier
+assert(aHead.some((l) => l.includes("Rai")), "auteur absent");
+assert(aHead.some((l) => l.includes("Journal of Hydrology 676, 135652")),
+  "référence incomplète");
+assert(aHead.some((l) => l.includes("10.1016/j.jhydrol.2026.135652")),
+  "DOI absent");
+assert(aHead.some((l) => l.includes("partial")), "réserve sur la couverture");
+
+const aBody = af2.text.split("\n").filter((l) => l && !l.startsWith("#"));
+assert.strictEqual(aBody[0],
+  "date,area_km2,uncertainty_km2,coverage_fraction,pass_coverage,n_scenes");
+assert.strictEqual(aBody.length - 1, 2);
+assert(aBody[1].includes(",full,"), aBody[1]);
+// Un passage partiel doit être identifiable dans le fichier lui-même
+assert(aBody[2].includes(",partial,"), aBody[2]);
+// Une incertitude absente reste une cellule vide, pas "null"
+assert(!aBody[2].includes("null"), aBody[2]);
+
+assert(D.AREA_CITATION.includes("doi.org/10.1016/j.jhydrol.2026.135652"));
+
+// Une série vide donne un fichier valide, citation comprise
+const emptyArea = D.areaCSV({ series: [] });
+assert(emptyArea.text.includes("Rai"));
+assert(emptyArea.text.includes("date,area_km2"));
+
+console.log("OK — export de la surface en eau : citation, DOI, réserve sur "
+  + "les passages partiels et valeurs manquantes validés.");

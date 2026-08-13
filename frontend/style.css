@@ -206,6 +206,13 @@ code {
 }
 .prose-body h3:first-of-type { border-top: none; padding-top: 0; }
 .prose-body strong { font-weight: 600; }
+.prose-body .reference {
+  border-left: 3px solid var(--flood);
+  background: rgba(30, 95, 107, 0.05);
+  padding: 10px 14px;
+  font-size: 13.5px;
+}
+.prose-body a { color: var(--flood-deep); }
 .prose-body em { font-style: italic; }
 
 /* Les réserves méthodologiques sont signalées, pas noyées */
@@ -395,6 +402,24 @@ main {
 }
 .map-wrap { position: relative; flex: 1; min-height: 620px; display: flex; }
 #map { width: 100%; flex: 1; min-height: 620px; }
+
+/* Lecture de la valeur sous le curseur */
+.map-readout {
+  position: absolute;
+  right: 12px; top: 12px;
+  z-index: 600;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid var(--panel-edge);
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 12px;
+  color: var(--basin);
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+  box-shadow: 0 1px 5px rgba(0,0,0,.12);
+}
+.map-readout b { font-weight: 600; }
+.map-readout .dim { color: var(--dune); font-size: 10.5px; }
 
 /* Message d'état du modèle, posé sur la carte */
 .map-message {

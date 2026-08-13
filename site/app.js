@@ -21,6 +21,8 @@
     modelLayer: "none", // none | currents | hsign | wlength | period
     modelRaster: null, modelShafts: null, modelHeads: null,
     modelData: null,
+    field: null,          // grid used for the hover readout
+    scaleMode: "auto",    // colour scale fitted to the scenario
     arrowPx: 16,       // arrow length in screen pixels
     staticMode: false, // no server: pre-rendered layers
     manifest: null, staticIndex: null, paramGrid: null,
@@ -234,6 +236,20 @@
     if (state.baseKey !== "topo") setBase(state.baseKey); // reload the layer
   }
 
+  function wireScaleToggle() {
+    const btn = $("scale-toggle");
+    if (!btn) return;
+    // En statique l'image est déjà colorée : l'échelle ne peut plus
+    // changer à l'affichage.
+    if (state.staticMode) { btn.hidden = true; return; }
+    btn.addEventListener("click", () => {
+      state.scaleMode = state.scaleMode === "auto" ? "fixed" : "auto";
+      btn.textContent = state.scaleMode === "auto" ? "Auto scale" : "Fixed scale";
+      btn.classList.toggle("active", state.scaleMode === "auto");
+      if (currentKey()) drawModelLayer();
+    });
+  }
+
   function wireMapBar() {
     const input = $("imagery-date");
     input.max = todayUTC();
@@ -284,6 +300,8 @@
     });
 
     wireMapBar();
+    wireScaleToggle();
+    wireHover(map);
   }
 
   function refreshMarkers() {
@@ -1142,7 +1160,63 @@
     if (el) el.hidden = true;
   }
 
+  // ── Value under the cursor ───────────────────────────────
+  //
+  // The grid is kept client-side so the readout works without a round
+  // trip. Behind Flask the full field is available; the static site
+  // carries a coarser grid, exported alongside the image.
+
+  function sampleField(lat, lon) {
+    const f = state.field;
+    if (!f || !f.v) return null;
+    const fy = (lat - f.lat0) / ((f.lat1 - f.lat0) || 1);
+    const fx = (lon - f.lon0) / ((f.lon1 - f.lon0) || 1);
+    if (fy < 0 || fy > 1 || fx < 0 || fx > 1) return null;
+    const iy = Math.round(fy * (f.n_y - 1));
+    const ix = Math.round(fx * (f.n_x - 1));
+    const v = f.v[iy * f.n_x + ix];
+    return (v === null || v === undefined) ? null : v;
+  }
+
+  function setField(d) {
+    // Le champ complet (Flask) ou la grille allégée (statique).
+    if (d && d.z && d.lat && d.lon) {
+      state.field = {
+        n_x: d.lon.length, n_y: d.lat.length,
+        lat0: d.lat[0], lat1: d.lat[d.lat.length - 1],
+        lon0: d.lon[0], lon1: d.lon[d.lon.length - 1],
+        v: [].concat.apply([], d.z), coarse: false,
+      };
+    } else if (d && d.coarse) {
+      state.field = Object.assign({ coarse: true }, d.coarse);
+    } else {
+      state.field = null;
+    }
+  }
+
+  function showReadout(lat, lon) {
+    const el = $("map-readout");
+    if (!el) return;
+    const d = state.modelData;
+    if (!d || !state.field) { el.hidden = true; return; }
+    const v = sampleField(lat, lon);
+    if (v === null) { el.hidden = true; return; }
+    const digits = Math.abs(v) < 1 ? 3 : 2;
+    el.innerHTML = `<b>${v.toFixed(digits)}</b> ${d.units || ""}`
+      + `<span class="dim"> · ${d.label}</span>`
+      + (state.field.coarse ? '<span class="dim"> · nearest sample</span>' : "");
+    el.hidden = false;
+  }
+
+  function wireHover(map) {
+    map.on("mousemove", (e) => showReadout(e.latlng.lat, e.latlng.lng));
+    map.on("mouseout", () => { const el = $("map-readout"); if (el) el.hidden = true; });
+  }
+
   function clearModelLayer() {
+    state.field = null;
+    const ro = $("map-readout");
+    if (ro) ro.hidden = true;
     state.modelData = null;
     refreshDownloadButtons();
     ["modelRaster", "modelShafts", "modelHeads"].forEach((k) => {
@@ -1197,6 +1271,7 @@
     ).addTo(state.map);
 
     state.modelData = d;
+    setField(d);
     refreshDownloadButtons();
     drawArrows(d, hi);
     showLegend(d, lo, hi);
@@ -1240,7 +1315,8 @@
     const url = "/api/scenario/maplayer?key=" + encodeURIComponent(key)
       + "&layer=" + encodeURIComponent(state.modelLayer)
       + (state.fieldLayer !== null ? "&layer_index=" + state.fieldLayer : "")
-      + (state.fieldTime !== null ? "&time=" + state.fieldTime : "");
+      + (state.fieldTime !== null ? "&time=" + state.fieldTime : "")
+      + "&scale=" + state.scaleMode;
     const res = await fetch(url, { cache: "no-store" });
     const d = await res.json();
     if (!res.ok) throw new Error(d.message || d.error);
@@ -1282,7 +1358,11 @@
       arrows.value.push(packed.v[k]);
     });
 
-    const [vmin, vmax] = man.scales[fileId] || [0, 1];
+    // Bornes propres au scénario si l'export les a enregistrées,
+    // sinon celles du manifeste.
+    const [vmin, vmax] = (packed.vmin !== undefined && packed.vmax !== undefined)
+      ? [packed.vmin, packed.vmax]
+      : (man.scales[fileId] || [0, 1]);
     const axes = vertical && man.layer_indices.length > 1
       ? [{ dim: "layer", kind: "layer", size: man.layer_indices.length,
            index: li, values: man.layer_indices,
@@ -1293,6 +1373,7 @@
       bounds, arrows, n_arrows: arrows.lat.length,
       arrow_scaled: vertical, vmin, vmax,
       zmax: packed.zmax, zmin: 0, axes, source: "static",
+      coarse: packed.coarse || null,
       image: `img/${encodeURIComponent(key)}__${fileId}.png`,
     };
   }
@@ -1563,6 +1644,8 @@
     bind("dl-wse", () => Download.wseCSV(state.data), () => Boolean(state.data));
     bind("dl-weather", () => Download.weatherCSV(state.weather),
          () => Boolean(state.weather));
+    bind("dl-area", () => Download.areaCSV(state.area),
+         () => Boolean(state.area));
 
     const layerBtn = $("dl-layer");
     if (layerBtn) {
@@ -1579,6 +1662,8 @@
     if (wse) wse.disabled = !state.data;
     const wx = $("dl-weather");
     if (wx) wx.disabled = !state.weather;
+    const areaBtn = $("dl-area");
+    if (areaBtn) areaBtn.hidden = !state.area;
     const layer = $("dl-layer");
     if (layer) {
       layer.hidden = !state.modelData;
@@ -1701,6 +1786,7 @@
     }
 
     state.area = await loadArea();
+    refreshDownloadButtons();
     state.imagery = await loadImageryConfig();
     initMap(data.lake, data.sites);
 

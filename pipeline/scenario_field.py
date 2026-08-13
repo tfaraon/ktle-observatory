@@ -851,6 +851,14 @@ def assemble_map(plon, plat, values, spec, extra=None, grid_res=260,
     rows = [[None if not np.isfinite(t) else round(float(t), 4)
              for t in row] for row in grid]
 
+    # Borne haute automatique : le 99e centile plutot que le maximum.
+    # Sur un champ dissymetrique — courants concentres dans quelques
+    # chenaux, reste du lac quasi immobile — caler la palette sur le
+    # maximum absolu ecraserait toute la structure.
+    # Une maille isolee, souvent un artefact d'interpolation en rive,
+    # ecraserait sinon toute la palette.
+    p99 = float(np.percentile(finite, 99)) if finite.size else None
+
     alon = np.linspace(lon0, lon1, int(n_arrows))
     alat = np.linspace(lat0, lat1, int(n_arrows))
     mal, mab = np.meshgrid(alon, alat)
@@ -896,8 +904,13 @@ def assemble_map(plon, plat, values, spec, extra=None, grid_res=260,
 
     dlat = (glat[-1] - glat[0]) / max(1, len(glat) - 1)
     dlon = (glon[-1] - glon[0]) / max(1, len(glon) - 1)
-    lo = spec["vmin"] if vmin is None else vmin
-    hi = spec["vmax"] if vmax is None else vmax
+    # vmin / vmax non fournis -> echelle adaptee au scenario affiche.
+    lo = 0.0 if vmin is None else vmin
+    hi = vmax
+    if hi is None:
+        hi = p99 if p99 else (float(finite.max()) if finite.size else 1.0)
+    if hi is not None and lo is not None and hi <= lo:
+        hi = lo + 1e-6
 
     return {
         "label": spec["label"], "units": spec["units"],
@@ -918,10 +931,36 @@ def assemble_map(plon, plat, values, spec, extra=None, grid_res=260,
         "arrow_scaled": spec["mode"] == "vector",
         "zmin": round(float(finite.min()), 4) if finite.size else None,
         "zmax": round(float(finite.max()), 4) if finite.size else None,
-        "vmin": lo, "vmax": hi,
+        "zp99": round(p99, 5) if p99 is not None else None,
+        "vmin": round(float(lo), 5), "vmax": round(float(hi), 5),
+        "autoscale": vmax is None,
         "smooth": float(smooth or 0.0),
         "n_wet": int(wet_pts.sum()),
         "masked": wet is not None,
+    }
+
+
+def coarse_grid(payload, size=48):
+    """Grille de valeurs allegee, pour la lecture au survol.
+
+    Le site statique ne recoit qu'une image : sans ces valeurs, la
+    souris n'aurait rien a afficher. Une grille 48x48 pese quelques
+    kilo-octets et suffit a une lecture ponctuelle.
+    """
+    import numpy as np
+
+    z = np.array([[np.nan if v is None else v for v in row]
+                  for row in payload["z"]], dtype="float64")
+    ny, nx = z.shape
+    iy = np.linspace(0, ny - 1, min(size, ny)).round().astype(int)
+    ix = np.linspace(0, nx - 1, min(size, nx)).round().astype(int)
+    sub = z[np.ix_(iy, ix)]
+    return {
+        "n_x": int(len(ix)), "n_y": int(len(iy)),
+        "lat0": payload["lat"][0], "lat1": payload["lat"][-1],
+        "lon0": payload["lon"][0], "lon1": payload["lon"][-1],
+        "v": [None if not np.isfinite(t) else round(float(t), 4)
+              for t in sub.ravel()],
     }
 
 

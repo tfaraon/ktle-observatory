@@ -72,6 +72,8 @@
             <div id="model-controls" class="imagery-controls mono" hidden>
               <select id="model-layer-idx" class="site-select" aria-label="Vertical layer"></select>
               <select id="model-time" class="site-select" aria-label="Time step"></select>
+              <button type="button" id="scale-toggle" class="date-btn active"
+                      title="Auto: scale fitted to this scenario. Fixed: same scale for all scenarios.">Auto scale</button>
               <label class="arrow-size-wrap">Arrows
                 <input type="range" id="arrow-size" min="6" max="42" step="2"
                        value="16" aria-label="Arrow size">
@@ -87,6 +89,7 @@
           <div class="map-wrap">
             <div id="map" aria-label="Map of SWOT extraction sites"></div>
             <div id="map-message" class="map-message mono" hidden></div>
+            <div id="map-readout" class="map-readout mono" hidden></div>
             <div id="map-legend" class="map-legend mono" hidden>
               <span id="legend-title"></span>
               <span class="legend-bar"><i></i></span>
@@ -140,8 +143,12 @@
             <p class="eyebrow">Time series</p>
             <h2 id="chart-title">SWOT water surface elevation</h2>
           </div>
-          <button type="button" id="dl-wse" class="dl-btn"
-                  title="All sites, all observations, as CSV">Download CSV</button>
+          <span class="head-actions">
+            <button type="button" id="dl-wse" class="dl-btn"
+                    title="All sites, all observations, as CSV">Water levels</button>
+            <button type="button" id="dl-area" class="dl-btn" hidden
+                    title="Surface water area, method of Rai et al. (2026)">Water area</button>
+          </span>
         </div>
         <div id="chart" class="chart"></div>
         <p class="chart-note">Each point is a SWOT observation (L2 HR Raster) extracted at the selected site — no observation, no point: sampling follows the satellite pass cycle. Water area, where available, follows the method of Rai et al. (2026); open circles mark passes that covered only part of the lake.</p>
@@ -241,6 +248,8 @@
             <div id="model-controls" class="imagery-controls mono" hidden>
               <select id="model-layer-idx" class="site-select" aria-label="Vertical layer"></select>
               <select id="model-time" class="site-select" aria-label="Time step"></select>
+              <button type="button" id="scale-toggle" class="date-btn active"
+                      title="Auto: scale fitted to this scenario. Fixed: same scale for all scenarios.">Auto scale</button>
               <label class="arrow-size-wrap">Arrows
                 <input type="range" id="arrow-size" min="6" max="42" step="2"
                        value="16" aria-label="Arrow size">
@@ -256,6 +265,7 @@
           <div class="map-wrap">
             <div id="map" aria-label="Map of SWOT extraction sites"></div>
             <div id="map-message" class="map-message mono" hidden></div>
+            <div id="map-readout" class="map-readout mono" hidden></div>
             <div id="map-legend" class="map-legend mono" hidden>
               <span id="legend-title"></span>
               <span class="legend-bar"><i></i></span>
@@ -300,8 +310,12 @@
             <p class="eyebrow">Time series</p>
             <h2 id="chart-title">SWOT water surface elevation</h2>
           </div>
-          <button type="button" id="dl-wse" class="dl-btn"
-                  title="All sites, all observations, as CSV">Download CSV</button>
+          <span class="head-actions">
+            <button type="button" id="dl-wse" class="dl-btn"
+                    title="All sites, all observations, as CSV">Water levels</button>
+            <button type="button" id="dl-area" class="dl-btn" hidden
+                    title="Surface water area, method of Rai et al. (2026)">Water area</button>
+          </span>
         </div>
         <div id="chart" class="chart"></div>
         <p class="chart-note">Each point is a SWOT observation (L2 HR Raster) extracted at the selected site — no observation, no point: sampling follows the satellite pass cycle. Water area, where available, follows the method of Rai et al. (2026); open circles mark passes that covered only part of the lake.</p>

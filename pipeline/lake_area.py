@@ -3,9 +3,15 @@
 """
 Surface en eau de Kati Thanda - Lake Eyre a partir de SWOT.
 
-Methode d'apres Rai, Cohen, Armon & Marx (2026), « Volumetric analysis
-of a playa lake using SWOT data », J. Hydrol. 676, 135652, adaptee au
-produit L2 HR Raster.
+Methode d'apres :
+
+    Rai, A.K., Cohen, T.J., Armon, M., Marx, S.K. (2026). Volumetric
+    analysis of a playa lake using SWOT data: An improved understanding
+    of the inflows to Kati Thanda-Lake Eyre. Journal of Hydrology, 676,
+    135652. https://doi.org/10.1016/j.jhydrol.2026.135652
+    (acces libre, licence CC BY)
+
+adaptee au produit L2 HR Raster.
 
 Ce que reprend cette implementation :
   - filtres qualite sur la detection d'eau (fraction d'eau bornee,
@@ -347,11 +353,29 @@ def build(cfg, limit=None, out_path=OUT_FILE):
 
     acfg = dict(DEFAULTS, **(cfg.get("area") or {}))
     swot_dir = resolve_path(cfg["paths"]["swot_data"])
-    files = list_nc_files(str(swot_dir), acfg.get("resolution"))
+    resolution = acfg.get("resolution")
+    files = list_nc_files(str(swot_dir), resolution)
+    if not files:
+        # Distinguer les trois causes : sans cela, « aucun granule »
+        # ne dit pas s'il faut monter un disque, corriger un chemin ou
+        # relacher le filtre de resolution.
+        if not swot_dir.exists():
+            raise SystemExit(
+                f"Répertoire introuvable : {swot_dir}\n"
+                "Le disque externe est-il monté ? Sinon, corrigez "
+                "paths.swot_data dans config.yaml.")
+        every = list_nc_files(str(swot_dir))
+        if not every:
+            raise SystemExit(
+                f"Aucun fichier .nc sous {swot_dir}\n"
+                "Lancez d'abord : python pipeline/update_swot.py --download")
+        raise SystemExit(
+            f"{len(every)} granule(s) présents, mais aucun ne correspond à "
+            f"la résolution « {resolution} ».\n"
+            f"  exemple de nom : {os.path.basename(every[0])}\n"
+            "Ajustez area.resolution dans config.yaml (null = toutes).")
     if limit:
         files = files[:limit]
-    if not files:
-        raise SystemExit(f"Aucun granule trouvé dans {swot_dir}")
 
     boundary = None
     if acfg.get("boundary", "model") == "model":
@@ -391,8 +415,13 @@ def build(cfg, limit=None, out_path=OUT_FILE):
 
     payload = {
         "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "method": "Rai et al. (2026), J. Hydrol. 676, 135652 — adapted to "
-                  "the SWOT L2 HR Raster product",
+        "method": "Rai et al. (2026) — adapted to the SWOT L2 HR Raster "
+                  "product",
+        "citation": "Rai, A.K., Cohen, T.J., Armon, M. & Marx, S.K. (2026). "
+                    "Volumetric analysis of a playa lake using SWOT data: an "
+                    "improved understanding of the inflows to Kati "
+                    "Thanda-Lake Eyre. Journal of Hydrology 676, 135652.",
+        "doi": "10.1016/j.jhydrol.2026.135652",
         "note": "Spatial constraint from the Delft3D domain replaces the "
                 "Sentinel-3 optical mask; the area is an upper bound",
         "parameters": {k: acfg[k] for k in

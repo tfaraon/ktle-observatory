@@ -525,7 +525,16 @@ def api_scenario_maplayer():
         return jsonify(_FIELD_CACHE[cache_key])
 
     zone, hint = scenario_zone()
-    scales = (scfg.get("layer_scales") or {}).get(layer) or [None, None]
+    # "auto" (defaut) : chaque scenario a son echelle, sans quoi un
+    # regime calme reste invisible. "fixed" : bornes de config.yaml,
+    # pour comparer les scenarios entre eux.
+    # Le parametre d'URL prime sur la configuration : le bouton de la
+    # carte bascule ainsi sans rien modifier sur le disque.
+    mode = request.args.get("scale") or scfg.get("colour_scale", "auto")
+    if mode == "fixed":
+        scales = (scfg.get("layer_scales") or {}).get(layer) or [None, None]
+    else:
+        scales = [None, None]      # bornes adaptees au scenario
     common = dict(grid_res=scfg.get("map_grid_res", 260),
                   n_arrows=scfg.get("arrow_density", 26),
                   smooth=scfg.get("current_smooth", 2.0),

@@ -98,6 +98,38 @@
     };
   }
 
+  // ── Lake surface area ────────────────────────────────────
+
+  const AREA_CITATION =
+    "Method: Rai, A.K., Cohen, T.J., Armon, M. & Marx, S.K. (2026). "
+    + "Volumetric analysis of a playa lake using SWOT data: an improved "
+    + "understanding of the inflows to Kati Thanda-Lake Eyre. "
+    + "Journal of Hydrology 676, 135652. "
+    + "https://doi.org/10.1016/j.jhydrol.2026.135652";
+
+  function areaRows(area) {
+    return (area.series || []).map((r) => [
+      r.date, r.area_km2, r.uncert_km2, r.coverage,
+      r.partial ? "partial" : "full", r.n_scenes]);
+  }
+
+  function areaCSV(area) {
+    const meta = [
+      "Kati Thanda-Lake Eyre observatory - surface water area",
+      "Source: SWOT L2 HR Raster (NASA/CNES)",
+      AREA_CITATION,
+    ];
+    if (area.note) meta.push("Note: " + area.note);
+    meta.push("Rows flagged 'partial' come from a pass covering only part "
+      + "of the lake and understate the area");
+    meta.push("Generated: " + new Date().toISOString());
+    return {
+      name: `ktle_water_area_${stamp()}.csv`,
+      text: toCSV(["date", "area_km2", "uncertainty_km2", "coverage_fraction",
+                   "pass_coverage", "n_scenes"], areaRows(area), meta),
+    };
+  }
+
   // ── Model layer ──────────────────────────────────────────
 
   function layerMeta(d, scenario) {
@@ -165,8 +197,9 @@
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 
-  const api = { toCSV, escapeCell, wseCSV, weatherCSV, layerCSV,
-                wseRows, weatherRows, WEATHER_COLUMNS, slug, save };
+  const api = { toCSV, escapeCell, wseCSV, weatherCSV, areaCSV, layerCSV,
+                wseRows, weatherRows, areaRows, WEATHER_COLUMNS,
+                AREA_CITATION, slug, save };
 
   if (typeof module === "object" && module.exports) {
     module.exports = api;
