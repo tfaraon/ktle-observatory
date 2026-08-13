@@ -1,0 +1,432 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Surface en eau de Kati Thanda - Lake Eyre a partir de SWOT.
+
+Methode d'apres Rai, Cohen, Armon & Marx (2026), « Volumetric analysis
+of a playa lake using SWOT data », J. Hydrol. 676, 135652, adaptee au
+produit L2 HR Raster.
+
+Ce que reprend cette implementation :
+  - filtres qualite sur la detection d'eau (fraction d'eau bornee,
+    drapeau de qualite) ;
+  - filtre median 5x5 pour supprimer les detections isolees, le bruit
+    de speckle etant important sur une croute de sel ;
+  - agregation a 100 m ;
+  - surface = somme des aires d'eau des mailles retenues ;
+  - propagation d'incertitude en somme quadratique (Eq. 10 de
+    l'article).
+
+Ce qui differe, et pourquoi :
+  - L'article travaille sur le nuage de points PIXC ; on utilise ici le
+    produit Raster, deja agrege a 100 m. Les auteurs jugent le Raster
+    « pas ideal » pour ce lac, notamment pour la couverture ; le
+    controle de couverture ci-dessous repond a cette reserve.
+  - L'article contraint SWOT par un masque optique Sentinel-3 OLCI
+    (MNDWI), car croute de sel humide et eau tres peu profonde ont des
+    retrodiffusions voisines (0-15 dB). Ce masque n'est pas disponible
+    ici : on le remplace par une emprise geographique — le domaine
+    Delft3D, qui EST le lac. C'est une contrainte spatiale, non
+    spectrale : elle ecarte les detections hors du lac mais ne separe
+    pas l'eau tres peu profonde du sel sature a l'interieur. La surface
+    est donc plutot un majorant, et l'incertitude reelle depasse les
+    ~15 % rapportes par l'article avec la fusion Sentinel-3.
+
+Usage :
+    python pipeline/lake_area.py            # -> data/lake_area.json
+    python pipeline/lake_area.py --limit 5  # essai rapide
+"""
+
+import argparse
+import json
+import math
+import os
+import sys
+from datetime import datetime, timezone
+from pathlib import Path
+
+import numpy as np
+import yaml
+
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(ROOT / "pipeline"))
+
+import geo  # noqa: E402
+
+OUT_FILE = ROOT / "data" / "lake_area.json"
+CACHE_FILE = ROOT / "data" / "area_cache.json"
+
+# Valeurs par defaut, reprises de l'article
+DEFAULTS = {
+    "water_frac_range": [0.1, 0.99],   # Fig. 4 : fraction d'eau retenue
+    "max_qual": 1,                     # 0 = bon, 1 = suspect
+    "median_size": 5,                  # filtre median 5x5 (Eq. 2)
+    "resolution": "100",               # agregation a 100 m
+    "min_coverage": 0.15,              # passage juge trop partiel en deca
+}
+
+
+def open_dataset(path):
+    """Ouverture NetCDF (import paresseux, isole pour les tests)."""
+    try:
+        from netCDF4 import Dataset
+    except ImportError:
+        raise RuntimeError("netCDF4 is not installed (pip install netCDF4) — "
+                           "required to read SWOT granules.")
+    return Dataset(str(path), "r")
+
+
+# ------------------------------------------------------------------
+# Coeur de la methode : masque d'eau
+# ------------------------------------------------------------------
+
+def median_filter_mask(mask, size=5):
+    """Filtre median sur un masque booleen (Eq. 2 de l'article).
+
+    Une maille est conservee si la majorite de son voisinage est en
+    eau. Cela supprime les detections isolees — speckle sur croute de
+    sel — sans eroder les rives, la ou un simple seuillage laisserait
+    un semis de faux positifs.
+    """
+    if not size or size < 2:
+        return mask
+    from scipy.ndimage import uniform_filter
+
+    frac = uniform_filter(mask.astype("float64"), size=int(size),
+                          mode="nearest")
+    return frac > 0.5
+
+
+def water_mask(water_frac, qual=None, frac_range=(0.1, 0.99), max_qual=1,
+               median_size=5):
+    """Mailles retenues comme etant en eau.
+
+    La borne basse ecarte les mailles majoritairement seches, la borne
+    haute les mailles saturees a 1.0, souvent issues d'une detection
+    degradee plutot que d'une eau franche.
+    """
+    lo, hi = frac_range
+    frac = np.asarray(water_frac, dtype="float64")
+    mask = np.isfinite(frac) & (frac >= lo) & (frac <= hi)
+    if qual is not None:
+        q = np.asarray(qual)
+        mask &= np.isfinite(q) & (q <= max_qual)
+    return median_filter_mask(mask, median_size)
+
+
+def area_from_arrays(water_area, water_frac, qual=None, uncert=None,
+                     inside=None, cell_area=None, **kw):
+    """Surface en eau d'une scene, en m2.
+
+    water_area est l'aire d'eau par maille fournie par le produit ; a
+    defaut, elle est reconstituee comme fraction x aire de maille.
+    inside restreint le calcul a l'emprise du lac.
+    """
+    mask = water_mask(water_frac, qual, **kw)
+    if inside is not None:
+        mask &= np.asarray(inside, dtype=bool)
+
+    if water_area is not None:
+        area = np.asarray(water_area, dtype="float64")
+        area = np.where(np.isfinite(area), area, 0.0)
+    elif cell_area is not None:
+        area = np.asarray(water_frac, dtype="float64") * float(cell_area)
+        area = np.where(np.isfinite(area), area, 0.0)
+    else:
+        raise ValueError("water_area or cell_area is required")
+
+    total = float(area[mask].sum())
+
+    # Somme quadratique : les erreurs de maille sont supposees
+    # independantes, comme la propagation de l'Eq. 10.
+    if uncert is not None:
+        u = np.asarray(uncert, dtype="float64")
+        u = np.where(np.isfinite(u), u, 0.0)
+        sigma = float(np.sqrt((u[mask] ** 2).sum()))
+    else:
+        sigma = None
+
+    return {"area_m2": total, "uncert_m2": sigma,
+            "n_cells": int(mask.sum()),
+            "n_valid": int(np.isfinite(np.asarray(water_frac)).sum())}
+
+
+# ------------------------------------------------------------------
+# Emprise du lac (remplace la contrainte optique Sentinel-3)
+# ------------------------------------------------------------------
+
+def model_boundary(cfg):
+    """Points du domaine Delft3D, en degres — l'emprise du lac.
+
+    Le domaine du modele epouse le lac : il fournit une contrainte
+    spatiale a defaut du masque optique de l'article.
+    """
+    import scenario_field as sfield
+
+    scfg = cfg.get("scenarios") or {}
+    index_path = ROOT / "data" / "scenarios.json"
+    if not index_path.exists():
+        return None
+    with open(index_path, "r", encoding="utf-8") as f:
+        idx = json.load(f)
+    if idx.get("demo") or not idx.get("scenarios"):
+        return None
+
+    entry = next((s for s in idx["scenarios"] if "wave" in (s.get("files") or {})),
+                 None)
+    if entry is None:
+        return None
+
+    zone = scfg.get("utm_zone") or geo.infer_zone(
+        ((cfg.get("lake") or {}).get("center") or {}).get("lon", 137.5))
+    south = scfg.get("southern_hemisphere", True)
+
+    ds = sfield.open_dataset(entry["files"]["wave"])
+    try:
+        xname, yname, xv, yv, _, _ = sfield.read_coords(ds, list(ds.variables))
+        if xname is None:
+            return None
+        good = np.isfinite(xv) & np.isfinite(yv)
+        pts = np.column_stack([xv[good].ravel(), yv[good].ravel()])
+    finally:
+        ds.close()
+
+    lonlat = np.array([geo.utm_to_lonlat(float(a), float(b), zone, south)
+                       for a, b in pts])
+    return lonlat
+
+
+def inside_boundary(lon, lat, boundary, tol_km=2.0):
+    """Mailles situees dans l'emprise, au sens du plus proche voisin.
+
+    tol_km absorbe l'ecart entre la grille du modele et celle de SWOT ;
+    une valeur trop large reintegrerait des detections hors du lac.
+    """
+    from scipy.spatial import cKDTree
+
+    if boundary is None:
+        return None
+    lat0 = float(np.nanmean(boundary[:, 1]))
+    kx = math.cos(math.radians(lat0)) or 1.0
+    tree = cKDTree(np.column_stack([boundary[:, 0] * kx, boundary[:, 1]]))
+
+    pts = np.column_stack([np.ravel(lon) * kx, np.ravel(lat)])
+    tol_deg = tol_km / 111.32
+    dist, _ = tree.query(pts, distance_upper_bound=tol_deg)
+    return np.isfinite(dist).reshape(np.shape(lon))
+
+
+# ------------------------------------------------------------------
+# Lecture d'un granule
+# ------------------------------------------------------------------
+
+def _get(ds, *names):
+    lower = {n.lower(): n for n in ds.variables}
+    for n in names:
+        real = lower.get(n.lower())
+        if real:
+            return np.ma.filled(np.ma.masked_array(
+                ds.variables[real][:]).astype("float64"), np.nan)
+    return None
+
+
+def granule_lonlat(ds, zone=None, south=True):
+    """Coordonnees geographiques des mailles du granule.
+
+    Le produit Raster est en UTM ; le fuseau est lu dans l'attribut
+    de projection quand il est present.
+    """
+    x = _get(ds, "x")
+    y = _get(ds, "y")
+    if x is None or y is None:
+        return None, None
+    if zone is None:
+        zone = 53
+        crs = ds.variables.get("crs")
+        for attr in ("utm_zone_num", "utm_zone", "zone"):
+            value = getattr(crs, attr, None) if crs is not None else None
+            if value is not None:
+                try:
+                    zone = int(value)
+                    break
+                except (TypeError, ValueError):
+                    pass
+    xx, yy = np.meshgrid(np.ravel(x), np.ravel(y))
+    lon = np.empty(xx.shape)
+    lat = np.empty(xx.shape)
+    for i in range(xx.shape[0]):
+        for j in range(xx.shape[1]):
+            lon[i, j], lat[i, j] = geo.utm_to_lonlat(xx[i, j], yy[i, j],
+                                                     zone, south)
+    return lon, lat
+
+
+def read_granule(path, boundary=None, params=None, zone=None, south=True):
+    """Surface en eau d'un granule, ou None si inexploitable."""
+    params = dict(DEFAULTS, **(params or {}))
+    ds = open_dataset(path)
+    try:
+        frac = _get(ds, "water_frac")
+        if frac is None:
+            return None
+        area = _get(ds, "water_area")
+        qual = _get(ds, "water_area_qual")
+        uncert = _get(ds, "water_area_uncert")
+
+        inside = None
+        covered = None
+        if boundary is not None:
+            lon, lat = granule_lonlat(ds, zone, south)
+            if lon is not None:
+                inside = inside_boundary(lon, lat, boundary)
+                covered = int((inside & np.isfinite(frac)).sum())
+
+        result = area_from_arrays(
+            area, frac, qual, uncert, inside,
+            frac_range=tuple(params["water_frac_range"]),
+            max_qual=params["max_qual"],
+            median_size=params["median_size"])
+        result["covered_cells"] = covered
+        return result
+    finally:
+        ds.close()
+
+
+# ------------------------------------------------------------------
+# Assemblage de la serie
+# ------------------------------------------------------------------
+
+def granule_datetime(name):
+    import re
+
+    m = re.search(r"(\d{8}T\d{6})", os.path.basename(name))
+    return datetime.strptime(m.group(1), "%Y%m%dT%H%M%S") if m else None
+
+
+def combine_scenes(scenes, boundary_cells=None, min_coverage=0.15):
+    """Somme les scenes d'un meme passage.
+
+    Les scenes du produit Raster ne se recouvrent pas (128 x 128 km),
+    leurs surfaces s'additionnent donc. Un passage ne couvrant qu'une
+    partie du lac est signale : sans ce controle, une couverture
+    partielle se lirait comme un assechement, defaut que l'article
+    releve explicitement pour octobre 2024.
+    """
+    total = sum(s["area_m2"] for s in scenes)
+    sig = [s["uncert_m2"] for s in scenes if s.get("uncert_m2") is not None]
+    uncert = math.sqrt(sum(u ** 2 for u in sig)) if sig else None
+    covered = sum(s.get("covered_cells") or 0 for s in scenes)
+
+    coverage = None
+    if boundary_cells:
+        coverage = covered / float(boundary_cells)
+
+    return {
+        "area_km2": round(total / 1e6, 3),
+        "uncert_km2": round(uncert / 1e6, 3) if uncert is not None else None,
+        "n_scenes": len(scenes),
+        "n_cells": sum(s["n_cells"] for s in scenes),
+        "coverage": round(coverage, 3) if coverage is not None else None,
+        "partial": bool(coverage is not None and coverage < min_coverage),
+    }
+
+
+def relative_volume_error(depth_error, area_error):
+    """Eq. 10 de l'article : erreur relative sur le volume.
+
+    Les erreurs relatives sur la profondeur et sur la surface se
+    combinent en somme quadratique.
+    """
+    return math.sqrt(depth_error ** 2 + area_error ** 2)
+
+
+def build(cfg, limit=None, out_path=OUT_FILE):
+    import scenarios as _  # noqa: F401  (verifie l'arborescence du projet)
+    from update_swot import list_nc_files, resolve_path
+
+    acfg = dict(DEFAULTS, **(cfg.get("area") or {}))
+    swot_dir = resolve_path(cfg["paths"]["swot_data"])
+    files = list_nc_files(str(swot_dir), acfg.get("resolution"))
+    if limit:
+        files = files[:limit]
+    if not files:
+        raise SystemExit(f"Aucun granule trouvé dans {swot_dir}")
+
+    boundary = None
+    if acfg.get("boundary", "model") == "model":
+        boundary = model_boundary(cfg)
+        if boundary is None:
+            print("Emprise du modèle indisponible : calcul sur le granule "
+                  "entier, la surface sera surestimée.")
+    boundary_cells = len(boundary) if boundary is not None else None
+
+    scfg = cfg.get("scenarios") or {}
+    zone = scfg.get("utm_zone")
+    south = scfg.get("southern_hemisphere", True)
+
+    by_date = {}
+    failures = []
+    for n, path in enumerate(files):
+        when = granule_datetime(path)
+        if when is None:
+            continue
+        try:
+            res = read_granule(path, boundary, acfg, zone, south)
+        except Exception as e:
+            failures.append((os.path.basename(path),
+                             f"{type(e).__name__}: {e}"[:100]))
+            continue
+        if res:
+            by_date.setdefault(when.strftime("%Y-%m-%d"), []).append(res)
+        if (n + 1) % 20 == 0 or n + 1 == len(files):
+            print(f"  {n + 1}/{len(files)} granules")
+
+    series = []
+    for day in sorted(by_date):
+        entry = combine_scenes(by_date[day], boundary_cells,
+                               acfg.get("min_coverage", 0.15))
+        entry["date"] = day
+        series.append(entry)
+
+    payload = {
+        "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "method": "Rai et al. (2026), J. Hydrol. 676, 135652 — adapted to "
+                  "the SWOT L2 HR Raster product",
+        "note": "Spatial constraint from the Delft3D domain replaces the "
+                "Sentinel-3 optical mask; the area is an upper bound",
+        "parameters": {k: acfg[k] for k in
+                       ("water_frac_range", "max_qual", "median_size",
+                        "resolution", "min_coverage") if k in acfg},
+        "n_granules": len(files),
+        "series": series,
+    }
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(out_path, "w", encoding="utf-8") as f:
+        json.dump(payload, f, ensure_ascii=False, indent=2)
+
+    print(f"\nJSON écrit : {out_path} ({len(series)} dates)")
+    for e in series[-5:]:
+        flag = "  (couverture partielle)" if e["partial"] else ""
+        print(f"  {e['date']}  {e['area_km2']:>8.1f} km²"
+              + (f" ± {e['uncert_km2']:.1f}" if e["uncert_km2"] else "")
+              + flag)
+    if failures:
+        print(f"  {len(failures)} granule(s) illisible(s), ex. {failures[0]}")
+    return payload
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Surface en eau SWOT (méthode Rai et al. 2026)")
+    parser.add_argument("--config", default=str(ROOT / "config.yaml"))
+    parser.add_argument("--limit", type=int, default=None)
+    args = parser.parse_args()
+
+    with open(args.config, "r", encoding="utf-8") as f:
+        cfg = yaml.safe_load(f)
+    build(cfg, limit=args.limit)
+
+
+if __name__ == "__main__":
+    main()

@@ -26,7 +26,7 @@
     manifest: null, staticIndex: null, paramGrid: null,
     staticArrows: null, staticArrowsKey: null,
     methodsLoaded: false,
-    weather: null,
+    weather: null, area: null,
     rosePeriod: "h24",
     canvasRenderer: null,
     timeline: [],      // BOM timestamps available for time travel
@@ -354,6 +354,21 @@
     svg.appendChild(label);
   }
 
+  // ── Lake surface area (Rai et al. 2026) ──────────────────
+
+  async function loadArea() {
+    const sources = state.staticMode
+      ? ["data/lake_area.json"]
+      : ["/api/area", "data/lake_area.json"];
+    for (const url of sources) {
+      try {
+        const res = await fetch(url, { cache: "no-store" });
+        if (res.ok) return await res.json();
+      } catch (_) { /* try the next source */ }
+    }
+    return null;
+  }
+
   // ── Plotly time series ───────────────────────────────────
 
   function drawChart(site) {
@@ -383,7 +398,38 @@
       hovertemplate: "%{x|%d %b %Y}<br>WSE: %{y:.2f} m<extra>latest</extra>",
     };
 
-    Plotly.newPlot(chart, [past, latest], {
+    const traces = [past, latest];
+
+    // Surface en eau sur l'axe de droite : lue conjointement au niveau,
+    // elle donne à voir la relation hypsométrique.
+    const area = state.area;
+    if (area && area.series && area.series.length) {
+      const solid = area.series.filter((r) => !r.partial);
+      const partial = area.series.filter((r) => r.partial);
+      const areaTrace = (rows, name, open) => ({
+        x: rows.map((r) => r.date), y: rows.map((r) => r.area_km2),
+        error_y: {
+          type: "data", visible: rows.some((r) => r.uncert_km2),
+          array: rows.map((r) => r.uncert_km2 || 0),
+          color: "#A8702D", thickness: 1, width: 2,
+        },
+        mode: "markers", type: "scatter", name, yaxis: "y2",
+        marker: {
+          color: open ? "rgba(0,0,0,0)" : "#A8702D", size: 7,
+          line: { color: "#A8702D", width: open ? 1.4 : 0 },
+        },
+        hovertemplate: "%{x|%d %b %Y}<br>%{y:.0f} km²"
+          + (open ? "<extra>partial pass</extra>" : "<extra>area</extra>"),
+      });
+      if (solid.length) traces.push(areaTrace(solid, "Water area", false));
+      // Les passages partiels sont tracés en cercles vides : une
+      // couverture incomplète se lirait sinon comme un assèchement.
+      if (partial.length) {
+        traces.push(areaTrace(partial, "Water area (partial pass)", true));
+      }
+    }
+
+    Plotly.newPlot(chart, traces, {
       margin: { l: 58, r: 18, t: 8, b: 42 },
       paper_bgcolor: "rgba(0,0,0,0)",
       plot_bgcolor: "rgba(0,0,0,0)",
@@ -394,7 +440,14 @@
         gridcolor: "#E9E3D6", zeroline: false,
         tickfont: { family: "IBM Plex Mono" },
       },
-      showlegend: false,
+      yaxis2: {
+        title: { text: "area (km²)" }, overlaying: "y", side: "right",
+        showgrid: false, rangemode: "tozero",
+        tickfont: { family: "IBM Plex Mono", color: "#A8702D" },
+        titlefont: { color: "#A8702D" },
+      },
+      showlegend: Boolean(state.area),
+      legend: { orientation: "h", y: 1.12, x: 0, font: { size: 10.5 } },
       hovermode: "closest",
     }, { displayModeBar: false, responsive: true });
   }
@@ -1647,6 +1700,7 @@
       }
     }
 
+    state.area = await loadArea();
     state.imagery = await loadImageryConfig();
     initMap(data.lake, data.sites);
 

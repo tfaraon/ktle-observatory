@@ -225,6 +225,21 @@ scenarios:
   # Emprise du lac utilisee dans les figures de reference :
   # current_bounds: [673229, 797654, 6778805, 6924813]
 
+# ============================================================
+# Surface en eau (methode Rai et al. 2026, J. Hydrol. 676, 135652)
+# ============================================================
+# L'article contraint SWOT par un masque optique Sentinel-3 (MNDWI),
+# indisponible ici : on le remplace par l'emprise du domaine Delft3D,
+# qui epouse le lac. Contrainte spatiale et non spectrale : la surface
+# obtenue est plutot un majorant.
+area:
+  water_frac_range: [0.1, 0.99]   # fraction d'eau retenue par maille
+  max_qual: 1                     # water_area_qual : 0 bon, 1 suspect
+  median_size: 5                  # filtre median 5x5 (Eq. 2 de l'article)
+  resolution: "100"               # granules 100 m
+  boundary: "model"               # "model" = domaine Delft3D ; null = tout
+  min_coverage: 0.15              # en deca, passage juge partiel
+
 display:
   datum_label: "WSE (m, EGM2008 geoid)"
 

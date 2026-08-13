@@ -321,7 +321,7 @@ def build(cfg, out_dir=SITE, colors=64, limit=None, sample=40):
     with open(data_dir / "scenarios.json", "w", encoding="utf-8") as f:
         json.dump(slim, f, separators=(",", ":"))
 
-    for name in ("swot_wse.json", "weather.json"):
+    for name in ("swot_wse.json", "weather.json", "lake_area.json"):
         src_file = ROOT / "data" / name
         if src_file.exists():
             shutil.copy(src_file, data_dir / name)

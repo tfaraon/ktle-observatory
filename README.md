@@ -119,6 +119,30 @@ The default collection is `SWOT_L2_HR_Raster_D`. Version C granules may still
 be kept as an archive, but a single processing version should be used for data
 intended for publication.
 
+### Surface water area
+
+```bash
+python pipeline/lake_area.py
+python pipeline/lake_area.py --limit 5    # quick check
+```
+
+Water area is computed from the SWOT granules already on disk, following
+Rai et al. (2026), *Volumetric analysis of a playa lake using SWOT data*,
+J. Hydrol. 676, 135652. Cells are kept where the water fraction lies between
+0.1 and 0.99 and the quality flag is good or suspect; a 5×5 median filter
+removes isolated detections; retained cell areas are summed and uncertainties
+combined in quadrature. The series is written to `data/lake_area.json` and
+drawn on the right-hand axis of the time-series chart.
+
+Two departures from the published method are worth knowing. The paper works on
+the PIXC point cloud, whereas this uses the Raster product already downloaded.
+More importantly, the paper constrains SWOT with a Sentinel-3 OLCI water mask,
+because wet salt crust and very shallow water are nearly indistinguishable to
+KaRIn; that mask is absent here, replaced by the Delft3D model domain. The
+constraint is spatial rather than spectral, so **the area is an upper bound**.
+Passes covering less than `area.min_coverage` of the domain are flagged and
+drawn as open circles, so that an incomplete pass is not read as a drying lake.
+
 ### BOM observations
 
 ```bash
@@ -279,6 +303,7 @@ The main routes are:
 | `/api/wse` | complete SWOT time series |
 | `/api/wse/latest` | latest observation for each site |
 | `/api/weather` | BOM observations |
+| `/api/area` | water area time series |
 | `/api/config` | imagery layers used by the frontend |
 | `/api/scenarios` | simulation index |
 | `/api/scenario/match` | closest scenario |
@@ -311,6 +336,7 @@ python tests/test_geo.py                 # MGA to WGS84 reprojection
 python tests/test_compact.py             # compact dataset encoding
 python tests/test_export_static.py       # static export
 python tests/test_startup.py             # first-run sequence
+python tests/test_lake_area.py           # water area from SWOT
 python tests/test_language.py            # interface strings stay in English
 node tests/test_windrose.js              # solar elevation and wind roses
 node tests/test_download.js              # CSV export

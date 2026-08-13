@@ -53,6 +53,41 @@ const METHODS_HTML = `
     Note also that a dry lake yields no valid elevation at all &mdash;
     early gaps reflect a dry basin, not a sensor failure.</p>
 
+    <h3>Surface water area</h3>
+
+    <p>Water area follows the method of <strong>Rai, Cohen, Armon and
+    Marx (2026)</strong>, <em>Volumetric analysis of a playa lake using
+    SWOT data</em>, Journal of Hydrology 676, 135652 &mdash; the same
+    lake, and the first study to estimate its storage from SWOT without
+    a hypsometric curve. Cells are retained where the water fraction
+    falls between 0.1 and 0.99 and the area quality flag is good or
+    suspect; a 5&nbsp;&times;&nbsp;5 median filter then removes isolated
+    detections, and the retained cell areas are summed.</p>
+
+    <p>The median filter matters more than it might seem. Over a salt
+    crust, speckle scatters false detections across the dry playa; on a
+    synthetic test that seeded 1&nbsp;706 such cells, the filter removed
+    1&nbsp;687 of them and brought the area error from
+    +2.2&nbsp;% to nil.</p>
+
+    <p class="caveat">One departure from the published method deserves
+    stating. Rai and colleagues constrain SWOT with an optical water
+    mask from Sentinel-3 OLCI, because wet salt crust and very shallow
+    water return almost the same backscatter to KaRIn
+    (roughly 0&ndash;15&nbsp;dB) and cannot be told apart from radar
+    alone. That mask is not part of this pipeline; the Delft3D model
+    domain is used instead, which excludes detections outside the lake
+    but does not separate shallow water from saturated salt within it.
+    The area reported here is therefore an upper bound, and less
+    accurate than the ~15&nbsp;% error the paper achieves with the
+    fusion. Adding Sentinel-3 would be the single most useful
+    improvement.</p>
+
+    <p class="caveat">A SWOT pass does not always cover the whole lake.
+    Passes observing less than 15&nbsp;% of the domain are flagged and
+    drawn as open circles: an incomplete pass would otherwise read as a
+    drying lake, an artefact the authors report for October 2024.</p>
+
     <h3>Hydrodynamic model</h3>
 
     <p>Simulations use <strong>Delft3D-FLOW coupled with

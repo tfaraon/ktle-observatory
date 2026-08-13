@@ -148,6 +148,21 @@ def api_config():
     return jsonify({"imagery": CONFIG.get("imagery") or {}})
 
 
+AREA_FILE = ROOT / "data" / "lake_area.json"
+
+
+@app.get("/api/area")
+def api_area():
+    """Serie de surface en eau (methode Rai et al. 2026)."""
+    if not AREA_FILE.exists():
+        return jsonify({
+            "error": "no_data",
+            "message": "No area series yet: run pipeline/lake_area.py",
+        }), 404
+    with open(AREA_FILE, "r", encoding="utf-8") as f:
+        return jsonify(json.load(f))
+
+
 # ── Meteo BOM ────────────────────────────────────────────────
 
 def _read_weather_file():
