@@ -150,7 +150,7 @@ try:
     sf.read_field(p, varname="absente")
     raise AssertionError("une variable absente doit lever une erreur")
 except ValueError as e:
-    assert "absente" in str(e)
+    assert "not found" in str(e)
 
 p4 = TMP / "vec.nc"
 f = netcdf_file(str(p4), "w")
@@ -162,7 +162,7 @@ try:
     sf.read_field(p4)
     raise AssertionError("un fichier sans champ 2D doit lever une erreur")
 except ValueError as e:
-    assert "2D" in str(e)
+    assert "2-D" in str(e)
 
 # ══════════════════════════════════════════════════════════════
 # Structure reelle d'une sortie Delft3D-FLOW
@@ -320,7 +320,7 @@ uu.long_name = "U on staggered points"
 f.close()
 o = sf.read_field(pstag, varname="UU", max_points=60)
 assert o["on_index"] is True, "champ decale -> trace sur les indices"
-assert "décalé" in o.get("note", ""), o.get("note")
+assert "staggered" in o.get("note", ""), o.get("note")
 assert o["n_x"] == 31 and o["n_y"] == 20
 
 print("OK — détection des variables, réduction temporelle, "

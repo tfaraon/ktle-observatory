@@ -51,19 +51,21 @@ CONSTITUENT_DIMS = ("lstsci", "ltur", "constituent", "nconst")
 EXTRA_DIMS = LAYER_DIMS + CONSTITUENT_DIMS
 
 # Libelles de secours quand long_name est absent
+# Libelles de secours, utilises quand la variable n'a pas de long_name.
+# Ils sont AFFICHES sur le site : en anglais, comme l'interface.
 KNOWN_VARS = {
     # Delft3D-FLOW
-    "s1": "Niveau d'eau", "u1": "Vitesse U", "v1": "Vitesse V",
-    "r1": "Concentration", "rho": "Masse volumique",
-    "taumax": "Contrainte de fond (max)",
-    "tauksi": "Contrainte de fond U", "taueta": "Contrainte de fond V",
-    "dps": "Profondeur",
+    "s1": "Water level", "u1": "U velocity", "v1": "V velocity",
+    "r1": "Concentration", "rho": "Density",
+    "taumax": "Bed shear stress (max)",
+    "tauksi": "Bed shear stress U", "taueta": "Bed shear stress V",
+    "dps": "Depth",
     # Delft3D-WAVE (SWAN)
-    "hsign": "Hauteur significative Hs", "hsig": "Hauteur significative Hs",
-    "hs": "Hauteur significative Hs",
-    "dir": "Direction des vagues", "period": "Période des vagues",
-    "wlength": "Longueur d'onde", "wlen": "Longueur d'onde",
-    "setup": "Set-up dû aux vagues", "depth": "Profondeur d'eau",
+    "hsign": "Significant wave height", "hsig": "Significant wave height",
+    "hs": "Significant wave height",
+    "dir": "Wave direction", "period": "Wave period",
+    "wlength": "Wavelength", "wlen": "Wavelength",
+    "setup": "Wave set-up", "depth": "Water depth",
 }
 
 
@@ -206,15 +208,15 @@ def open_dataset(path):
         from netCDF4 import Dataset
     except ImportError:
         raise RuntimeError(
-            "netCDF4 n'est pas installé (pip install netCDF4) — requis "
-            "pour lire les sorties Delft3D.")
+            "netCDF4 is not installed (pip install netCDF4) — required "
+            "to read Delft3D output.")
 
     name = Path(path).name
     if name.startswith("._"):
         raise ValueError(
-            f"« {name} » est un fichier de métadonnées macOS (AppleDouble), "
-            "pas une sortie Delft3D. Relancez pipeline/scenario_index.py : "
-            "ces fichiers sont désormais ignorés.")
+            f"'{name}' is a macOS metadata file (AppleDouble), not a "
+            "Delft3D output. Re-run pipeline/scenario_index.py: these files "
+            "are now skipped.")
     return Dataset(path, "r")
 
 
@@ -320,7 +322,7 @@ def build_slice(var, time_index=-1, layer_index=0, constituent_index=0):
         # interrompue avant la premiere ecriture).
         if size <= 0:
             raise ValueError(
-                f"dimension '{dim}' vide dans ce fichier — sortie tronquée")
+                f"dimension '{dim}' is empty — truncated output")
         if k < 0:
             k = max(k, -size)
         else:
@@ -365,12 +367,12 @@ def read_field(path, varname=None, max_points=180, time_index=-1,
     try:
         info = describe_dataset(ds)
         if not info["fields"]:
-            raise ValueError("Aucun champ 2D trouvé dans le fichier.")
+            raise ValueError("No 2-D field found in this file.")
 
         if varname is None:
             varname = min(info["fields"], key=field_priority)["name"]
         if varname not in ds.variables:
-            raise ValueError(f"Variable '{varname}' absente du fichier.")
+            raise ValueError(f"Variable '{varname}' not found in this file.")
 
         var = ds.variables[varname]
         sl, notes, axes = build_slice(var, time_index, layer_index,
@@ -380,8 +382,8 @@ def read_field(path, varname=None, max_points=180, time_index=-1,
             z = np.ma.masked_where(z == 0, z)
         if z.ndim != 2:
             raise ValueError(
-                f"'{varname}' reste de dimension {z.ndim} après réduction "
-                f"(dimensions {var.dimensions}).")
+                f"'{varname}' is still {z.ndim}-D after reduction "
+                f"(dims {var.dimensions}).")
 
         meta = {
             "var": varname,
@@ -402,8 +404,8 @@ def read_field(path, varname=None, max_points=180, time_index=-1,
             # differente de celle des centres de mailles.
             alt, _, alt_xv, _, _, _ = read_coords(ds, names)
             if alt is not None and getattr(alt_xv, "ndim", 0) == 2:
-                meta["note"] = (f"champ {tuple(z.shape)} décalé par rapport "
-                                f"aux coordonnées {tuple(alt_xv.shape)}")
+                meta["note"] = (f"field {tuple(z.shape)} staggered relative "
+                                f"to coordinates {tuple(alt_xv.shape)}")
             return _payload(np.arange(z.shape[1]), np.arange(z.shape[0]), z,
                             meta, regridded=False, on_index=True)
         meta["coords"] = f"{xname}/{yname}"
@@ -466,13 +468,13 @@ def _regrid_curvilinear(xv, yv, z, max_points, meta):
     from scipy.interpolate import griddata
 
     if xv.shape != z.shape or yv.shape != z.shape:
-        raise ValueError(f"Coordonnées 2D {xv.shape} incompatibles avec le "
-                         f"champ {z.shape}.")
+        raise ValueError(f"2-D coordinates {xv.shape} do not match the "
+                         f"field {z.shape}.")
 
     zf = np.ma.filled(z, np.nan)
     good = np.isfinite(zf) & np.isfinite(xv) & np.isfinite(yv)
     if not good.any():
-        raise ValueError("Champ entièrement masqué.")
+        raise ValueError("Field is entirely masked.")
 
     pts = np.column_stack([xv[good].ravel(), yv[good].ravel()])
     vals = zf[good].ravel()

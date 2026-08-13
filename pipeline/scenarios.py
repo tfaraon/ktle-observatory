@@ -24,11 +24,13 @@ import re
 from pathlib import Path
 
 # Cle interne -> (motif dans le nom de fichier, unite, libelle)
+# Les libelles sont AFFICHES sur le site : ils restent en anglais,
+# comme le reste de l'interface.
 PARAM_SPECS = {
-    "wind_speed": ("wind-sp", "m/s", "Vitesse du vent"),
-    "wind_dir": ("wind-dir", "°", "Direction du vent"),
-    "wlvl": ("wlvl", "m", "Niveau d'eau"),
-    "salinity": ("sal", "g/L", "Salinité"),
+    "wind_speed": ("wind-sp", "m/s", "Wind speed"),
+    "wind_dir": ("wind-dir", "°", "Wind direction"),
+    "wlvl": ("wlvl", "m", "Water level"),
+    "salinity": ("sal", "g/L", "Salinity"),
 }
 
 # Colonnes du plan d'experience (lhs_all.csv) -> cles internes
@@ -295,12 +297,12 @@ def match_scenario(scenarios, grid, target, weights=None, mode="range",
             envelope[key] = "in"  # grandeur circulaire : jamais hors bornes
         elif vals and value < vals[0]:
             envelope[key] = "below"
-            warnings.append(f"{label} ({value:g} {unit}) sous la plage "
-                            f"simulée [{vals[0]:g} – {vals[-1]:g} {unit}]")
+            warnings.append(f"{label} ({value:g} {unit}) below the simulated "
+                            f"range [{vals[0]:g} – {vals[-1]:g} {unit}]")
         elif vals and value > vals[-1]:
             envelope[key] = "above"
-            warnings.append(f"{label} ({value:g} {unit}) au-dessus de la plage "
-                            f"simulée [{vals[0]:g} – {vals[-1]:g} {unit}]")
+            warnings.append(f"{label} ({value:g} {unit}) above the simulated "
+                            f"range [{vals[0]:g} – {vals[-1]:g} {unit}]")
         else:
             envelope[key] = "in"
 
@@ -309,8 +311,8 @@ def match_scenario(scenarios, grid, target, weights=None, mode="range",
         if key == "wlvl" and wlvl_capped:
             continue        # ecart voulu : on n'a garde que les niveaux bas
         if envelope[key] == "in" and d > 0.12 * scales.get(key, 1.0):
-            warnings.append(f"{label} : écart de {d:.1f} {unit} "
-                            f"avec le scénario le plus proche")
+            warnings.append(f"{label}: {d:.1f} {unit} away from the "
+                            f"closest scenario")
 
     alternatives = [{
         "key": s["key"],

@@ -311,8 +311,14 @@ python tests/test_geo.py                 # MGA to WGS84 reprojection
 python tests/test_compact.py             # compact dataset encoding
 python tests/test_export_static.py       # static export
 python tests/test_startup.py             # first-run sequence
+python tests/test_language.py            # interface strings stay in English
 node tests/test_windrose.js              # solar elevation and wind roses
 ```
+
+The interface is in English. Labels and warnings shown on the site come partly
+from Python and partly from JavaScript, so `test_language.py` inspects the
+payloads actually served as well as the frontend strings. Code comments,
+docstrings, and terminal output from the pipeline scripts remain in French.
 
 ## Static export
 

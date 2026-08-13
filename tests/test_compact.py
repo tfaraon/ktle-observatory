@@ -225,7 +225,7 @@ try:
     sf.build_slice(FakeVar(("time", "N", "M"), (0, 40, 30)), -1, 0)
     raise AssertionError("une dimension vide doit lever une erreur")
 except ValueError as e:
-    assert "vide" in str(e)
+    assert "empty" in str(e)
 
 # ── Le magasin signale une tranche vide (scénario en échec) ──
 empty_path = TMP / "compact_empty.nc"

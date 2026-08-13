@@ -121,13 +121,13 @@ r = sc.match_scenario(scen, grid,
                       mode="step")
 assert r["envelope"]["wlvl"] == "below"
 assert r["scenario"]["params"]["wlvl"] == -14.0, "borne la plus proche"
-assert any("sous la plage" in w for w in r["warnings"]), r["warnings"]
+assert any("below the simulated" in w for w in r["warnings"]), r["warnings"]
 
 r = sc.match_scenario(scen, grid,
                       {"wind_speed": 35.0, "wind_dir": 90.0, "wlvl": -12.0},
                       mode="step")
 assert r["envelope"]["wind_speed"] == "above"
-assert any("au-dessus" in w for w in r["warnings"])
+assert any("above the simulated" in w for w in r["warnings"])
 
 # ── Grille creuse : le plus proche disponible ────────────────
 sparse = [make(5.0, 0.0, -13.0), make(20.0, 180.0, -11.0)]
@@ -358,7 +358,7 @@ r_high = sc.match_scenario(high, sc.build_grid(high), target_mid,
                            wlvl_mode="down")
 assert r_high["wlvl_capped"] is False
 assert r_high["envelope"]["wlvl"] == "below"
-assert any("sous la plage" in w for w in r_high["warnings"])
+assert any("below the simulated" in w for w in r_high["warnings"])
 
 # candidate_pool : filtrage direct
 pool, capped = sc.candidate_pool(pair, target_mid, "down")
@@ -373,7 +373,7 @@ assert len(pool3) == 2 and capped3 is False
 sparse = [scen_at(10.0, 90.0, -14.0), scen_at(10.0, 90.0, -12.0)]
 r_sp = sc.match_scenario(sparse, sc.build_grid(sparse), target_mid,
                          wlvl_mode="down")
-assert not any("Niveau d'eau" in w and "écart" in w
+assert not any("Water level" in w and "away from" in w
                for w in r_sp["warnings"]), r_sp["warnings"]
 
 print("OK — arrondi du niveau vers le bas : filtrage, égalité, repli et "

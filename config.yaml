@@ -226,7 +226,7 @@ scenarios:
   # current_bounds: [673229, 797654, 6778805, 6924813]
 
 display:
-  datum_label: "WSE (m, géoïde EGM2008)"
+  datum_label: "WSE (m, EGM2008 geoid)"
 
 # Imagerie satellite NASA GIBS proposee sur la carte (EPSG:3857).
 # L'ordre de la liste = l'ordre des boutons ; la premiere couche est
