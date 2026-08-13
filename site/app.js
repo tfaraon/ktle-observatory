@@ -589,31 +589,56 @@
     })).filter((t) => t.r.some((v) => v > 0));
   }
 
-  function drawRose(el, station, records) {
+  function drawRose(cell, station, records) {
     const rose = WindRose.binRose(records);
+    const title = document.createElement("p");
+    title.className = "rose-title";
+    cell.appendChild(title);
+
     if (!rose.total) {
-      el.innerHTML = `<div class="rose-empty">${station.name}<br>`
-        + `no observations in this period</div>`;
+      title.textContent = station.name;
+      const empty = document.createElement("div");
+      empty.className = "rose-empty";
+      empty.textContent = "no observations in this period";
+      cell.appendChild(empty);
       return 0;
     }
-    Plotly.newPlot(el, roseTraces(rose), {
-      title: { text: `${station.name} · ${rose.total} obs`,
-               font: { size: 12, family: "Archivo, sans-serif" } },
-      margin: { l: 30, r: 30, t: 34, b: 22 },
-      height: 260,
+    title.textContent = `${station.name} · ${rose.total} obs`
+      + (rose.calm > 0 ? ` · ${rose.calmPercent.toFixed(0)} % calm` : "");
+
+    const plot = document.createElement("div");
+    plot.className = "rose-plot";
+    cell.appendChild(plot);
+
+    Plotly.newPlot(plot, roseTraces(rose), {
+      // autosize + resize différé : Plotly mesure son conteneur au
+      // moment du tracé, et une largeur non encore établie le fait
+      // retomber sur 700 px, qui débordent de la cellule.
+      autosize: true,
+      margin: { l: 26, r: 26, t: 10, b: 18 },
+      height: 240,
       paper_bgcolor: "rgba(0,0,0,0)",
-      font: { family: "Archivo, sans-serif", size: 10, color: "#241F1A" },
+      font: { family: "Archivo, sans-serif", size: 9, color: "#241F1A" },
       polar: {
         bgcolor: "rgba(0,0,0,0)",
-        radialaxis: { ticksuffix: "%", angle: 45, tickfont: { size: 9 },
-                      gridcolor: "#E9E3D6" },
+        hole: 0.06,
+        radialaxis: { ticksuffix: "%", angle: 45, nticks: 4,
+                      tickfont: { size: 8, color: "#7C7466" },
+                      gridcolor: "#E9E3D6", linecolor: "#E9E3D6" },
         angularaxis: { direction: "clockwise", rotation: 90,
-                       tickfont: { size: 9 }, gridcolor: "#E9E3D6" },
+                       tickfont: { size: 8.5 }, gridcolor: "#E9E3D6",
+                       linecolor: "#E4DDD0" },
       },
       barmode: "stack",
       showlegend: false,
     }, { displayModeBar: false, responsive: true });
     return rose.total;
+  }
+
+  function roseLegend() {
+    return WindRose.SPEED_LABELS.map((lab, k) =>
+      `<span class="rose-key"><i style="background:${ROSE_COLOURS[k]}"></i>`
+      + `${lab}</span>`).join("") + '<span class="rose-key-unit">km/h</span>';
   }
 
   function drawWindRoses() {
@@ -641,6 +666,15 @@
       shown += drawRose(cell, st,
         WindRose.selectPeriod(st.history, state.rosePeriod,
                               centre.lat, centre.lon));
+    });
+    $("rose-legend").innerHTML = roseLegend();
+
+    // Une fois toutes les cellules posées, la grille a sa largeur
+    // définitive : c'est là que Plotly peut mesurer juste.
+    requestAnimationFrame(() => {
+      grid.querySelectorAll(".rose-plot").forEach((el) => {
+        if (el.data) Plotly.Plots.resize(el);
+      });
     });
 
     // L'archive se construit au fil des relevés : dire franchement
@@ -1463,7 +1497,7 @@
           const el = $(id);
           if (el && el.data) Plotly.Plots.resize(el);
         });
-        document.querySelectorAll(".rose-cell").forEach((el) => {
+        document.querySelectorAll(".rose-plot").forEach((el) => {
           if (el.data) Plotly.Plots.resize(el);
         });
       });
