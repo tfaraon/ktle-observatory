@@ -158,6 +158,15 @@
           <p class="weather-empty mono">Loading observations…</p>
         </div>
         <div id="weather-history" class="weather-history" hidden></div>
+
+        <div id="rose-block" class="rose-block" hidden>
+          <div class="rose-head">
+            <p class="eyebrow">Wind roses</p>
+            <div class="seg" id="rose-seg" role="group" aria-label="Period"></div>
+          </div>
+          <p id="rose-note" class="rose-note mono"></p>
+          <div id="rose-grid" class="rose-grid"></div>
+        </div>
       </article>
 
 
@@ -258,6 +267,15 @@
           <p class="weather-empty mono">Loading observations…</p>
         </div>
         <div id="weather-history" class="weather-history" hidden></div>
+
+        <div id="rose-block" class="rose-block" hidden>
+          <div class="rose-head">
+            <p class="eyebrow">Wind roses</p>
+            <div class="seg" id="rose-seg" role="group" aria-label="Period"></div>
+          </div>
+          <p id="rose-note" class="rose-note mono"></p>
+          <div id="rose-grid" class="rose-grid"></div>
+        </div>
       </article>
 
       <!-- Panel 3: time series -->
@@ -319,6 +337,7 @@
     <span>Base map: © OpenTopoMap (CC-BY-SA) · © OpenStreetMap</span>
   </footer>
 
+  <script src="windrose.js"></script>
   <script src="methods.js"></script>
   <script src="app.js"></script>
 </body>

@@ -115,6 +115,20 @@ const METHODS_HTML = `
     reported roughly every half hour. A rolling 48-hour archive is
     maintained locally, which also drives the timeline.</p>
 
+    <p>The wind roses show the direction the wind blows
+    <em>from</em>, in sixteen sectors, stacked by speed band. Day and
+    night are separated using the <strong>actual solar elevation</strong>
+    at the lake rather than clock hours, because the point of the split
+    is physical: by day, convective mixing brings momentum down from
+    aloft and the wind is stronger and gustier; at night the surface
+    layer decouples, and the wind often falls away or veers.</p>
+
+    <p class="caveat">The archive builds up over time. Only the most
+    recent 72&nbsp;hours can be recovered from the Bureau in one call,
+    so the seven-day roses fill in progressively as observations
+    accumulate. The note under the selector states how much the archive
+    currently spans.</p>
+
     <p class="caveat">All three stations sit on land, tens of
     kilometres from the modelled water. Over a smooth, unobstructed
     salt surface the wind is typically stronger than at an inland

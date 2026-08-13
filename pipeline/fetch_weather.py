@@ -217,7 +217,7 @@ def make_demo_station(name):
     now = datetime.now(timezone.utc).replace(second=0, microsecond=0)
     dirs = ["SE", "SSE", "ESE", "S"]
     history = []
-    for i in range(96):                 # 48 h a 30 min
+    for i in range(336):                # 7 j a 30 min
         t = now - timedelta(minutes=30 * i)
         d = rng.choice(dirs)
         spd = round(max(4, rng.gauss(22, 6)))

@@ -141,6 +141,8 @@ with tempfile.TemporaryDirectory() as td:
     demo = fw.update(cfg, demo=True)
     assert demo["demo"] is True
     assert all(s["ok"] for s in demo["stations"]), "demo : toutes les stations OK"
+    # Le generateur couvre 7 j a 30 min (336 releves) ; la fenetre
+    # d'archive de cette configuration (48 h par defaut) les tronque.
     assert len(demo["stations"][0]["history"]) == 96, "48 h a 30 min"
 
 # ══════════════════════════════════════════════════════════════
@@ -227,7 +229,7 @@ print("OK — archive glissante de 48 h : fusion, dedoublonnage, purge "
 
 with tempfile.TemporaryDirectory() as td:
     fw.WEATHER_FILE = Path(td) / "weather.json"
-    cfg_one = {"weather": {"user_agent": "UA", "history_hours": 48,
+    cfg_one = {"weather": {"user_agent": "UA", "history_hours": 168,
                            "stations": [{"name": "Marree Airport",
                                          "product": "IDS60801",
                                          "wmo": "95480"}]}}
@@ -236,7 +238,7 @@ with tempfile.TemporaryDirectory() as td:
     demo_payload = fw.update(cfg_one, demo=True)
     assert demo_payload["demo"] is True
     n_demo = len(demo_payload["stations"][0]["history"])
-    assert n_demo == 96
+    assert n_demo == 336
     assert all(r.get("src") == "demo"
                for r in demo_payload["stations"][0]["history"])
 

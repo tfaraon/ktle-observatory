@@ -123,7 +123,8 @@ ex.build(cfg, out_dir=SITE, colors=64)
 
 # ── Structure ────────────────────────────────────────────────
 for name in ("manifest.json", "index.html", "app.js", "style.css",
-             "methods.js", ".nojekyll", "data/scenarios.json"):
+             "methods.js", "windrose.js", ".nojekyll",
+             "data/scenarios.json"):
     assert (SITE / name).exists(), f"{name} manquant"
 
 man = json.loads((SITE / "manifest.json").read_text(encoding="utf-8"))

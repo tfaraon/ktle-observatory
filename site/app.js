@@ -26,6 +26,8 @@
     manifest: null, staticIndex: null, paramGrid: null,
     staticArrows: null, staticArrowsKey: null,
     methodsLoaded: false,
+    weather: null,
+    rosePeriod: "h24",
     canvasRenderer: null,
     timeline: [],      // BOM timestamps available for time travel
     timeIdx: 0,
@@ -569,6 +571,126 @@
     }, { displayModeBar: false, responsive: true });
   }
 
+  // ── Wind roses ───────────────────────────────────────────
+  //
+  // Day and night follow the actual solar elevation at the lake, not
+  // clock hours: the split is meant to separate the well-mixed daytime
+  // boundary layer from the decoupled night-time one.
+
+  const ROSE_COLOURS = ["#BFD9DD", "#7FB3BC", "#3F8C9B", "#1E5F6B", "#0E3C45"];
+
+  function roseTraces(rose) {
+    return rose.series.map((row, k) => ({
+      type: "barpolar", r: row, theta: rose.sectors,
+      name: rose.labels[k] + " km/h",
+      marker: { color: ROSE_COLOURS[k], line: { color: "#FFF", width: 0.5 } },
+      hovertemplate: "%{theta} · %{r:.1f} %<extra>"
+        + rose.labels[k] + " km/h</extra>",
+    })).filter((t) => t.r.some((v) => v > 0));
+  }
+
+  function drawRose(el, station, records) {
+    const rose = WindRose.binRose(records);
+    if (!rose.total) {
+      el.innerHTML = `<div class="rose-empty">${station.name}<br>`
+        + `no observations in this period</div>`;
+      return 0;
+    }
+    Plotly.newPlot(el, roseTraces(rose), {
+      title: { text: `${station.name} · ${rose.total} obs`,
+               font: { size: 12, family: "Archivo, sans-serif" } },
+      margin: { l: 30, r: 30, t: 34, b: 22 },
+      height: 260,
+      paper_bgcolor: "rgba(0,0,0,0)",
+      font: { family: "Archivo, sans-serif", size: 10, color: "#241F1A" },
+      polar: {
+        bgcolor: "rgba(0,0,0,0)",
+        radialaxis: { ticksuffix: "%", angle: 45, tickfont: { size: 9 },
+                      gridcolor: "#E9E3D6" },
+        angularaxis: { direction: "clockwise", rotation: 90,
+                       tickfont: { size: 9 }, gridcolor: "#E9E3D6" },
+      },
+      barmode: "stack",
+      showlegend: false,
+    }, { displayModeBar: false, responsive: true });
+    return rose.total;
+  }
+
+  function drawWindRoses() {
+    const wx = state.weather;
+    const block = $("rose-block");
+    if (!wx || !wx.stations || typeof WindRose === "undefined") {
+      block.hidden = true;
+      return;
+    }
+    const stations = wx.stations.filter((s) => s.ok && (s.history || []).length);
+    if (!stations.length) { block.hidden = true; return; }
+    block.hidden = false;
+
+    const centre = (state.data && state.data.lake && state.data.lake.center)
+      || (state.manifest && state.manifest.lake && state.manifest.lake.center)
+      || { lat: -28.9, lon: 137.35 };
+
+    const grid = $("rose-grid");
+    grid.innerHTML = "";
+    let shown = 0;
+    stations.forEach((st) => {
+      const cell = document.createElement("div");
+      cell.className = "rose-cell";
+      grid.appendChild(cell);
+      shown += drawRose(cell, st,
+        WindRose.selectPeriod(st.history, state.rosePeriod,
+                              centre.lat, centre.lon));
+    });
+
+    // L'archive se construit au fil des relevés : dire franchement
+    // ce que la période couvre réellement évite de sur-interpréter
+    // une rose bâtie sur quelques heures.
+    const span = archiveSpanHours(stations);
+    const spec = WindRose.PERIODS[state.rosePeriod] || {};
+    const note = $("rose-note");
+    const bits = [`direction the wind blows from · ${shown} observations`];
+    if (span !== null) bits.push(`archive spans ${span.toFixed(0)} h`);
+    const short = spec.hours && span !== null && span < spec.hours * 0.9;
+    if (short) {
+      bits.push(`this period needs ${spec.hours} h — it will fill in as `
+        + `observations accumulate`);
+    }
+    note.textContent = bits.join(" · ");
+    note.classList.toggle("warn", Boolean(short));
+  }
+
+  function archiveSpanHours(stations) {
+    let lo = null, hi = null;
+    stations.forEach((st) => (st.history || []).forEach((r) => {
+      const d = WindRose.obsDate(r);
+      if (!d) return;
+      if (lo === null || d < lo) lo = d;
+      if (hi === null || d > hi) hi = d;
+    }));
+    return lo && hi ? (hi - lo) / 3600000 : null;
+  }
+
+  function buildRoseButtons() {
+    const seg = $("rose-seg");
+    if (!seg || seg.childElementCount || typeof WindRose === "undefined") return;
+    Object.entries(WindRose.PERIODS).forEach(([id, spec]) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "seg-btn" + (id === state.rosePeriod ? " active" : "");
+      b.dataset.period = id;
+      b.textContent = spec.label;
+      seg.appendChild(b);
+    });
+    seg.querySelectorAll(".seg-btn").forEach((b) =>
+      b.addEventListener("click", () => {
+        state.rosePeriod = b.dataset.period;
+        seg.querySelectorAll(".seg-btn").forEach((o) =>
+          o.classList.toggle("active", o === b));
+        drawWindRoses();
+      }));
+  }
+
   async function loadWeather() {
     const strip = $("weather-strip");
     let wx;
@@ -605,6 +727,8 @@
 
     const okStations = wx.stations.filter((s) => s.ok);
     drawWeatherHistory(okStations, wx.history_hours || 48);
+    buildRoseButtons();
+    drawWindRoses();
     buildTimeline(okStations);
     addWeatherMarkers(wx.stations);
   }
@@ -1338,6 +1462,9 @@
         ["chart", "weather-history"].forEach((id) => {
           const el = $(id);
           if (el && el.data) Plotly.Plots.resize(el);
+        });
+        document.querySelectorAll(".rose-cell").forEach((el) => {
+          if (el.data) Plotly.Plots.resize(el);
         });
       });
     }
