@@ -351,7 +351,8 @@ def api_scenario_match():
     scfg = CONFIG.get("scenarios") or {}
     result = scenarios_mod.match_scenario(
         idx["scenarios"], idx["grid"], target, scfg.get("weights"),
-        mode=scfg.get("normalize", "range"))
+        mode=scfg.get("normalize", "range"),
+        wlvl_mode=scfg.get("wlvl_rounding", "nearest"))
     if result is None:
         return jsonify({"error": "empty_index"}), 404
 

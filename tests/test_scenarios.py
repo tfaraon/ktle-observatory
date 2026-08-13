@@ -307,3 +307,74 @@ assert not sc.is_junk_path("/x/Output/wave/wave_a.nc")
 
 print("OK — fichiers macOS ._*, dossiers cachés et en-têtes NetCDF "
       "invalides correctement écartés.")
+
+# ══════════════════════════════════════════════════════════════
+# Arrondi du niveau d'eau vers le bas.
+#
+# Retenir un scenario dont le niveau depasse l'observe simulerait plus
+# d'eau qu'il n'y en a : a -12.4 m sur un fond vers -15.2 m, passer a
+# -12.0 m ajoute 14 % de tirant d'eau, et bien davantage a mesure que
+# le lac s'assèche.
+# ══════════════════════════════════════════════════════════════
+
+
+def scen_at(sp, di, wl, sal=250.0):
+    return {"key": f"sp{sp}_dir{di}_wl{wl}", "files": {},
+            "params": {"wind_speed": sp, "wind_dir": di,
+                       "wlvl": wl, "salinity": sal}}
+
+
+# Vent identique : seul le niveau départage
+pair = [scen_at(10.0, 90.0, -12.0), scen_at(10.0, 90.0, -14.0)]
+grid_pair = sc.build_grid(pair)
+target_mid = {"wind_speed": 10.0, "wind_dir": 90.0, "wlvl": -12.4,
+              "salinity": 250.0}
+
+r_near = sc.match_scenario(pair, grid_pair, target_mid, wlvl_mode="nearest")
+assert r_near["scenario"]["params"]["wlvl"] == -12.0, "plus proche : -12.0"
+assert r_near["wlvl_capped"] is False
+
+r_down = sc.match_scenario(pair, grid_pair, target_mid, wlvl_mode="down")
+assert r_down["scenario"]["params"]["wlvl"] == -14.0, (
+    "vers le bas : aucun niveau au-dessus de l'observé n'est admissible")
+assert r_down["wlvl_capped"] is True
+assert r_down["deltas"]["wlvl"] > 0, "l'écart devient positif : moins d'eau"
+
+# Un niveau exactement egal est admissible
+exact = [scen_at(10.0, 90.0, -12.4), scen_at(10.0, 90.0, -12.0)]
+r_eq = sc.match_scenario(exact, sc.build_grid(exact), target_mid,
+                         wlvl_mode="down")
+assert r_eq["scenario"]["params"]["wlvl"] == -12.4
+
+# Le mode par defaut reste "nearest" : le comportement ne change pas
+# sans configuration explicite.
+r_def = sc.match_scenario(pair, grid_pair, target_mid)
+assert r_def["scenario"]["params"]["wlvl"] == -12.0
+
+# Repli : si TOUS les scenarios sont au-dessus, on garde le plus proche
+# plutot que de ne rien afficher, et l'enveloppe le signale.
+high = [scen_at(10.0, 90.0, -9.0), scen_at(12.0, 90.0, -8.0)]
+r_high = sc.match_scenario(high, sc.build_grid(high), target_mid,
+                           wlvl_mode="down")
+assert r_high["wlvl_capped"] is False
+assert r_high["envelope"]["wlvl"] == "below"
+assert any("sous la plage" in w for w in r_high["warnings"])
+
+# candidate_pool : filtrage direct
+pool, capped = sc.candidate_pool(pair, target_mid, "down")
+assert len(pool) == 1 and capped is True
+pool2, capped2 = sc.candidate_pool(pair, target_mid, "nearest")
+assert len(pool2) == 2 and capped2 is False
+# Cible sans niveau : aucun filtrage possible
+pool3, capped3 = sc.candidate_pool(pair, {"wind_speed": 10.0}, "down")
+assert len(pool3) == 2 and capped3 is False
+
+# L'écart de niveau volontaire ne doit pas être signalé comme un défaut
+sparse = [scen_at(10.0, 90.0, -14.0), scen_at(10.0, 90.0, -12.0)]
+r_sp = sc.match_scenario(sparse, sc.build_grid(sparse), target_mid,
+                         wlvl_mode="down")
+assert not any("Niveau d'eau" in w and "écart" in w
+               for w in r_sp["warnings"]), r_sp["warnings"]
+
+print("OK — arrondi du niveau vers le bas : filtrage, égalité, repli et "
+      "absence d'avertissement superflu validés.")

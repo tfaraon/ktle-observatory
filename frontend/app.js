@@ -816,8 +816,19 @@
     return scales;
   }
 
-  function matchStatic(scenarios, grid, target, weights) {
+  function matchStatic(scenarios, grid, target, weights, wlvlMode) {
     const scales = paramScales(grid);
+
+    // Même règle que le serveur : ne jamais retenir un scénario dont le
+    // niveau dépasse celui observé, sous peine de simuler plus d'eau
+    // qu'il n'y en a.
+    let pool = scenarios, capped = false;
+    if (wlvlMode === "down" && target.wlvl !== undefined
+        && target.wlvl !== null) {
+      const below = scenarios.filter((s) => s.params.wlvl !== undefined
+        && s.params.wlvl <= target.wlvl + 1e-6);
+      if (below.length) { pool = below; capped = true; }
+    }
     const deltasOf = (p) => {
       const d = {};
       Object.entries(target).forEach(([k, v]) => {
@@ -835,8 +846,8 @@
       return Math.sqrt(total);
     };
 
-    let best = scenarios[0], bestD = Infinity;
-    scenarios.forEach((s) => {
+    let best = pool[0], bestD = Infinity;
+    pool.forEach((s) => {
       const d = distance(s.params);
       if (d < bestD) { bestD = d; best = s; }
     });
@@ -868,7 +879,7 @@
     return {
       scenario: { key: best.key, params: best.params, files: {} },
       deltas, distance: Math.round(bestD * 1000) / 1000,
-      envelope, warnings, alternatives: [],
+      wlvl_capped: capped, envelope, warnings, alternatives: [],
     };
   }
 
@@ -1339,7 +1350,7 @@
             + match.warnings.map((w) => `<li>${w}</li>`).join("") + `</ul>`
           : "")
       + `<p class="scenario-file"><span id="shown-key">${match.scenario.key}</span>`
-      + `<br>Conditions: ${originNote(m.origin, m.demo, m.at)}${coverageNote(m)}`
+      + `<br>Conditions: ${originNote(m.origin, m.demo, m.at)}${coverageNote(m)}${roundingNote(m)}`
       + `<br><span id="scenario-note"></span></p>`;
 
 
@@ -1348,6 +1359,11 @@
     drawModelLayer();
   }
 
+
+  function roundingNote(m) {
+    return m.match && m.match.wlvl_capped
+      ? ' · water level rounded down to the nearest simulated level' : "";
+  }
 
   function coverageNote(m) {
     const c = m.coverage;
@@ -1454,8 +1470,9 @@
       return;
     }
     const idx = state.staticIndex;
+    const cfgm = state.manifest.matching || {};
     const match = matchStatic(idx.scenarios, state.paramGrid, target,
-                              (state.manifest.matching || {}).weights);
+                              cfgm.weights, cfgm.wlvl_rounding);
     renderScenario(body, {
       target, origin, match, at: query && query.at ? query.at : null,
       overrides: {}, demo: false,

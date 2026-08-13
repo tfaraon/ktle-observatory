@@ -207,6 +207,11 @@ The main conversion settings are:
 | `wind_station` | BOM station used for the wind conditions |
 | `wind_dir_convention` | wind direction expressed as `from` or `to` |
 | `wlvl_offset` | offset between the SWOT and model vertical datums |
+| `wlvl_rounding` | `down` restricts the match to levels at or below the observed one; `nearest` allows either side |
+
+`wlvl_rounding` defaults to `down`. Selecting a scenario above the observed
+level would simulate more water than there is, which on a shallow lake changes
+wave dissipation and current speeds appreciably.
 
 The timeline uses the recent weather archive. Moving along it selects a
 different steady-state scenario; it does not move through time within a single

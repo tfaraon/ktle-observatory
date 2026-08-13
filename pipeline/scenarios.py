@@ -219,8 +219,31 @@ def build_scales(grid, mode="range"):
     return scales
 
 
+def candidate_pool(scenarios, target, wlvl_mode="nearest", tol=1e-6):
+    """Scenarios eligibles a l'appariement.
+
+    wlvl_mode="down" n'autorise que les niveaux INFERIEURS OU EGAUX au
+    niveau observe. Retenir un scenario plus haut simulerait plus
+    d'eau qu'il n'y en a : a -12.91 m sur un fond vers -15.2 m, passer
+    a -12.0 m ajoute pres de 40 % de tirant d'eau, ce qui modifie la
+    dissipation des vagues et les vitesses. Choisir vers le bas laisse
+    l'erreur du cote conservateur.
+
+    Retourne (pool, limite_appliquee).
+    """
+    if wlvl_mode != "down" or target.get("wlvl") is None:
+        return scenarios, False
+    limit = target["wlvl"] + tol
+    below = [s for s in scenarios
+             if s["params"].get("wlvl") is not None
+             and s["params"]["wlvl"] <= limit]
+    # Si tous les scenarios sont au-dessus du niveau observe, mieux vaut
+    # le plus proche que rien : le controle d'enveloppe le signalera.
+    return (below, True) if below else (scenarios, False)
+
+
 def match_scenario(scenarios, grid, target, weights=None, mode="range",
-                   n_alternatives=4):
+                   n_alternatives=4, wlvl_mode="nearest"):
     """Scenario le plus proche des conditions cibles.
 
     La distance est normalisee par l'echelle de chaque parametre
@@ -239,6 +262,7 @@ def match_scenario(scenarios, grid, target, weights=None, mode="range",
         return None
     weights = weights or {}
     scales = build_scales(grid, mode)
+    pool, wlvl_capped = candidate_pool(scenarios, target, wlvl_mode)
 
     def deltas_of(params):
         out = {}
@@ -255,7 +279,7 @@ def match_scenario(scenarios, grid, target, weights=None, mode="range",
             total += (weights.get(key, 1.0) * d / scales.get(key, 1.0)) ** 2
         return math.sqrt(total)
 
-    ranked = sorted(scenarios, key=lambda s: distance(s["params"]))
+    ranked = sorted(pool, key=lambda s: distance(s["params"]))
     best = ranked[0]
     params = best["params"]
     deltas = {k: round(v, 3) for k, v in deltas_of(params).items()}
@@ -282,6 +306,8 @@ def match_scenario(scenarios, grid, target, weights=None, mode="range",
 
         # Ecart notable au sein de la plage : le plan est lacunaire ici
         d = abs(deltas.get(key, 0.0))
+        if key == "wlvl" and wlvl_capped:
+            continue        # ecart voulu : on n'a garde que les niveaux bas
         if envelope[key] == "in" and d > 0.12 * scales.get(key, 1.0):
             warnings.append(f"{label} : écart de {d:.1f} {unit} "
                             f"avec le scénario le plus proche")
@@ -297,6 +323,7 @@ def match_scenario(scenarios, grid, target, weights=None, mode="range",
         "scenario": best,
         "deltas": deltas,
         "distance": round(distance(params), 3),
+        "wlvl_capped": bool(wlvl_capped),
         "envelope": envelope,
         "scales": {k: round(v, 3) for k, v in scales.items()},
         "mode": mode,

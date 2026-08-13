@@ -120,6 +120,13 @@ scenarios:
   # visible. A verifier dans le .mdw / .mdf des simulations.
   wind_dir_convention: "from"
 
+  # Choix du niveau d'eau parmi les scenarios :
+  #   "down"    : uniquement les niveaux INFERIEURS OU EGAUX a l'observe
+  #   "nearest" : le plus proche, au-dessus comme en dessous
+  # Retenir un scenario plus haut simulerait plus d'eau qu'il n'y en a,
+  # ce qui surestime le tirant d'eau et modifie vagues et courants.
+  wlvl_rounding: "down"
+
   # Site SWOT fournissant le niveau d'eau pour l'appariement.
   # null = premier site de la liste disposant d'une observation.
   wlvl_site: "Belt Bay"
@@ -249,10 +256,12 @@ imagery:
 # Ex. Birdsville (Qld) : produit IDQ60801 + n° indique sur la page.
 weather:
   cache_minutes: 15
-  # Fenetre d'archive conservee. Le BOM publie 72 h glissantes ; les
-  # releves deja vus sont fusionnes, ce qui maintient l'historique meme
-  # si le flux est tronque ou si une recuperation echoue.
-  history_hours: 48
+  # Fenetre d'archive conservee. Le BOM ne publie que 72 h glissantes,
+  # mais les releves deja vus sont fusionnes a chaque passage : au-dela
+  # de 72 h l'archive se construit donc progressivement, a raison des
+  # executions du cron. Les roses des vents « 7 jours / 7 nuits » ont
+  # besoin de 168 h et se completeront au fil de la semaine.
+  history_hours: 168
   user_agent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36"
   stations:
     - { name: "Marree Airport",  product: "IDS60801", wmo: "95480", lat: -29.660, lon: 138.065 }

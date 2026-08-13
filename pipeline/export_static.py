@@ -294,6 +294,7 @@ def build(cfg, out_dir=SITE, colors=64, limit=None, sample=40):
         "matching": {
             "weights": scfg.get("weights") or {},
             "normalize": scfg.get("normalize", "range"),
+            "wlvl_rounding": scfg.get("wlvl_rounding", "nearest"),
             "wind_station": scfg.get("wind_station"),
             "wind_dir_convention": scfg.get("wind_dir_convention", "from"),
             "wlvl_offset": scfg.get("wlvl_offset", 0.0),

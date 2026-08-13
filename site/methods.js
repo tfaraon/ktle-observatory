@@ -80,6 +80,15 @@ const METHODS_HTML = `
     which parameter to sacrifice: wind speed and direction drive wave
     generation, whereas salinity acts only through density.</p>
 
+    <p>Water level is treated asymmetrically: only scenarios at or
+    <em>below</em> the observed level are eligible. Selecting a higher
+    one would simulate more water than there is, and on a shallow lake
+    that error compounds &mdash; at &minus;12.9&nbsp;m over a bed near
+    &minus;15.2&nbsp;m, moving up to &minus;12.0&nbsp;m adds nearly
+    40&nbsp;% to the depth, which changes wave dissipation, current
+    speeds and set-up. Rounding down keeps the error on the
+    conservative side.</p>
+
     <p class="caveat">A Latin hypercube of 790 runs covers roughly
     3&nbsp;% of the parameter space, so the nearest scenario is a
     compromise, not a match. The site reports the offset on every
