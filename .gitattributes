@@ -1,0 +1,9 @@
+# Series regenerables par le pipeline : en cas de divergence entre une
+# execution locale et le workflow horaire, on remplace le fichier au
+# lieu de tenter une fusion ligne a ligne, qui n'a aucun sens sur du
+# JSON de donnees.
+#
+# Necessite, une fois :  git config merge.ours.driver true
+site/data/weather.json    merge=ours
+site/data/swot_wse.json   merge=ours
+site/data/lake_area.json  merge=ours

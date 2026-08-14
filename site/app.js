@@ -20,6 +20,7 @@
     fieldTime: null,   // time-step index
     modelLayer: "none", // none | currents | hsign | wlength | period
     modelRaster: null, modelShafts: null, modelHeads: null,
+    areaIdx: 0,
     modelData: null,
     field: null,          // grid used for the hover readout
     scaleMode: "auto",    // colour scale fitted to the scenario
@@ -387,6 +388,53 @@
     return null;
   }
 
+  function drawAreaChart() {
+    const card = $("area-card");
+    const el = $("area-chart");
+    const a = state.area;
+    if (!card || !el || !a || !a.series || !a.series.length) {
+      if (card) card.hidden = true;
+      return;
+    }
+    card.hidden = false;
+
+    const solid = a.series.filter((r) => !r.partial);
+    const partial = a.series.filter((r) => r.partial);
+    const trace = (rows, name, open) => ({
+      x: rows.map((r) => r.date), y: rows.map((r) => r.area_km2),
+      error_y: {
+        type: "data", visible: rows.some((r) => r.uncert_km2),
+        array: rows.map((r) => r.uncert_km2 || 0),
+        color: "#A8702D", thickness: 1, width: 3,
+      },
+      mode: "markers", type: "scatter", name,
+      marker: {
+        color: open ? "rgba(0,0,0,0)" : "#A8702D", size: 8,
+        line: { color: "#A8702D", width: open ? 1.5 : 0 },
+      },
+      hovertemplate: "%{x|%d %b %Y}<br>%{y:,.0f} km²"
+        + (open ? "<extra>partial pass</extra>" : "<extra></extra>"),
+    });
+
+    const traces = [];
+    if (solid.length) traces.push(trace(solid, "Full pass", false));
+    if (partial.length) traces.push(trace(partial, "Partial pass", true));
+
+    Plotly.newPlot(el, traces, {
+      margin: { l: 64, r: 18, t: 8, b: 42 },
+      paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
+      font: { family: "Archivo, sans-serif", size: 12, color: "#241F1A" },
+      xaxis: { gridcolor: "#E9E3D6", tickfont: { family: "IBM Plex Mono" } },
+      yaxis: {
+        title: { text: "water area (km²)" }, rangemode: "tozero",
+        gridcolor: "#E9E3D6", tickfont: { family: "IBM Plex Mono" },
+      },
+      showlegend: partial.length > 0,
+      legend: { orientation: "h", y: 1.14, x: 0, font: { size: 10.5 } },
+      hovermode: "closest",
+    }, { displayModeBar: false, responsive: true });
+  }
+
   // ── Plotly time series ───────────────────────────────────
 
   function drawChart(site) {
@@ -418,35 +466,6 @@
 
     const traces = [past, latest];
 
-    // Surface en eau sur l'axe de droite : lue conjointement au niveau,
-    // elle donne à voir la relation hypsométrique.
-    const area = state.area;
-    if (area && area.series && area.series.length) {
-      const solid = area.series.filter((r) => !r.partial);
-      const partial = area.series.filter((r) => r.partial);
-      const areaTrace = (rows, name, open) => ({
-        x: rows.map((r) => r.date), y: rows.map((r) => r.area_km2),
-        error_y: {
-          type: "data", visible: rows.some((r) => r.uncert_km2),
-          array: rows.map((r) => r.uncert_km2 || 0),
-          color: "#A8702D", thickness: 1, width: 2,
-        },
-        mode: "markers", type: "scatter", name, yaxis: "y2",
-        marker: {
-          color: open ? "rgba(0,0,0,0)" : "#A8702D", size: 7,
-          line: { color: "#A8702D", width: open ? 1.4 : 0 },
-        },
-        hovertemplate: "%{x|%d %b %Y}<br>%{y:.0f} km²"
-          + (open ? "<extra>partial pass</extra>" : "<extra>area</extra>"),
-      });
-      if (solid.length) traces.push(areaTrace(solid, "Water area", false));
-      // Les passages partiels sont tracés en cercles vides : une
-      // couverture incomplète se lirait sinon comme un assèchement.
-      if (partial.length) {
-        traces.push(areaTrace(partial, "Water area (partial pass)", true));
-      }
-    }
-
     Plotly.newPlot(chart, traces, {
       margin: { l: 58, r: 18, t: 8, b: 42 },
       paper_bgcolor: "rgba(0,0,0,0)",
@@ -458,13 +477,7 @@
         gridcolor: "#E9E3D6", zeroline: false,
         tickfont: { family: "IBM Plex Mono" },
       },
-      yaxis2: {
-        title: { text: "area (km²)" }, overlaying: "y", side: "right",
-        showgrid: false, rangemode: "tozero",
-        tickfont: { family: "IBM Plex Mono", color: "#A8702D" },
-        titlefont: { color: "#A8702D" },
-      },
-      showlegend: Boolean(state.area),
+      showlegend: false,
       legend: { orientation: "h", y: 1.12, x: 0, font: { size: 10.5 } },
       hovermode: "closest",
     }, { displayModeBar: false, responsive: true });
@@ -1226,6 +1239,8 @@
   }
 
   function showLegend(d, lo, hi) {
+    const bar = document.querySelector(".legend-bar");
+    if (bar) bar.style.background = "";
     $("legend-title").textContent = `${d.label}${d.units ? " (" + d.units + ")" : ""}`;
     $("legend-min").textContent = lo.toFixed(hi < 2 ? 2 : 0);
     $("legend-max").textContent = hi.toFixed(hi < 2 ? 2 : 0);
@@ -1234,7 +1249,15 @@
 
   async function drawModelLayer() {
     if (!state.map) return;
-    if (state.modelLayer === "none" || !state.scenario) {
+    if (state.modelLayer === "none") {
+      clearModelLayer();
+      hideMapMessage();
+      $("model-controls").hidden = true;
+      return;
+    }
+    // L'étendue en eau vient de SWOT, pas d'un scénario apparié.
+    if (state.modelLayer === "water") return drawWaterExtent();
+    if (!state.scenario) {
       clearModelLayer();
       hideMapMessage();
       $("model-controls").hidden = true;
@@ -1406,9 +1429,77 @@
     el.classList.toggle("warn", Boolean(isError));
   }
 
+  // ── SWOT water extent on the map ─────────────────────────
+
+  function areaDates() {
+    const a = state.area;
+    return (a && a.series) ? a.series.filter((r) => r.map) : [];
+  }
+
+  function areaBase() {
+    // Chemin des masques : servi par Flask ou copié dans le site.
+    return state.staticMode ? "data/" : "/data/";
+  }
+
+  function drawWaterExtent() {
+    clearModelLayer();
+    hideMapMessage();
+    const dates = areaDates();
+    const a = state.area;
+    if (!dates.length || !a.map_bounds) {
+      showMapMessage("No SWOT water extent available — run "
+        + "pipeline/lake_area.py");
+      return;
+    }
+    const idx = Math.min(Math.max(0, state.areaIdx), dates.length - 1);
+    state.areaIdx = idx;
+    const entry = dates[idx];
+
+    state.modelRaster = L.imageOverlay(
+      areaBase() + entry.map, a.map_bounds,
+      { opacity: 1, interactive: false }).addTo(state.map);
+
+    $("legend-title").textContent = "SWOT water extent";
+    $("legend-min").textContent = "dry";
+    $("legend-max").textContent = "open water";
+    $("map-legend").hidden = false;
+    // La palette du modèle n'a pas de sens ici : une seule teinte,
+    // dont l'opacité suit la fraction d'eau de la maille.
+    const bar = document.querySelector(".legend-bar");
+    if (bar) {
+      bar.style.background =
+        "linear-gradient(to right, rgba(30,95,107,0.08), rgba(30,95,107,0.85))";
+    }
+
+    buildAreaDateControls(dates, idx, entry);
+    setModelNote(`SWOT water extent · ${entry.date} · `
+      + `${entry.area_km2.toLocaleString("en-GB")} km²`
+      + (entry.partial ? " · partial pass" : ""), Boolean(entry.partial));
+  }
+
+  function buildAreaDateControls(dates, idx, entry) {
+    const box = $("model-controls");
+    box.hidden = false;
+    box.innerHTML =
+      `<button type="button" id="area-prev" class="date-btn" `
+      + `${idx === 0 ? "disabled" : ""}>◀</button>`
+      + `<select id="area-date" class="site-select">`
+      + dates.map((r, k) => `<option value="${k}"${k === idx ? " selected" : ""}>`
+          + `${r.date}${r.partial ? " (partial)" : ""}</option>`).join("")
+      + `</select>`
+      + `<button type="button" id="area-next" class="date-btn" `
+      + `${idx >= dates.length - 1 ? "disabled" : ""}>▶</button>`;
+    const go = (k) => { state.areaIdx = k; drawWaterExtent(); };
+    $("area-prev").addEventListener("click", () => go(idx - 1));
+    $("area-next").addEventListener("click", () => go(idx + 1));
+    $("area-date").addEventListener("change",
+      (e) => go(parseInt(e.target.value, 10)));
+  }
+
   function buildModelButtons() {
     const seg = $("model-seg");
     const specs = [
+      { id: "water", label: "SWOT water" },
       { id: "currents", label: "Currents" },
       { id: "hsign", label: "Wave height" },
       { id: "wlength", label: "Wavelength" },
@@ -1646,6 +1737,8 @@
          () => Boolean(state.weather));
     bind("dl-area", () => Download.areaCSV(state.area),
          () => Boolean(state.area));
+    bind("dl-area2", () => Download.areaCSV(state.area),
+         () => Boolean(state.area));
 
     const layerBtn = $("dl-layer");
     if (layerBtn) {
@@ -1700,7 +1793,7 @@
     if (name === "observatory") {
       requestAnimationFrame(() => {
         if (state.map) state.map.invalidateSize();
-        ["chart", "weather-history"].forEach((id) => {
+        ["chart", "area-chart", "weather-history"].forEach((id) => {
           const el = $(id);
           if (el && el.data) Plotly.Plots.resize(el);
         });
@@ -1801,6 +1894,8 @@
     // The scenario depends on the weather, so it follows.
     wireScenario();
     wireTimeline();
+    state.areaIdx = Math.max(0, areaDates().length - 1);
+    drawAreaChart();
     loadWeather().then(() => loadScenario(null));
   }
 

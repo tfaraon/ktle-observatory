@@ -268,7 +268,8 @@ def granule_lonlat(ds, zone=None, south=True):
     return lon, lat
 
 
-def read_granule(path, boundary=None, params=None, zone=None, south=True):
+def read_granule(path, boundary=None, params=None, zone=None, south=True,
+                 want_mask=False):
     """Surface en eau d'un granule, ou None si inexploitable."""
     params = dict(DEFAULTS, **(params or {}))
     ds = open_dataset(path)
@@ -282,6 +283,7 @@ def read_granule(path, boundary=None, params=None, zone=None, south=True):
 
         inside = None
         covered = None
+        lon = lat = None
         if boundary is not None:
             lon, lat = granule_lonlat(ds, zone, south)
             if lon is not None:
@@ -294,9 +296,74 @@ def read_granule(path, boundary=None, params=None, zone=None, south=True):
             max_qual=params["max_qual"],
             median_size=params["median_size"])
         result["covered_cells"] = covered
+        if want_mask and lon is not None:
+            keep = water_mask(frac, qual,
+                              frac_range=tuple(params["water_frac_range"]),
+                              max_qual=params["max_qual"],
+                              median_size=params["median_size"])
+            if inside is not None:
+                keep &= inside
+            result["mask"] = (lon, lat, frac, keep)
         return result
     finally:
         ds.close()
+
+
+# ------------------------------------------------------------------
+# Masque spatial : un raster lon/lat par date
+# ------------------------------------------------------------------
+
+def accumulate_mask(grid, count, lon, lat, frac, mask, bounds):
+    """Ajoute une scene au raster cumule.
+
+    Le raster cible est regulier en lon/lat : chaque maille source y
+    tombe dans une case unique, ce qui evite une interpolation. Les
+    scenes d'un meme passage ne se recouvrant pas, la moyenne par case
+    revient a une simple mosaique.
+    """
+    lat0, lat1, lon0, lon1 = bounds
+    ny, nx = grid.shape
+    la = np.ravel(lat)[np.ravel(mask)]
+    lo = np.ravel(lon)[np.ravel(mask)]
+    fr = np.ravel(frac)[np.ravel(mask)]
+    keep = (la >= lat0) & (la <= lat1) & (lo >= lon0) & (lo <= lon1)
+    if not keep.any():
+        return
+    iy = np.clip(((la[keep] - lat0) / (lat1 - lat0) * (ny - 1)).round()
+                 .astype(int), 0, ny - 1)
+    ix = np.clip(((lo[keep] - lon0) / (lon1 - lon0) * (nx - 1)).round()
+                 .astype(int), 0, nx - 1)
+    np.add.at(grid, (iy, ix), np.nan_to_num(fr[keep]))
+    np.add.at(count, (iy, ix), 1)
+
+
+def write_mask_png(grid, count, path, colour=(30, 95, 107)):
+    """Raster de fraction d'eau -> PNG bleu, transparent hors de l'eau.
+
+    L'opacite suit la fraction d'eau : une rive a demi inondee apparait
+    plus pale qu'un plan d'eau franc, ce qu'un masque binaire cacherait.
+    """
+    from PIL import Image
+
+    with np.errstate(invalid="ignore", divide="ignore"):
+        frac = np.where(count > 0, grid / np.maximum(count, 1), np.nan)
+    frac = frac[::-1, :]                    # latitude croissante -> haut
+    alpha = np.where(np.isfinite(frac), np.clip(frac, 0, 1) * 205, 0)
+    rgb = np.zeros(frac.shape + (3,), dtype="uint8")
+    for k, v in enumerate(colour):
+        rgb[..., k] = v
+    path.parent.mkdir(parents=True, exist_ok=True)
+    Image.fromarray(np.dstack([rgb, alpha.astype("uint8")]), "RGBA").save(
+        path, "PNG", optimize=True)
+    return int(np.isfinite(frac).sum())
+
+
+def boundary_bounds(boundary, pad=0.05):
+    """Cadre lon/lat commun a toutes les dates, deduit de l'emprise."""
+    if boundary is None:
+        return None
+    return (float(boundary[:, 1].min()) - pad, float(boundary[:, 1].max()) + pad,
+            float(boundary[:, 0].min()) - pad, float(boundary[:, 0].max()) + pad)
 
 
 # ------------------------------------------------------------------
@@ -389,28 +456,52 @@ def build(cfg, limit=None, out_path=OUT_FILE):
     zone = scfg.get("utm_zone")
     south = scfg.get("southern_hemisphere", True)
 
+    map_bounds = boundary_bounds(boundary)
+    map_size = int(acfg.get("map_size", 420))
+    want_mask = bool(acfg.get("write_maps", True)) and map_bounds is not None
+    maps = {}          # date -> (somme, effectif)
+
     by_date = {}
     failures = []
+    outside = 0        # granules ne recoupant pas le lac
     for n, path in enumerate(files):
         when = granule_datetime(path)
         if when is None:
             continue
         try:
-            res = read_granule(path, boundary, acfg, zone, south)
+            res = read_granule(path, boundary, acfg, zone, south, want_mask)
         except Exception as e:
             failures.append((os.path.basename(path),
                              f"{type(e).__name__}: {e}"[:100]))
             continue
-        if res:
-            by_date.setdefault(when.strftime("%Y-%m-%d"), []).append(res)
+        if res and (res.get("covered_cells") or res["n_cells"]):
+            day = when.strftime("%Y-%m-%d")
+            by_date.setdefault(day, []).append(res)
+            if want_mask and res.get("mask"):
+                if day not in maps:
+                    maps[day] = (np.zeros((map_size, map_size)),
+                                 np.zeros((map_size, map_size)))
+                accumulate_mask(maps[day][0], maps[day][1],
+                                *res["mask"], map_bounds)
+            res.pop("mask", None)
+        elif res:
+            # Le repertoire de telechargement peut contenir des granules
+            # d'autres zones : ils sont ecartes par l'emprise du lac.
+            outside += 1
         if (n + 1) % 20 == 0 or n + 1 == len(files):
             print(f"  {n + 1}/{len(files)} granules")
 
+    map_dir = out_path.parent / "area_maps"
     series = []
     for day in sorted(by_date):
         entry = combine_scenes(by_date[day], boundary_cells,
                                acfg.get("min_coverage", 0.15))
         entry["date"] = day
+        if day in maps:
+            n_wet = write_mask_png(maps[day][0], maps[day][1],
+                                   map_dir / f"{day}.png")
+            if n_wet:
+                entry["map"] = f"area_maps/{day}.png"
         series.append(entry)
 
     payload = {
@@ -424,10 +515,18 @@ def build(cfg, limit=None, out_path=OUT_FILE):
         "doi": "10.1016/j.jhydrol.2026.135652",
         "note": "Spatial constraint from the Delft3D domain replaces the "
                 "Sentinel-3 optical mask; the area is an upper bound",
+        "uncertainty_note": "uncert_km2 is the quadrature sum of per-cell "
+                            "uncertainties reported by the product. It is a "
+                            "formal precision, not a validated accuracy: the "
+                            "source paper reports ~15 % error against optical "
+                            "water masks, several orders of magnitude larger",
         "parameters": {k: acfg[k] for k in
                        ("water_frac_range", "max_qual", "median_size",
                         "resolution", "min_coverage") if k in acfg},
         "n_granules": len(files),
+        "map_bounds": ([[map_bounds[0], map_bounds[2]],
+                        [map_bounds[1], map_bounds[3]]]
+                       if map_bounds else None),
         "series": series,
     }
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -440,6 +539,8 @@ def build(cfg, limit=None, out_path=OUT_FILE):
         print(f"  {e['date']}  {e['area_km2']:>8.1f} km²"
               + (f" ± {e['uncert_km2']:.1f}" if e["uncert_km2"] else "")
               + flag)
+    if outside:
+        print(f"  {outside} granule(s) hors de l'emprise du lac, ignoré(s)")
     if failures:
         print(f"  {len(failures)} granule(s) illisible(s), ex. {failures[0]}")
     return payload

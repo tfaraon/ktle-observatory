@@ -162,3 +162,47 @@ assert la.granule_datetime("readme.txt") is None
 print("OK — filtres de fraction et de qualité, filtre médian, contrainte "
       "d'emprise, sommation des scènes, détection des passages partiels et "
       "propagation d'incertitude validés.")
+
+# ══════════════════════════════════════════════════════════════
+# Hygiene du repertoire de granules.
+#
+# Le dossier de telechargement contient des fichiers systeme macOS et,
+# le cas echeant, des granules d'autres regions. Les premiers cassent
+# la lecture, les seconds gonfleraient la surface s'ils n'etaient pas
+# ecartes par l'emprise.
+# ══════════════════════════════════════════════════════════════
+
+import tempfile  # noqa: E402
+import os  # noqa: E402
+
+sys.path.insert(0, str(ROOT / "pipeline"))
+from update_swot import list_nc_files  # noqa: E402
+
+with tempfile.TemporaryDirectory() as td:
+    root = Path(td)
+    (root / "sub").mkdir()
+    (root / "__MACOSX").mkdir()
+    names = {
+        "SWOT_L2_HR_Raster_100m_UTM53J_a.nc": True,
+        "sub/SWOT_L2_HR_Raster_100m_UTM53J_b.nc": True,
+        "._SWOT_L2_HR_Raster_100m_UTM53J_a.nc": False,   # AppleDouble
+        "sub/._SWOT_L2_HR_Raster_100m_UTM53J_b.nc": False,
+        ".hidden_100m.nc": False,
+        "__MACOSX/SWOT_L2_HR_Raster_100m_c.nc": False,
+        "SWOT_L2_HR_Raster_250m_d.nc": False,            # autre résolution
+        "notes.txt": False,
+    }
+    for name in names:
+        (root / name).write_bytes(b"x")
+
+    found = {os.path.relpath(f, root) for f in list_nc_files(str(root), "100")}
+    expected = {n for n, keep in names.items() if keep}
+    assert found == expected, f"attendu {expected}, obtenu {found}"
+
+    # Sans filtre de résolution, les 250 m entrent mais pas les parasites
+    all_nc = {os.path.basename(f) for f in list_nc_files(str(root))}
+    assert "SWOT_L2_HR_Raster_250m_d.nc" in all_nc
+    assert not any(n.startswith("._") for n in all_nc)
+
+print("OK — fichiers AppleDouble, dossiers cachés et __MACOSX écartés du "
+      "listage des granules.")

@@ -135,8 +135,11 @@ Water area is computed from the SWOT granules already on disk, following:
 0.1 and 0.99 and the quality flag is good or suspect; a 5×5 median filter
 removes isolated detections; retained cell areas are summed and uncertainties
 combined in quadrature. The series is written to `data/lake_area.json` and
-drawn on the right-hand axis of the time-series chart, and can be downloaded
-as CSV with the reference in its header.
+shown in its own panel and downloadable as CSV with the reference in its
+header. The retained water mask is also rasterised to `data/area_maps/`, one
+PNG per pass, and can be viewed on the map through the **SWOT water** layer,
+with a date selector. Opacity follows the water fraction, so partially flooded
+margins read paler than open water.
 
 > Rai, A.K., Cohen, T.J., Armon, M. & Marx, S.K. (2026). Volumetric analysis of
 > a playa lake using SWOT data: an improved understanding of the inflows to
@@ -151,6 +154,15 @@ KaRIn; that mask is absent here, replaced by the Delft3D model domain. The
 constraint is spatial rather than spectral, so **the area is an upper bound**.
 Passes covering less than `area.min_coverage` of the domain are flagged and
 drawn as open circles, so that an incomplete pass is not read as a drying lake.
+Granules that do not intersect the lake — the download directory may hold
+scenes from other regions — are counted and reported separately.
+
+The `uncertainty_km2` column is the quadrature sum of the per-cell
+uncertainties reported by the product. It is a **formal precision, not a
+validated accuracy**: it will look implausibly small, because it says nothing
+about how well SWOT separates shallow water from wet salt. The source paper
+reports around 15 % error against optical water masks, which is the figure to
+quote.
 
 ### BOM observations
 

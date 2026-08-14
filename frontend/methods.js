@@ -85,6 +85,12 @@ const METHODS_HTML = `
     fusion. Adding Sentinel-3 would be the single most useful
     improvement.</p>
 
+    <p>The area series has its own panel, and the retained water mask
+    is kept for each pass: the <em>SWOT water</em> layer draws it over
+    the map, with a date selector. Opacity follows the water fraction of
+    each cell, so a half-flooded margin reads paler than open water
+    &mdash; a distinction a binary mask would hide.</p>
+
     <p class="caveat">A SWOT pass does not always cover the whole lake.
     Passes observing less than 15&nbsp;% of the domain are flagged and
     drawn as open circles: an incomplete pass would otherwise read as a

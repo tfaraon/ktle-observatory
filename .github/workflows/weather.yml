@@ -35,7 +35,9 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add -f data/weather.json
+          # data/ est ignore par .gitignore : seul le site publie a
+          # besoin d'une copie versionnee. Forcer data/weather.json
+          # doublait inutilement les conflits de rebase.
           [ -f site/data/weather.json ] && git add -f site/data/weather.json
           git diff --staged --quiet || git commit -m "Weather refresh"
           git push

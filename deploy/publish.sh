@@ -63,6 +63,15 @@ for name in swot_wse.json weather.json lake_area.json; do
 done
 echo "Données  : $data_copied fichier(s) mis à jour"
 
+# Masques d'eau SWOT : un PNG par date
+if [ -d data/area_maps ]; then
+  mkdir -p site/data/area_maps
+  if ! diff -rq data/area_maps site/data/area_maps >/dev/null 2>&1; then
+    cp data/area_maps/*.png site/data/area_maps/ 2>/dev/null || true
+    echo "Masques : $(ls -1 site/data/area_maps/*.png 2>/dev/null | wc -l | tr -d ' ') date(s)"
+  fi
+fi
+
 # Rappel : les images du modele ne sont regenerees que par l'export.
 if [ ! -d site/img ] || [ -z "$(ls -A site/img 2>/dev/null)" ]; then
   echo "Attention : site/img est vide — les couches du modèle ne"
@@ -70,6 +79,11 @@ if [ ! -d site/img ] || [ -z "$(ls -A site/img 2>/dev/null)" ]; then
 fi
 
 # ── Commit ──────────────────────────────────────────────────
+# Le pilote « ours » de .gitattributes doit etre declare une fois par
+# depot ; sans lui, Git ignore la regle et le conflit revient.
+git config --get merge.ours.driver >/dev/null 2>&1 || \
+  git config merge.ours.driver true
+
 git add -A
 if git diff --cached --quiet; then
   echo "Rien à publier : le dépôt est déjà à jour."

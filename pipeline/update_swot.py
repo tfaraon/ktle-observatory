@@ -64,14 +64,23 @@ def resolve_path(p):
 # ------------------------------------------------------------------
 
 def list_nc_files(swot_dir, filter_resolution=None):
-    """Liste recursive des .nc, memes filtres de nom que la toolbox."""
+    """Liste recursive des .nc, memes filtres de nom que la toolbox.
+
+    Les fichiers commencant par « ._ » sont des AppleDouble : macOS les
+    cree en copiant vers un volume exFAT/FAT. Ils portent le nom d'un
+    granule mais ne contiennent que des metadonnees, d'ou des erreurs
+    « Unknown file format » a la lecture.
+    """
     out = []
-    for root, _, files in os.walk(swot_dir):
+    for root, dirs, files in os.walk(swot_dir):
+        dirs[:] = [d for d in dirs if not d.startswith(".")
+                   and d != "__MACOSX"]
         for f in files:
-            if f.endswith(".nc"):
-                if filter_resolution and str(filter_resolution) not in f:
-                    continue
-                out.append(os.path.join(root, f))
+            if not f.endswith(".nc") or f.startswith("._") or f.startswith("."):
+                continue
+            if filter_resolution and str(filter_resolution) not in f:
+                continue
+            out.append(os.path.join(root, f))
     return sorted(out)
 
 

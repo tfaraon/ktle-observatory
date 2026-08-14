@@ -337,6 +337,11 @@ def build(cfg, out_dir=SITE, colors=64, limit=None, sample=40):
         if src_file.exists():
             shutil.copy(src_file, data_dir / name)
 
+    # Masques d'eau : un PNG par date, quelques kilo-octets chacun
+    maps_src = ROOT / "data" / "area_maps"
+    if maps_src.is_dir():
+        shutil.copytree(maps_src, data_dir / "area_maps", dirs_exist_ok=True)
+
     for name in ("index.html", "style.css", "app.js", "methods.js",
                  "windrose.js", "download.js"):
         shutil.copy(ROOT / "frontend" / name, out_dir / name)

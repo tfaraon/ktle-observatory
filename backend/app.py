@@ -151,6 +151,12 @@ def api_config():
 AREA_FILE = ROOT / "data" / "lake_area.json"
 
 
+@app.get("/data/area_maps/<path:name>")
+def area_map_file(name):
+    """Masques d'eau produits par lake_area.py."""
+    return send_from_directory(str(ROOT / "data" / "area_maps"), name)
+
+
 @app.get("/api/area")
 def api_area():
     """Serie de surface en eau (methode Rai et al. 2026)."""
