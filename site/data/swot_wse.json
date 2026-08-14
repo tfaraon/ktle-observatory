@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-12T01:59:35Z",
+  "generated_at": "2026-08-14T00:28:17Z",
   "demo": false,
   "lake": {
     "name": "Kati Thanda – Lake Eyre",
@@ -9,11 +9,11 @@
     },
     "zoom": 8
   },
-  "datum_label": "WSE (m, géoïde EGM2008)",
+  "datum_label": "WSE (m, EGM2008 geoid)",
   "source": {
     "n_granules": 1413,
     "last_granule_date": "2026-07-25T17:03:18",
-    "new_this_run": 1365
+    "new_this_run": 0
   },
   "sites": [
     {
