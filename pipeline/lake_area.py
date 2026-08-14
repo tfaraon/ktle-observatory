@@ -352,14 +352,14 @@ def read_granule(path, boundary=None, params=None, zone=None, south=True,
             max_qual=params["max_qual"],
             median_size=params["median_size"])
         result["covered_cells"] = covered
-        if want_mask and lon is not None:
+        if lon is not None:
             keep = water_mask(frac, qual,
                               frac_range=tuple(params["water_frac_range"]),
                               max_qual=params["max_qual"],
                               median_size=params["median_size"])
             if inside is not None:
                 keep &= inside
-            result["mask"] = (lon, lat, frac, keep)
+            result["mask"] = (lon, lat, frac, area, keep)
         return result
     finally:
         ds.close()
@@ -400,19 +400,32 @@ def _process_one(path):
 # Masque spatial : un raster lon/lat par date
 # ------------------------------------------------------------------
 
-def accumulate_mask(grid, count, lon, lat, frac, mask, bounds):
-    """Ajoute une scene au raster cumule.
+def new_accumulator(size):
+    """Grilles cumulees d'une date."""
+    z = lambda: np.zeros((size, size))          # noqa: E731
+    return {"frac": z(), "area": z(), "wet": z(), "scene": z()}
 
-    Le raster cible est regulier en lon/lat : chaque maille source y
-    tombe dans une case unique, ce qui evite une interpolation. Les
-    scenes d'un meme passage ne se recouvrant pas, la moyenne par case
-    revient a une simple mosaique.
+
+def accumulate_mask(acc, lon, lat, frac, area, wet, bounds):
+    """Ajoute une scene aux grilles cumulees de la date.
+
+    Deux passes (394 et 435) peuvent imager le lac le meme jour et se
+    recouvrir. Sommer leurs surfaces compterait l'eau deux fois : on
+    accumule donc sur une grille lon/lat commune, en retenant combien
+    de scenes ont vu chaque case en eau, pour en faire la moyenne
+    plutot que la somme.
     """
     lat0, lat1, lon0, lon1 = bounds
-    ny, nx = grid.shape
-    la = np.ravel(lat)[np.ravel(mask)]
-    lo = np.ravel(lon)[np.ravel(mask)]
-    fr = np.ravel(frac)[np.ravel(mask)]
+    ny, nx = acc["frac"].shape
+    sel = np.ravel(wet)
+    if not sel.any():
+        return
+    la = np.ravel(lat)[sel]
+    lo = np.ravel(lon)[sel]
+    fr = np.nan_to_num(np.ravel(frac)[sel])
+    ar = (np.nan_to_num(np.ravel(area)[sel]) if area is not None
+          else np.zeros(fr.shape))
+
     keep = (la >= lat0) & (la <= lat1) & (lo >= lon0) & (lo <= lon1)
     if not keep.any():
         return
@@ -420,11 +433,29 @@ def accumulate_mask(grid, count, lon, lat, frac, mask, bounds):
                  .astype(int), 0, ny - 1)
     ix = np.clip(((lo[keep] - lon0) / (lon1 - lon0) * (nx - 1)).round()
                  .astype(int), 0, nx - 1)
-    np.add.at(grid, (iy, ix), np.nan_to_num(fr[keep]))
-    np.add.at(count, (iy, ix), 1)
+
+    np.add.at(acc["frac"], (iy, ix), fr[keep])
+    np.add.at(acc["area"], (iy, ix), ar[keep])
+    np.add.at(acc["wet"], (iy, ix), 1)
+    # Une scene ne compte qu'une fois par case, quel que soit le nombre
+    # de mailles sources qui y tombent.
+    touched = np.zeros((ny, nx), dtype=bool)
+    touched[iy, ix] = True
+    acc["scene"] += touched
 
 
-def write_mask_png(grid, count, path, colour=(30, 95, 107)):
+def area_from_accumulator(acc):
+    """Surface en eau de la date, en m2, sans double comptage.
+
+    Chaque case vaut la moyenne des estimations des scenes qui l'ont
+    vue en eau, et non leur somme.
+    """
+    scenes = np.maximum(acc["scene"], 1)
+    per_cell = np.where(acc["wet"] > 0, acc["area"] / scenes, 0.0)
+    return float(per_cell.sum()), int((acc["wet"] > 0).sum())
+
+
+def write_mask_png(acc, path, colour=(30, 95, 107)):
     """Raster de fraction d'eau -> PNG bleu, transparent hors de l'eau.
 
     L'opacite suit la fraction d'eau : une rive a demi inondee apparait
@@ -433,7 +464,8 @@ def write_mask_png(grid, count, path, colour=(30, 95, 107)):
     from PIL import Image
 
     with np.errstate(invalid="ignore", divide="ignore"):
-        frac = np.where(count > 0, grid / np.maximum(count, 1), np.nan)
+        frac = np.where(acc["wet"] > 0,
+                        acc["frac"] / np.maximum(acc["wet"], 1), np.nan)
     frac = frac[::-1, :]                    # latitude croissante -> haut
     alpha = np.where(np.isfinite(frac), np.clip(frac, 0, 1) * 205, 0)
     rgb = np.zeros(frac.shape + (3,), dtype="uint8")
@@ -545,8 +577,8 @@ def build(cfg, limit=None, out_path=OUT_FILE):
 
     map_bounds = boundary_bounds(boundary)
     map_size = int(acfg.get("map_size", 420))
-    want_mask = bool(acfg.get("write_maps", True)) and map_bounds is not None
-    maps = {}          # date -> (somme, effectif)
+    want_mask = map_bounds is not None      # requis aussi pour la surface
+    maps = {}          # date -> grilles cumulees
 
     by_date = {}
     failures = []
@@ -590,10 +622,8 @@ def build(cfg, limit=None, out_path=OUT_FILE):
             by_date.setdefault(day, []).append(res)
             if want_mask and res.get("mask"):
                 if day not in maps:
-                    maps[day] = (np.zeros((map_size, map_size)),
-                                 np.zeros((map_size, map_size)))
-                accumulate_mask(maps[day][0], maps[day][1],
-                                *res["mask"], map_bounds)
+                    maps[day] = new_accumulator(map_size)
+                accumulate_mask(maps[day], *res["mask"], map_bounds)
             res.pop("mask", None)
         elif res:
             # Le repertoire de telechargement peut contenir des granules
@@ -603,15 +633,25 @@ def build(cfg, limit=None, out_path=OUT_FILE):
             print(f"  {n + 1}/{len(files)} granules")
 
     map_dir = out_path.parent / "area_maps"
+    n_overlap = 0
     series = []
     for day in sorted(by_date):
         entry = combine_scenes(by_date[day], boundary_cells,
                                acfg.get("min_coverage", 0.15))
         entry["date"] = day
         if day in maps:
-            n_wet = write_mask_png(maps[day][0], maps[day][1],
-                                   map_dir / f"{day}.png")
-            if n_wet:
+            # Surface issue de la grille fusionnee : une case vue par
+            # deux passes n'est comptee qu'une fois.
+            merged, n_cells = area_from_accumulator(maps[day])
+            overlap = float((maps[day]["scene"] > 1).sum())
+            entry["scene_area_km2"] = entry["area_km2"]
+            entry["area_km2"] = round(merged / 1e6, 3)
+            entry["overlap_cells"] = int(overlap)
+            if entry["scene_area_km2"] and overlap:
+                inflate = entry["scene_area_km2"] / max(entry["area_km2"], 1e-9)
+                if inflate > 1.02:
+                    n_overlap += 1
+            if write_mask_png(maps[day], map_dir / f"{day}.png"):
                 entry["map"] = f"area_maps/{day}.png"
         series.append(entry)
 
@@ -650,6 +690,10 @@ def build(cfg, limit=None, out_path=OUT_FILE):
         print(f"  {e['date']}  {e['area_km2']:>8.1f} km²"
               + (f" ± {e['uncert_km2']:.1f}" if e["uncert_km2"] else "")
               + flag)
+    if n_overlap:
+        print(f"  {n_overlap} date(s) avec recouvrement entre passes : "
+              "la surface est calculée sur la grille fusionnée, pas en "
+              "sommant les scènes")
     if outside:
         print(f"  {outside} granule(s) hors de l'emprise du lac, ignoré(s)")
     if failures:

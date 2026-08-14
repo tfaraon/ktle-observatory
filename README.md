@@ -161,7 +161,11 @@ KaRIn; that mask is absent here, replaced by the Delft3D model domain. The
 constraint is spatial rather than spectral, so **the area is an upper bound**.
 Passes covering less than `area.min_coverage` of the domain are flagged and
 drawn as open circles, so that an incomplete pass is not read as a drying lake.
-Granules that do not intersect the lake — the download directory may hold
+Area is computed from a merged lon/lat grid rather than by summing scenes.
+Passes 394 and 435 both image the lake and can fall on the same day; summing
+their scenes counted the same water twice. Each grid cell now takes the mean of
+the scenes that saw it as water, and `scene_area_km2` is kept alongside
+`area_km2` so the two can be compared. Granules that do not intersect the lake — the download directory may hold
 scenes from other regions — are counted and reported separately.
 
 The `uncertainty_km2` column is the quadrature sum of the per-cell

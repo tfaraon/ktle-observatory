@@ -91,6 +91,12 @@ const METHODS_HTML = `
     each cell, so a half-flooded margin reads paler than open water
     &mdash; a distinction a binary mask would hide.</p>
 
+    <p class="caveat">Two SWOT passes cover the lake and can fall on
+    the same day. Their footprints overlap, so the area is computed on a
+    merged grid rather than by adding scenes together: each cell takes
+    the mean of the passes that saw it as water. Adding them would count
+    the same water twice, and nothing on the chart would betray it.</p>
+
     <p class="caveat">A SWOT pass does not always cover the whole lake.
     Passes observing less than 15&nbsp;% of the domain are flagged and
     drawn as open circles: an incomplete pass would otherwise read as a

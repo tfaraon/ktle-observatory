@@ -270,3 +270,55 @@ assert x_axis[kx[0]] <= 673229 and x_axis[kx[-1]] >= 797654
 
 print("OK — reprojection vectorisée exacte, cadre de rejet couvrant le "
       "domaine sans excès, et mise en cache effective.")
+
+# ══════════════════════════════════════════════════════════════
+# Recouvrement entre passes.
+#
+# Les passes 394 et 435 imagent toutes deux le lac et peuvent tomber
+# le meme jour. Sommer leurs surfaces comptait l'eau deux fois — un
+# doublement silencieux, invisible sur la courbe.
+# ══════════════════════════════════════════════════════════════
+
+BOUNDS = (-29.2, -27.7, 136.7, 138.1)
+gi, gj = np.meshgrid(np.linspace(137.0, 137.8, 120),
+                     np.linspace(-29.0, -28.0, 120))
+gfrac = np.full(gi.shape, 0.8)
+garea = np.full(gi.shape, CELL)
+gwet = gfrac > 0.1
+
+one = la.new_accumulator(200)
+la.accumulate_mask(one, gi, gj, gfrac, garea, gwet, BOUNDS)
+solo, solo_cells = la.area_from_accumulator(one)
+
+two = la.new_accumulator(200)
+for _ in range(2):
+    la.accumulate_mask(two, gi, gj, gfrac, garea, gwet, BOUNDS)
+merged, merged_cells = la.area_from_accumulator(two)
+
+assert abs(merged / solo - 1) < 0.02, (
+    f"deux scènes identiques donnent {merged / solo:.2f}× la surface")
+assert merged_cells == solo_cells
+assert (two["scene"] > 1).sum() > 0, "le recouvrement doit être détecté"
+assert (one["scene"] > 1).sum() == 0
+
+# Deux scènes disjointes doivent, elles, s'additionner
+left = gi < 137.4
+right = ~left
+sep = la.new_accumulator(200)
+la.accumulate_mask(sep, gi, gj, gfrac, garea, gwet & left, BOUNDS)
+la.accumulate_mask(sep, gi, gj, gfrac, garea, gwet & right, BOUNDS)
+split, _ = la.area_from_accumulator(sep)
+assert abs(split / solo - 1) < 0.05, (
+    f"scènes disjointes : {split / solo:.2f}× au lieu de 1")
+assert (sep["scene"] > 1).sum() == 0, "aucun recouvrement attendu"
+
+# Une case vue en eau par une seule scène garde sa valeur entière
+partial = la.new_accumulator(200)
+la.accumulate_mask(partial, gi, gj, gfrac, garea, gwet, BOUNDS)
+la.accumulate_mask(partial, gi, gj, gfrac, garea, gwet & left, BOUNDS)
+mixed, _ = la.area_from_accumulator(partial)
+assert abs(mixed / solo - 1) < 0.05, (
+    "une scène partielle ne doit ni gonfler ni amputer la surface")
+
+print("OK — recouvrement entre passes : plus de double comptage, "
+      "scènes disjointes toujours additionnées.")

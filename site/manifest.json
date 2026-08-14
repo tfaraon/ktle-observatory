@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-08-12T02:30:46Z",
+ "generated_at": "2026-08-14T02:16:05Z",
  "n_scenarios": 790,
  "bounds": {
   "flow": [
@@ -111,6 +111,7 @@
    "salinity": 0.3
   },
   "normalize": "range",
+  "wlvl_rounding": "down",
   "wind_station": "Marree Airport",
   "wind_dir_convention": "from",
   "wlvl_offset": 0.0,
@@ -144,5 +145,5 @@
   },
   "zoom": 8
  },
- "datum_label": "WSE (m, géoïde EGM2008)"
+ "datum_label": "WSE (m, EGM2008 geoid)"
 }
