@@ -247,6 +247,7 @@ area:
   resolution: "100"               # granules 100 m
   boundary: "model"               # "model" = domaine Delft3D ; null = tout
   min_coverage: 0.15              # en deca, passage juge partiel
+  workers: null                   # null = coeurs - 1 ; 1 = sequentiel
 
 display:
   datum_label: "WSE (m, EGM2008 geoid)"

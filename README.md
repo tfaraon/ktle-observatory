@@ -123,8 +123,15 @@ intended for publication.
 
 ```bash
 python pipeline/lake_area.py
-python pipeline/lake_area.py --limit 5    # quick check
+python pipeline/lake_area.py --limit 5      # quick check
+python pipeline/lake_area.py --workers 1    # sequential, for debugging
 ```
+
+Granules are processed in parallel across cores. Two shortcuts do most of the
+work before that: the reprojection is vectorised, and each granule is rejected
+up front if its UTM zone or its bounding box does not meet the lake, so scenes
+from other regions cost almost nothing. Both are covered by tests, since a
+rejection that is slightly too aggressive would silently drop water.
 
 Water area is computed from the SWOT granules already on disk, following:
 

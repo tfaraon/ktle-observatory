@@ -237,6 +237,39 @@ def _get(ds, *names):
     return None
 
 
+_BBOX_CACHE = {}
+
+
+def granule_zone(ds, default=53):
+    """Fuseau UTM declare par le granule."""
+    crs = ds.variables.get("crs")
+    for attr in ("utm_zone_num", "utm_zone", "zone"):
+        value = getattr(crs, attr, None) if crs is not None else None
+        if value is not None:
+            try:
+                return int(value)
+            except (TypeError, ValueError):
+                pass
+    return default
+
+
+def boundary_utm_bbox(boundary, zone, south=True, pad=5000.0):
+    """Cadre du lac en coordonnees du fuseau demande, avec marge.
+
+    Sert de rejet prealable : inutile de reprojeter 1,6 million de
+    mailles pour decouvrir qu'un granule ne touche pas le lac.
+    """
+    key = (zone, south, round(pad))
+    if key in _BBOX_CACHE:
+        return _BBOX_CACHE[key]
+    ex, ny = geo.lonlat_to_utm_array(boundary[:, 0], boundary[:, 1], zone,
+                                     south)
+    box = (float(ex.min()) - pad, float(ex.max()) + pad,
+           float(ny.min()) - pad, float(ny.max()) + pad)
+    _BBOX_CACHE[key] = box
+    return box
+
+
 def granule_lonlat(ds, zone=None, south=True):
     """Coordonnees geographiques des mailles du granule.
 
@@ -259,13 +292,7 @@ def granule_lonlat(ds, zone=None, south=True):
                 except (TypeError, ValueError):
                     pass
     xx, yy = np.meshgrid(np.ravel(x), np.ravel(y))
-    lon = np.empty(xx.shape)
-    lat = np.empty(xx.shape)
-    for i in range(xx.shape[0]):
-        for j in range(xx.shape[1]):
-            lon[i, j], lat[i, j] = geo.utm_to_lonlat(xx[i, j], yy[i, j],
-                                                     zone, south)
-    return lon, lat
+    return geo.utm_to_lonlat_array(xx, yy, zone, south)
 
 
 def read_granule(path, boundary=None, params=None, zone=None, south=True,
@@ -274,18 +301,47 @@ def read_granule(path, boundary=None, params=None, zone=None, south=True,
     params = dict(DEFAULTS, **(params or {}))
     ds = open_dataset(path)
     try:
-        frac = _get(ds, "water_frac")
+        gz = granule_zone(ds, zone or 53)
+
+        # Rejets prealables, avant toute lecture lourde. Le repertoire
+        # de telechargement peut contenir des scenes d'autres regions :
+        # un ecart de fuseau les ecarte immediatement.
+        if boundary is not None:
+            lake_zone = zone or geo.infer_zone(float(boundary[:, 0].mean()))
+            if abs(gz - lake_zone) > 1:
+                return {"area_m2": 0.0, "uncert_m2": None, "n_cells": 0,
+                        "n_valid": 0, "covered_cells": 0}
+
+        x = _get(ds, "x")
+        y = _get(ds, "y")
+        sub_y = sub_x = slice(None)
+        if boundary is not None and x is not None and y is not None:
+            xmin, xmax, ymin, ymax = boundary_utm_bbox(boundary, gz, south)
+            kx = np.where((x >= xmin) & (x <= xmax))[0]
+            ky = np.where((y >= ymin) & (y <= ymax))[0]
+            if not kx.size or not ky.size:
+                return {"area_m2": 0.0, "uncert_m2": None, "n_cells": 0,
+                        "n_valid": 0, "covered_cells": 0}
+            sub_y = slice(int(ky[0]), int(ky[-1]) + 1)
+            sub_x = slice(int(kx[0]), int(kx[-1]) + 1)
+
+        def sub(name):
+            arr = _get(ds, name)
+            return None if arr is None else arr[sub_y, sub_x]
+
+        frac = sub("water_frac")
         if frac is None:
             return None
-        area = _get(ds, "water_area")
-        qual = _get(ds, "water_area_qual")
-        uncert = _get(ds, "water_area_uncert")
+        area = sub("water_area")
+        qual = sub("water_area_qual")
+        uncert = sub("water_area_uncert")
 
         inside = None
         covered = None
         lon = lat = None
         if boundary is not None:
-            lon, lat = granule_lonlat(ds, zone, south)
+            xx, yy = np.meshgrid(x[sub_x], y[sub_y])
+            lon, lat = geo.utm_to_lonlat_array(xx, yy, gz, south)
             if lon is not None:
                 inside = inside_boundary(lon, lat, boundary)
                 covered = int((inside & np.isfinite(frac)).sum())
@@ -307,6 +363,37 @@ def read_granule(path, boundary=None, params=None, zone=None, south=True,
         return result
     finally:
         ds.close()
+
+
+# ------------------------------------------------------------------
+# Traitement parallele
+# ------------------------------------------------------------------
+
+_WORKER = {}
+
+
+def _init_worker(boundary, params, zone, south, want_mask):
+    """Contexte d'un processus fils.
+
+    L'emprise du lac compte des dizaines de milliers de points : la
+    transmettre une fois par processus, et non par granule, evite de la
+    serialiser des centaines de fois.
+    """
+    _WORKER.update(boundary=boundary, params=params, zone=zone,
+                   south=south, want_mask=want_mask)
+
+
+def _process_one(path):
+    """Un granule, dans un processus fils. Les erreurs sont renvoyees
+    plutot que levees : un fichier corrompu ne doit pas interrompre le
+    traitement des centaines d'autres."""
+    try:
+        res = read_granule(path, _WORKER["boundary"], _WORKER["params"],
+                           _WORKER["zone"], _WORKER["south"],
+                           _WORKER["want_mask"])
+        return path, res, None
+    except Exception as e:
+        return path, None, f"{type(e).__name__}: {e}"[:100]
 
 
 # ------------------------------------------------------------------
@@ -464,15 +551,39 @@ def build(cfg, limit=None, out_path=OUT_FILE):
     by_date = {}
     failures = []
     outside = 0        # granules ne recoupant pas le lac
-    for n, path in enumerate(files):
+    workers = acfg.get("workers")
+    if workers is None:
+        workers = max(1, (os.cpu_count() or 2) - 1)
+    workers = max(1, min(int(workers), len(files)))
+
+    def results():
+        """Granules traites, en parallele au-dela d'un worker."""
+        if workers == 1:
+            for path in files:
+                yield _process_one_local(path)
+            return
+        from concurrent.futures import ProcessPoolExecutor
+
+        with ProcessPoolExecutor(
+                max_workers=workers, initializer=_init_worker,
+                initargs=(boundary, acfg, zone, south, want_mask)) as pool:
+            for out in pool.map(_process_one, files, chunksize=4):
+                yield out
+
+    def _process_one_local(path):
+        try:
+            return path, read_granule(path, boundary, acfg, zone, south,
+                                      want_mask), None
+        except Exception as e:
+            return path, None, f"{type(e).__name__}: {e}"[:100]
+
+    print(f"Traitement de {len(files)} granules sur {workers} processus…")
+    for n, (path, res, err) in enumerate(results()):
         when = granule_datetime(path)
         if when is None:
             continue
-        try:
-            res = read_granule(path, boundary, acfg, zone, south, want_mask)
-        except Exception as e:
-            failures.append((os.path.basename(path),
-                             f"{type(e).__name__}: {e}"[:100]))
+        if err:
+            failures.append((os.path.basename(path), err))
             continue
         if res and (res.get("covered_cells") or res["n_cells"]):
             day = when.strftime("%Y-%m-%d")
@@ -551,10 +662,14 @@ def main():
         description="Surface en eau SWOT (méthode Rai et al. 2026)")
     parser.add_argument("--config", default=str(ROOT / "config.yaml"))
     parser.add_argument("--limit", type=int, default=None)
+    parser.add_argument("--workers", type=int, default=None,
+                        help="Processus parallèles (défaut : cœurs - 1)")
     args = parser.parse_args()
 
     with open(args.config, "r", encoding="utf-8") as f:
         cfg = yaml.safe_load(f)
+    if args.workers is not None:
+        cfg.setdefault("area", {})["workers"] = args.workers
     build(cfg, limit=args.limit)
 
 

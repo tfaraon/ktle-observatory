@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-14T01:10:44Z",
+  "generated_at": "2026-08-14T01:40:56Z",
   "method": "Rai et al. (2026) — adapted to the SWOT L2 HR Raster product",
   "citation": "Rai, A.K., Cohen, T.J., Armon, M. & Marx, S.K. (2026). Volumetric analysis of a playa lake using SWOT data: an improved understanding of the inflows to Kati Thanda-Lake Eyre. Journal of Hydrology 676, 135652.",
   "doi": "10.1016/j.jhydrol.2026.135652",
@@ -16,6 +16,16 @@
     "min_coverage": 0.15
   },
   "n_granules": 408,
+  "map_bounds": [
+    [
+      -29.139241138101408,
+      136.76418662128242
+    ],
+    [
+      -27.794167703998507,
+      137.94056499109865
+    ]
+  ],
   "series": [
     {
       "area_km2": 1059.776,
@@ -24,7 +34,8 @@
       "n_cells": 116314,
       "coverage": 12.022,
       "partial": false,
-      "date": "2023-08-05"
+      "date": "2023-08-05",
+      "map": "area_maps/2023-08-05.png"
     },
     {
       "area_km2": 1227.055,
@@ -33,7 +44,8 @@
       "n_cells": 31289,
       "coverage": 3.445,
       "partial": false,
-      "date": "2023-10-05"
+      "date": "2023-10-05",
+      "map": "area_maps/2023-10-05.png"
     },
     {
       "area_km2": 2999.776,
@@ -42,7 +54,8 @@
       "n_cells": 239688,
       "coverage": 21.81,
       "partial": false,
-      "date": "2023-10-07"
+      "date": "2023-10-07",
+      "map": "area_maps/2023-10-07.png"
     },
     {
       "area_km2": 0.0,
@@ -60,7 +73,8 @@
       "n_cells": 124963,
       "coverage": 10.716,
       "partial": false,
-      "date": "2023-10-26"
+      "date": "2023-10-26",
+      "map": "area_maps/2023-10-26.png"
     },
     {
       "area_km2": 0.0,
@@ -78,7 +92,8 @@
       "n_cells": 282,
       "coverage": 0.164,
       "partial": false,
-      "date": "2023-11-06"
+      "date": "2023-11-06",
+      "map": "area_maps/2023-11-06.png"
     },
     {
       "area_km2": 1835.579,
@@ -87,7 +102,8 @@
       "n_cells": 208715,
       "coverage": 19.545,
       "partial": false,
-      "date": "2023-11-16"
+      "date": "2023-11-16",
+      "map": "area_maps/2023-11-16.png"
     },
     {
       "area_km2": 0.0,
@@ -105,7 +121,8 @@
       "n_cells": 3855,
       "coverage": 1.736,
       "partial": false,
-      "date": "2023-11-27"
+      "date": "2023-11-27",
+      "map": "area_maps/2023-11-27.png"
     },
     {
       "area_km2": 3494.182,
@@ -114,7 +131,8 @@
       "n_cells": 418693,
       "coverage": 35.124,
       "partial": false,
-      "date": "2023-12-07"
+      "date": "2023-12-07",
+      "map": "area_maps/2023-12-07.png"
     },
     {
       "area_km2": 3441.141,
@@ -123,7 +141,8 @@
       "n_cells": 408269,
       "coverage": 34.225,
       "partial": false,
-      "date": "2023-12-08"
+      "date": "2023-12-08",
+      "map": "area_maps/2023-12-08.png"
     },
     {
       "area_km2": 12.65,
@@ -132,7 +151,8 @@
       "n_cells": 1258,
       "coverage": 0.963,
       "partial": false,
-      "date": "2023-12-18"
+      "date": "2023-12-18",
+      "map": "area_maps/2023-12-18.png"
     },
     {
       "area_km2": 1495.72,
@@ -141,7 +161,8 @@
       "n_cells": 180757,
       "coverage": 32.154,
       "partial": false,
-      "date": "2023-12-29"
+      "date": "2023-12-29",
+      "map": "area_maps/2023-12-29.png"
     },
     {
       "area_km2": 4.275,
@@ -150,7 +171,8 @@
       "n_cells": 557,
       "coverage": 0.243,
       "partial": false,
-      "date": "2024-01-08"
+      "date": "2024-01-08",
+      "map": "area_maps/2024-01-08.png"
     },
     {
       "area_km2": 2825.128,
@@ -159,7 +181,8 @@
       "n_cells": 335835,
       "coverage": 33.328,
       "partial": false,
-      "date": "2024-01-18"
+      "date": "2024-01-18",
+      "map": "area_maps/2024-01-18.png"
     },
     {
       "area_km2": 2923.998,
@@ -168,7 +191,8 @@
       "n_cells": 331944,
       "coverage": 34.427,
       "partial": false,
-      "date": "2024-01-19"
+      "date": "2024-01-19",
+      "map": "area_maps/2024-01-19.png"
     },
     {
       "area_km2": 4.704,
@@ -177,7 +201,8 @@
       "n_cells": 547,
       "coverage": 0.288,
       "partial": false,
-      "date": "2024-01-29"
+      "date": "2024-01-29",
+      "map": "area_maps/2024-01-29.png"
     },
     {
       "area_km2": 2005.512,
@@ -186,7 +211,8 @@
       "n_cells": 226608,
       "coverage": 21.091,
       "partial": false,
-      "date": "2024-02-08"
+      "date": "2024-02-08",
+      "map": "area_maps/2024-02-08.png"
     },
     {
       "area_km2": 1965.25,
@@ -195,7 +221,8 @@
       "n_cells": 221079,
       "coverage": 19.841,
       "partial": false,
-      "date": "2024-02-09"
+      "date": "2024-02-09",
+      "map": "area_maps/2024-02-09.png"
     },
     {
       "area_km2": 1.426,
@@ -204,7 +231,8 @@
       "n_cells": 150,
       "coverage": 0.144,
       "partial": true,
-      "date": "2024-02-19"
+      "date": "2024-02-19",
+      "map": "area_maps/2024-02-19.png"
     },
     {
       "area_km2": 1678.776,
@@ -213,7 +241,8 @@
       "n_cells": 205531,
       "coverage": 16.923,
       "partial": false,
-      "date": "2024-02-28"
+      "date": "2024-02-28",
+      "map": "area_maps/2024-02-28.png"
     },
     {
       "area_km2": 1552.565,
@@ -222,7 +251,8 @@
       "n_cells": 189358,
       "coverage": 16.232,
       "partial": false,
-      "date": "2024-03-01"
+      "date": "2024-03-01",
+      "map": "area_maps/2024-03-01.png"
     },
     {
       "area_km2": 1.423,
@@ -231,7 +261,8 @@
       "n_cells": 152,
       "coverage": 0.223,
       "partial": false,
-      "date": "2024-03-10"
+      "date": "2024-03-10",
+      "map": "area_maps/2024-03-10.png"
     },
     {
       "area_km2": 1513.357,
@@ -240,7 +271,8 @@
       "n_cells": 183008,
       "coverage": 15.738,
       "partial": false,
-      "date": "2024-03-22"
+      "date": "2024-03-22",
+      "map": "area_maps/2024-03-22.png"
     },
     {
       "area_km2": 7.143,
@@ -249,7 +281,8 @@
       "n_cells": 948,
       "coverage": 0.286,
       "partial": false,
-      "date": "2024-03-31"
+      "date": "2024-03-31",
+      "map": "area_maps/2024-03-31.png"
     },
     {
       "area_km2": 1868.15,
@@ -258,7 +291,8 @@
       "n_cells": 215558,
       "coverage": 19.87,
       "partial": false,
-      "date": "2024-04-10"
+      "date": "2024-04-10",
+      "map": "area_maps/2024-04-10.png"
     },
     {
       "area_km2": 2017.694,
@@ -267,7 +301,8 @@
       "n_cells": 230185,
       "coverage": 19.201,
       "partial": false,
-      "date": "2024-04-12"
+      "date": "2024-04-12",
+      "map": "area_maps/2024-04-12.png"
     },
     {
       "area_km2": 1803.586,
@@ -276,7 +311,8 @@
       "n_cells": 218938,
       "coverage": 18.06,
       "partial": false,
-      "date": "2024-05-01"
+      "date": "2024-05-01",
+      "map": "area_maps/2024-05-01.png"
     },
     {
       "area_km2": 1757.267,
@@ -285,7 +321,8 @@
       "n_cells": 206681,
       "coverage": 18.07,
       "partial": false,
-      "date": "2024-05-02"
+      "date": "2024-05-02",
+      "map": "area_maps/2024-05-02.png"
     },
     {
       "area_km2": 7.762,
@@ -294,7 +331,8 @@
       "n_cells": 1059,
       "coverage": 0.244,
       "partial": false,
-      "date": "2024-06-02"
+      "date": "2024-06-02",
+      "map": "area_maps/2024-06-02.png"
     },
     {
       "area_km2": 2179.609,
@@ -303,7 +341,8 @@
       "n_cells": 247694,
       "coverage": 22.63,
       "partial": false,
-      "date": "2024-06-12"
+      "date": "2024-06-12",
+      "map": "area_maps/2024-06-12.png"
     },
     {
       "area_km2": 2187.516,
@@ -312,7 +351,8 @@
       "n_cells": 243337,
       "coverage": 21.348,
       "partial": false,
-      "date": "2024-06-13"
+      "date": "2024-06-13",
+      "map": "area_maps/2024-06-13.png"
     },
     {
       "area_km2": 5.098,
@@ -321,7 +361,8 @@
       "n_cells": 746,
       "coverage": 0.248,
       "partial": false,
-      "date": "2024-06-23"
+      "date": "2024-06-23",
+      "map": "area_maps/2024-06-23.png"
     },
     {
       "area_km2": 2151.335,
@@ -330,7 +371,8 @@
       "n_cells": 243704,
       "coverage": 22.492,
       "partial": false,
-      "date": "2024-07-03"
+      "date": "2024-07-03",
+      "map": "area_maps/2024-07-03.png"
     },
     {
       "area_km2": 2230.844,
@@ -339,7 +381,8 @@
       "n_cells": 249283,
       "coverage": 21.544,
       "partial": false,
-      "date": "2024-07-04"
+      "date": "2024-07-04",
+      "map": "area_maps/2024-07-04.png"
     },
     {
       "area_km2": 19.875,
@@ -348,7 +391,8 @@
       "n_cells": 3125,
       "coverage": 0.406,
       "partial": false,
-      "date": "2024-07-14"
+      "date": "2024-07-14",
+      "map": "area_maps/2024-07-14.png"
     },
     {
       "area_km2": 2146.923,
@@ -357,7 +401,8 @@
       "n_cells": 253006,
       "coverage": 22.683,
       "partial": false,
-      "date": "2024-07-23"
+      "date": "2024-07-23",
+      "map": "area_maps/2024-07-23.png"
     },
     {
       "area_km2": 2155.311,
@@ -366,7 +411,8 @@
       "n_cells": 249462,
       "coverage": 20.898,
       "partial": false,
-      "date": "2024-07-25"
+      "date": "2024-07-25",
+      "map": "area_maps/2024-07-25.png"
     },
     {
       "area_km2": 0.0,
@@ -384,7 +430,8 @@
       "n_cells": 231665,
       "coverage": 21.585,
       "partial": false,
-      "date": "2024-08-13"
+      "date": "2024-08-13",
+      "map": "area_maps/2024-08-13.png"
     },
     {
       "area_km2": 2896.517,
@@ -393,7 +440,8 @@
       "n_cells": 259384,
       "coverage": 23.057,
       "partial": false,
-      "date": "2024-08-15"
+      "date": "2024-08-15",
+      "map": "area_maps/2024-08-15.png"
     },
     {
       "area_km2": 2118.235,
@@ -402,7 +450,8 @@
       "n_cells": 241567,
       "coverage": 19.979,
       "partial": false,
-      "date": "2024-09-05"
+      "date": "2024-09-05",
+      "map": "area_maps/2024-09-05.png"
     },
     {
       "area_km2": 0.0,
@@ -420,7 +469,8 @@
       "n_cells": 234216,
       "coverage": 20.705,
       "partial": false,
-      "date": "2024-09-24"
+      "date": "2024-09-24",
+      "map": "area_maps/2024-09-24.png"
     },
     {
       "area_km2": 3280.014,
@@ -429,7 +479,8 @@
       "n_cells": 251202,
       "coverage": 23.083,
       "partial": false,
-      "date": "2024-09-26"
+      "date": "2024-09-26",
+      "map": "area_maps/2024-09-26.png"
     },
     {
       "area_km2": 0.0,
@@ -447,7 +498,8 @@
       "n_cells": 229978,
       "coverage": 18.669,
       "partial": false,
-      "date": "2024-10-16"
+      "date": "2024-10-16",
+      "map": "area_maps/2024-10-16.png"
     },
     {
       "area_km2": 10.366,
@@ -456,7 +508,8 @@
       "n_cells": 1092,
       "coverage": 0.367,
       "partial": false,
-      "date": "2024-10-26"
+      "date": "2024-10-26",
+      "map": "area_maps/2024-10-26.png"
     },
     {
       "area_km2": 1013.83,
@@ -465,7 +518,8 @@
       "n_cells": 121546,
       "coverage": 10.387,
       "partial": false,
-      "date": "2024-11-05"
+      "date": "2024-11-05",
+      "map": "area_maps/2024-11-05.png"
     },
     {
       "area_km2": 1731.907,
@@ -474,7 +528,8 @@
       "n_cells": 205108,
       "coverage": 18.526,
       "partial": false,
-      "date": "2025-05-12"
+      "date": "2025-05-12",
+      "map": "area_maps/2025-05-12.png"
     },
     {
       "area_km2": 1762.825,
@@ -483,7 +538,8 @@
       "n_cells": 205257,
       "coverage": 16.27,
       "partial": false,
-      "date": "2025-05-13"
+      "date": "2025-05-13",
+      "map": "area_maps/2025-05-13.png"
     },
     {
       "area_km2": 1385.266,
@@ -492,7 +548,8 @@
       "n_cells": 187633,
       "coverage": 14.672,
       "partial": false,
-      "date": "2025-06-01"
+      "date": "2025-06-01",
+      "map": "area_maps/2025-06-01.png"
     },
     {
       "area_km2": 3812.093,
@@ -501,7 +558,8 @@
       "n_cells": 277273,
       "coverage": 18.893,
       "partial": false,
-      "date": "2025-06-03"
+      "date": "2025-06-03",
+      "map": "area_maps/2025-06-03.png"
     },
     {
       "area_km2": 1880.373,
@@ -510,7 +568,8 @@
       "n_cells": 226804,
       "coverage": 18.811,
       "partial": false,
-      "date": "2025-06-22"
+      "date": "2025-06-22",
+      "map": "area_maps/2025-06-22.png"
     },
     {
       "area_km2": 2121.631,
@@ -519,7 +578,8 @@
       "n_cells": 238858,
       "coverage": 21.747,
       "partial": false,
-      "date": "2025-06-24"
+      "date": "2025-06-24",
+      "map": "area_maps/2025-06-24.png"
     },
     {
       "area_km2": 1804.161,
@@ -528,7 +588,8 @@
       "n_cells": 220361,
       "coverage": 19.975,
       "partial": false,
-      "date": "2025-07-13"
+      "date": "2025-07-13",
+      "map": "area_maps/2025-07-13.png"
     },
     {
       "area_km2": 2243.7,
@@ -537,7 +598,8 @@
       "n_cells": 249503,
       "coverage": 22.376,
       "partial": false,
-      "date": "2025-07-15"
+      "date": "2025-07-15",
+      "map": "area_maps/2025-07-15.png"
     },
     {
       "area_km2": 2190.959,
@@ -546,7 +608,8 @@
       "n_cells": 245801,
       "coverage": 20.555,
       "partial": false,
-      "date": "2025-08-05"
+      "date": "2025-08-05",
+      "map": "area_maps/2025-08-05.png"
     },
     {
       "area_km2": 3001.809,
@@ -555,7 +618,8 @@
       "n_cells": 232277,
       "coverage": 23.207,
       "partial": false,
-      "date": "2025-08-24"
+      "date": "2025-08-24",
+      "map": "area_maps/2025-08-24.png"
     },
     {
       "area_km2": 2194.038,
@@ -564,7 +628,8 @@
       "n_cells": 245527,
       "coverage": 21.46,
       "partial": false,
-      "date": "2025-08-25"
+      "date": "2025-08-25",
+      "map": "area_maps/2025-08-25.png"
     },
     {
       "area_km2": 3791.914,
@@ -573,7 +638,8 @@
       "n_cells": 436838,
       "coverage": 39.777,
       "partial": false,
-      "date": "2025-09-14"
+      "date": "2025-09-14",
+      "map": "area_maps/2025-09-14.png"
     },
     {
       "area_km2": 2177.92,
@@ -582,7 +648,8 @@
       "n_cells": 248492,
       "coverage": 20.525,
       "partial": false,
-      "date": "2025-09-15"
+      "date": "2025-09-15",
+      "map": "area_maps/2025-09-15.png"
     },
     {
       "area_km2": 6870.96,
@@ -591,7 +658,8 @@
       "n_cells": 532290,
       "coverage": 49.42,
       "partial": false,
-      "date": "2025-10-05"
+      "date": "2025-10-05",
+      "map": "area_maps/2025-10-05.png"
     },
     {
       "area_km2": 3118.058,
@@ -600,7 +668,8 @@
       "n_cells": 256688,
       "coverage": 25.239,
       "partial": false,
-      "date": "2025-10-06"
+      "date": "2025-10-06",
+      "map": "area_maps/2025-10-06.png"
     },
     {
       "area_km2": 3982.542,
@@ -609,7 +678,8 @@
       "n_cells": 456704,
       "coverage": 39.808,
       "partial": false,
-      "date": "2025-10-26"
+      "date": "2025-10-26",
+      "map": "area_maps/2025-10-26.png"
     },
     {
       "area_km2": 1706.035,
@@ -618,7 +688,8 @@
       "n_cells": 195192,
       "coverage": 18.323,
       "partial": false,
-      "date": "2025-10-27"
+      "date": "2025-10-27",
+      "map": "area_maps/2025-10-27.png"
     },
     {
       "area_km2": 2480.447,
@@ -627,7 +698,8 @@
       "n_cells": 229426,
       "coverage": 22.367,
       "partial": false,
-      "date": "2025-11-15"
+      "date": "2025-11-15",
+      "map": "area_maps/2025-11-15.png"
     },
     {
       "area_km2": 987.399,
@@ -636,7 +708,8 @@
       "n_cells": 107687,
       "coverage": 10.409,
       "partial": false,
-      "date": "2025-11-17"
+      "date": "2025-11-17",
+      "map": "area_maps/2025-11-17.png"
     },
     {
       "area_km2": 1947.369,
@@ -645,7 +718,8 @@
       "n_cells": 233042,
       "coverage": 20.951,
       "partial": false,
-      "date": "2025-12-06"
+      "date": "2025-12-06",
+      "map": "area_maps/2025-12-06.png"
     },
     {
       "area_km2": 1881.388,
@@ -654,7 +728,8 @@
       "n_cells": 219056,
       "coverage": 18.611,
       "partial": false,
-      "date": "2025-12-08"
+      "date": "2025-12-08",
+      "map": "area_maps/2025-12-08.png"
     },
     {
       "area_km2": 954.329,
@@ -663,7 +738,8 @@
       "n_cells": 107606,
       "coverage": 9.154,
       "partial": false,
-      "date": "2025-12-29"
+      "date": "2025-12-29",
+      "map": "area_maps/2025-12-29.png"
     },
     {
       "area_km2": 2947.73,
@@ -672,7 +748,8 @@
       "n_cells": 381684,
       "coverage": 33.563,
       "partial": false,
-      "date": "2026-01-17"
+      "date": "2026-01-17",
+      "map": "area_maps/2026-01-17.png"
     },
     {
       "area_km2": 3375.889,
@@ -681,7 +758,8 @@
       "n_cells": 415342,
       "coverage": 34.35,
       "partial": false,
-      "date": "2026-01-18"
+      "date": "2026-01-18",
+      "map": "area_maps/2026-01-18.png"
     },
     {
       "area_km2": 5625.69,
@@ -690,7 +768,8 @@
       "n_cells": 764768,
       "coverage": 47.661,
       "partial": false,
-      "date": "2026-02-07"
+      "date": "2026-02-07",
+      "map": "area_maps/2026-02-07.png"
     },
     {
       "area_km2": 5031.234,
@@ -699,7 +778,8 @@
       "n_cells": 684418,
       "coverage": 42.05,
       "partial": false,
-      "date": "2026-02-08"
+      "date": "2026-02-08",
+      "map": "area_maps/2026-02-08.png"
     },
     {
       "area_km2": 4681.663,
@@ -708,7 +788,8 @@
       "n_cells": 574198,
       "coverage": 50.319,
       "partial": false,
-      "date": "2026-02-28"
+      "date": "2026-02-28",
+      "map": "area_maps/2026-02-28.png"
     },
     {
       "area_km2": 5552.947,
@@ -717,7 +798,8 @@
       "n_cells": 718636,
       "coverage": 50.044,
       "partial": false,
-      "date": "2026-03-01"
+      "date": "2026-03-01",
+      "map": "area_maps/2026-03-01.png"
     },
     {
       "area_km2": 2312.691,
@@ -726,7 +808,8 @@
       "n_cells": 284044,
       "coverage": 25.549,
       "partial": false,
-      "date": "2026-03-21"
+      "date": "2026-03-21",
+      "map": "area_maps/2026-03-21.png"
     },
     {
       "area_km2": 2301.607,
@@ -735,7 +818,8 @@
       "n_cells": 269636,
       "coverage": 24.111,
       "partial": false,
-      "date": "2026-03-22"
+      "date": "2026-03-22",
+      "map": "area_maps/2026-03-22.png"
     },
     {
       "area_km2": 4088.045,
@@ -744,7 +828,8 @@
       "n_cells": 482288,
       "coverage": 47.182,
       "partial": false,
-      "date": "2026-04-10"
+      "date": "2026-04-10",
+      "map": "area_maps/2026-04-10.png"
     },
     {
       "area_km2": 2270.282,
@@ -753,7 +838,8 @@
       "n_cells": 255726,
       "coverage": 23.838,
       "partial": false,
-      "date": "2026-04-12"
+      "date": "2026-04-12",
+      "map": "area_maps/2026-04-12.png"
     },
     {
       "area_km2": 1865.056,
@@ -762,7 +848,8 @@
       "n_cells": 221675,
       "coverage": 22.161,
       "partial": false,
-      "date": "2026-05-01"
+      "date": "2026-05-01",
+      "map": "area_maps/2026-05-01.png"
     },
     {
       "area_km2": 1991.37,
@@ -771,7 +858,8 @@
       "n_cells": 231104,
       "coverage": 21.835,
       "partial": false,
-      "date": "2026-05-03"
+      "date": "2026-05-03",
+      "map": "area_maps/2026-05-03.png"
     },
     {
       "area_km2": 2098.354,
@@ -780,7 +868,8 @@
       "n_cells": 249329,
       "coverage": 21.396,
       "partial": false,
-      "date": "2026-05-22"
+      "date": "2026-05-22",
+      "map": "area_maps/2026-05-22.png"
     },
     {
       "area_km2": 2202.059,
@@ -789,7 +878,8 @@
       "n_cells": 257488,
       "coverage": 21.934,
       "partial": false,
-      "date": "2026-05-24"
+      "date": "2026-05-24",
+      "map": "area_maps/2026-05-24.png"
     },
     {
       "area_km2": 2118.601,
@@ -798,7 +888,8 @@
       "n_cells": 243351,
       "coverage": 22.852,
       "partial": false,
-      "date": "2026-06-12"
+      "date": "2026-06-12",
+      "map": "area_maps/2026-06-12.png"
     },
     {
       "area_km2": 2218.048,
@@ -807,7 +898,8 @@
       "n_cells": 247351,
       "coverage": 23.581,
       "partial": false,
-      "date": "2026-06-13"
+      "date": "2026-06-13",
+      "map": "area_maps/2026-06-13.png"
     },
     {
       "area_km2": 2061.088,
@@ -816,7 +908,8 @@
       "n_cells": 249511,
       "coverage": 22.133,
       "partial": false,
-      "date": "2026-07-03"
+      "date": "2026-07-03",
+      "map": "area_maps/2026-07-03.png"
     },
     {
       "area_km2": 1897.83,
@@ -825,7 +918,8 @@
       "n_cells": 228333,
       "coverage": 22.621,
       "partial": false,
-      "date": "2026-07-04"
+      "date": "2026-07-04",
+      "map": "area_maps/2026-07-04.png"
     },
     {
       "area_km2": 2046.555,
@@ -834,7 +928,8 @@
       "n_cells": 235192,
       "coverage": 23.24,
       "partial": false,
-      "date": "2026-07-24"
+      "date": "2026-07-24",
+      "map": "area_maps/2026-07-24.png"
     },
     {
       "area_km2": 2018.153,
@@ -843,7 +938,8 @@
       "n_cells": 243139,
       "coverage": 21.565,
       "partial": false,
-      "date": "2026-07-25"
+      "date": "2026-07-25",
+      "map": "area_maps/2026-07-25.png"
     }
   ]
 }

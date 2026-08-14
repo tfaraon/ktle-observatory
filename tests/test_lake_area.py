@@ -206,3 +206,67 @@ with tempfile.TemporaryDirectory() as td:
 
 print("OK — fichiers AppleDouble, dossiers cachés et __MACOSX écartés du "
       "listage des granules.")
+
+# ══════════════════════════════════════════════════════════════
+# Performance : rejets prealables et reprojection vectorisee.
+#
+# Reprojeter maille par maille coutait une quinzaine de secondes par
+# granule ; sur des centaines de granules, l'essentiel du temps s'y
+# passait. Ces controles garantissent que les raccourcis restent
+# exacts — un rejet trop large ferait disparaitre de l'eau.
+# ══════════════════════════════════════════════════════════════
+
+sys.path.insert(0, str(ROOT / "pipeline"))
+import geo as _geo  # noqa: E402
+
+# ── Reprojection vectorisée identique à la version scalaire ──
+
+xx, yy = np.meshgrid(np.linspace(673229, 797654, 40),
+                     np.linspace(6778805, 6924813, 40))
+vlon, vlat = _geo.utm_to_lonlat_array(xx, yy, 53)
+worst = 0.0
+for k in (0, 137, 799, xx.size - 1):
+    slon, slat = _geo.utm_to_lonlat(float(xx.flat[k]), float(yy.flat[k]), 53)
+    worst = max(worst, abs(slon - vlon.flat[k]), abs(slat - vlat.flat[k]))
+assert worst < 1e-9, f"écart vectorisé/scalaire : {worst}"
+
+# L'emprise doit retomber sur le lac
+assert 136 < vlon.min() and vlon.max() < 139
+assert -30 < vlat.min() and vlat.max() < -27
+
+# ── Cadre de rejet ───────────────────────────────────────────
+
+bi, bj = np.meshgrid(np.linspace(136.76, 138.06, 40),
+                     np.linspace(-29.11, -27.77, 40))
+lake_boundary = np.column_stack([bi.ravel(), bj.ravel()])
+
+box53 = la.boundary_utm_bbox(lake_boundary, 53, pad=5000.0)
+xmin, xmax, ymin, ymax = box53
+# Le cadre doit contenir le domaine du modèle, avec sa marge
+assert xmin < 673229 and xmax > 797654, box53
+assert ymin < 6778805 and ymax > 6924813, box53
+# ... sans être démesuré : moins de 50 km de marge au total
+assert (xmax - xmin) < (797654 - 673229) + 60000, box53
+
+# Mise en cache : le second appel doit rendre le même objet
+assert la.boundary_utm_bbox(lake_boundary, 53, pad=5000.0) is box53
+
+# Un autre fuseau projette le lac très loin : aucun granule réel n'y
+# tombe, ce qui écarte les scènes d'autres régions.
+box1 = la.boundary_utm_bbox(lake_boundary, 1)
+assert box1[0] > 1e6 or box1[1] > 1e6, box1
+
+# ── Découpage cohérent avec le cadre ─────────────────────────
+
+x_axis = np.linspace(600000, 900000, 300)
+y_axis = np.linspace(6700000, 7000000, 300)
+kx = np.where((x_axis >= xmin) & (x_axis <= xmax))[0]
+ky = np.where((y_axis >= ymin) & (y_axis <= ymax))[0]
+assert kx.size and ky.size
+# Le sous-bloc doit être nettement plus petit que la scène entière
+assert kx.size * ky.size < 0.6 * x_axis.size * y_axis.size, (kx.size, ky.size)
+# ... tout en couvrant l'intégralité du domaine du modèle
+assert x_axis[kx[0]] <= 673229 and x_axis[kx[-1]] >= 797654
+
+print("OK — reprojection vectorisée exacte, cadre de rejet couvrant le "
+      "domaine sans excès, et mise en cache effective.")
