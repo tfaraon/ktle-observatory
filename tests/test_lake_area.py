@@ -322,3 +322,48 @@ assert abs(mixed / solo - 1) < 0.05, (
 
 print("OK — recouvrement entre passes : plus de double comptage, "
       "scènes disjointes toujours additionnées.")
+
+# ══════════════════════════════════════════════════════════════
+# Grille du raster : isotrope, plus grossiere que la source.
+#
+# Une grille carree en NOMBRE de cases sur une emprise rectangulaire
+# donne des mailles allongees. Le rapport entre le pas source (100 m) et
+# le pas cible differe alors selon l'axe et, s'il n'est pas entier,
+# certaines cases recoivent une maille source et d'autres deux : d'ou un
+# moire diagonal sur la carte.
+# ══════════════════════════════════════════════════════════════
+
+BOX = (-29.04, -27.84, 136.93, 137.75)
+ny_, nx_ = la.grid_shape(BOX, 300.0)
+
+mid = math.radians((BOX[0] + BOX[1]) / 2)
+height_m = (BOX[1] - BOX[0]) * 110540.0
+width_m = (BOX[3] - BOX[2]) * 111320.0 * math.cos(mid)
+cell_y = height_m / ny_
+cell_x = width_m / nx_
+
+# Mailles carrées à quelques pour cent près
+assert abs(cell_x / cell_y - 1) < 0.05, (cell_x, cell_y)
+assert 280 < cell_x < 320 and 280 < cell_y < 320, (cell_x, cell_y)
+
+# Plus grossière que la source : chaque case reçoit plusieurs mailles
+assert cell_x / 100.0 >= 2.5 and cell_y / 100.0 >= 2.5
+
+# Une résolution plus fine donne plus de cases, et réciproquement
+finer = la.grid_shape(BOX, 150.0)
+assert finer[0] > ny_ and finer[1] > nx_
+coarse = la.grid_shape(BOX, 600.0)
+assert coarse[0] < ny_ and coarse[1] < nx_
+
+# Plancher : une emprise minuscule ne doit pas donner une grille vide
+tiny = la.grid_shape((-28.5, -28.49, 137.0, 137.01), 300.0)
+assert tiny[0] >= 32 and tiny[1] >= 32
+
+# L'accumulateur accepte une forme rectangulaire
+acc_rect = la.new_accumulator((ny_, nx_))
+assert acc_rect["frac"].shape == (ny_, nx_)
+acc_sq = la.new_accumulator(64)
+assert acc_sq["frac"].shape == (64, 64)
+
+print("OK — grille isotrope, plus grossière que la source, sans rapport "
+      "non entier générateur de moiré.")

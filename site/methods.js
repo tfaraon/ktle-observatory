@@ -39,8 +39,20 @@ const METHODS_HTML = `
     outliers. Groups of fewer than four observations are left
     untouched, since a quartile estimate would be meaningless.</p>
 
-    <p>Elevations are referenced to the <strong>EGM2008
-    geoid</strong>. Two sites are extracted: <strong>Belt Bay</strong>
+    <p class="caveat">Elevations are referenced to the
+    <strong>EGM2008 geoid</strong>, the model SWOT distributes.
+    Australian bathymetries and the contours the hydrodynamic model is
+    built on use the <strong>Australian Height Datum</strong>, reached
+    through AUSGeoid2020 &mdash; the two are not interchangeable, and
+    comparing a SWOT level to a model level without reconciling them
+    introduces a systematic bias. The <code>wlvl_offset</code> setting
+    exists for this; it is currently zero and should be established
+    before any published comparison. Rai and colleagues found their
+    elevations 0.45&ndash;0.55&nbsp;m above field DGPS surveys and
+    applied a uniform 0.5&nbsp;m correction, which gives an order of
+    magnitude rather than a value to adopt.</p>
+
+    <p> Two sites are extracted: <strong>Belt Bay</strong>
     (137.028&nbsp;&deg;E, 28.893&nbsp;&deg;S), which contains the
     lowest point of the lake and serves as the level reference, and
     <strong>Madigan Gulf</strong> (137.560&nbsp;&deg;E), about

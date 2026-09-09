@@ -80,6 +80,15 @@ Paths, weather stations, extraction sites, and model settings are defined in
 - `scenarios.design_csv`: experimental design, when available;
 - `scenarios.wlvl_site`: SWOT site used to match water levels to scenarios.
 
+**Vertical datum.** SWOT distributes heights against the EGM2008 geoid, while
+Australian bathymetries (LC12, WOLP) and the contours behind the hydrodynamic
+model use AHD via AUSGeoid2020. The author's reference implementation applies
+`water_surface_AHD = SWOT_ellipsoidal_height − AUSGeoid_separation`. Comparing a
+SWOT level to a model level without reconciling the two introduces a systematic
+bias; `scenarios.wlvl_offset` is where that belongs, and it is currently zero.
+Rai et al. measured their elevations 0.45–0.55 m above field DGPS and applied a
+uniform 0.5 m correction — an order of magnitude, not a value to adopt blindly.
+
 Two sites are included by default: Belt Bay and Madigan Gulf. A vertical offset
 can be applied to the WSE at each site with `datum_offset`.
 
@@ -165,7 +174,10 @@ Area is computed from a merged lon/lat grid rather than by summing scenes.
 Passes 394 and 435 both image the lake and can fall on the same day; summing
 their scenes counted the same water twice. Each grid cell now takes the mean of
 the scenes that saw it as water, and `scene_area_km2` is kept alongside
-`area_km2` so the two can be compared. Granules that do not intersect the lake — the download directory may hold
+`area_km2` so the two can be compared. The mask raster is sized in **metres**, not in cell counts. A square grid over
+a rectangular extent gives elongated cells, and where the ratio to the 100 m
+source is not an integer some cells receive one source pixel and others two,
+producing a regular diagonal moiré. Granules that do not intersect the lake — the download directory may hold
 scenes from other regions — are counted and reported separately.
 
 The `uncertainty_km2` column is the quadrature sum of the per-cell

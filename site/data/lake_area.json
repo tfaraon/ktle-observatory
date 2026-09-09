@@ -1,9 +1,10 @@
 {
-  "generated_at": "2026-08-14T01:49:36Z",
+  "generated_at": "2026-08-14T06:53:21Z",
   "method": "Rai et al. (2026) — adapted to the SWOT L2 HR Raster product",
   "citation": "Rai, A.K., Cohen, T.J., Armon, M. & Marx, S.K. (2026). Volumetric analysis of a playa lake using SWOT data: an improved understanding of the inflows to Kati Thanda-Lake Eyre. Journal of Hydrology 676, 135652.",
   "doi": "10.1016/j.jhydrol.2026.135652",
   "note": "Spatial constraint from the Delft3D domain replaces the Sentinel-3 optical mask; the area is an upper bound",
+  "datum_note": "SWOT heights are referenced to EGM2008. Australian bathymetries and contours use AHD via AUSGeoid2020; set scenarios.wlvl_offset to reconcile them",
   "uncertainty_note": "uncert_km2 is the quadrature sum of per-cell uncertainties reported by the product. It is a formal precision, not a validated accuracy: the source paper reports ~15 % error against optical water masks, several orders of magnitude larger",
   "parameters": {
     "water_frac_range": [
@@ -26,6 +27,7 @@
       137.94056499109865
     ]
   ],
+  "map_resolution_m": 300.0,
   "series": [
     {
       "area_km2": 1059.776,
@@ -52,7 +54,7 @@
       "map": "area_maps/2023-10-05.png"
     },
     {
-      "area_km2": 2359.516,
+      "area_km2": 2363.317,
       "uncert_km2": 3.186,
       "n_scenes": 4,
       "n_cells": 239688,
@@ -60,7 +62,7 @@
       "partial": false,
       "date": "2023-10-07",
       "scene_area_km2": 2999.776,
-      "overlap_cells": 11532,
+      "overlap_cells": 12262,
       "map": "area_maps/2023-10-07.png"
     },
     {
@@ -110,7 +112,7 @@
       "map": "area_maps/2023-11-06.png"
     },
     {
-      "area_km2": 1835.504,
+      "area_km2": 1835.579,
       "uncert_km2": 0.64,
       "n_scenes": 2,
       "n_cells": 208715,
@@ -118,7 +120,7 @@
       "partial": false,
       "date": "2023-11-16",
       "scene_area_km2": 1835.579,
-      "overlap_cells": 5,
+      "overlap_cells": 0,
       "map": "area_maps/2023-11-16.png"
     },
     {
@@ -141,11 +143,11 @@
       "partial": false,
       "date": "2023-11-27",
       "scene_area_km2": 34.047,
-      "overlap_cells": 223,
+      "overlap_cells": 248,
       "map": "area_maps/2023-11-27.png"
     },
     {
-      "area_km2": 1765.286,
+      "area_km2": 1767.198,
       "uncert_km2": 1.627,
       "n_scenes": 4,
       "n_cells": 418693,
@@ -153,11 +155,11 @@
       "partial": false,
       "date": "2023-12-07",
       "scene_area_km2": 3494.182,
-      "overlap_cells": 35473,
+      "overlap_cells": 37840,
       "map": "area_maps/2023-12-07.png"
     },
     {
-      "area_km2": 1746.613,
+      "area_km2": 1748.38,
       "uncert_km2": 0.961,
       "n_scenes": 4,
       "n_cells": 408269,
@@ -165,11 +167,11 @@
       "partial": false,
       "date": "2023-12-08",
       "scene_area_km2": 3441.141,
-      "overlap_cells": 32750,
+      "overlap_cells": 35070,
       "map": "area_maps/2023-12-08.png"
     },
     {
-      "area_km2": 5.595,
+      "area_km2": 5.589,
       "uncert_km2": 0.174,
       "n_scenes": 6,
       "n_cells": 1258,
@@ -177,11 +179,11 @@
       "partial": false,
       "date": "2023-12-18",
       "scene_area_km2": 12.65,
-      "overlap_cells": 142,
+      "overlap_cells": 149,
       "map": "area_maps/2023-12-18.png"
     },
     {
-      "area_km2": 1495.682,
+      "area_km2": 1495.72,
       "uncert_km2": 0.831,
       "n_scenes": 4,
       "n_cells": 180757,
@@ -189,7 +191,7 @@
       "partial": false,
       "date": "2023-12-29",
       "scene_area_km2": 1495.72,
-      "overlap_cells": 2,
+      "overlap_cells": 0,
       "map": "area_maps/2023-12-29.png"
     },
     {
@@ -205,7 +207,7 @@
       "map": "area_maps/2024-01-08.png"
     },
     {
-      "area_km2": 1757.875,
+      "area_km2": 1767.301,
       "uncert_km2": 0.941,
       "n_scenes": 4,
       "n_cells": 335835,
@@ -213,11 +215,11 @@
       "partial": false,
       "date": "2024-01-18",
       "scene_area_km2": 2825.128,
-      "overlap_cells": 22833,
+      "overlap_cells": 24098,
       "map": "area_maps/2024-01-18.png"
     },
     {
-      "area_km2": 1655.098,
+      "area_km2": 1660.144,
       "uncert_km2": 1.336,
       "n_scenes": 4,
       "n_cells": 331944,
@@ -225,7 +227,7 @@
       "partial": false,
       "date": "2024-01-19",
       "scene_area_km2": 2923.998,
-      "overlap_cells": 23719,
+      "overlap_cells": 25357,
       "map": "area_maps/2024-01-19.png"
     },
     {
@@ -241,7 +243,7 @@
       "map": "area_maps/2024-01-29.png"
     },
     {
-      "area_km2": 2005.452,
+      "area_km2": 2005.498,
       "uncert_km2": 0.586,
       "n_scenes": 2,
       "n_cells": 226608,
@@ -249,11 +251,11 @@
       "partial": false,
       "date": "2024-02-08",
       "scene_area_km2": 2005.512,
-      "overlap_cells": 3,
+      "overlap_cells": 1,
       "map": "area_maps/2024-02-08.png"
     },
     {
-      "area_km2": 1965.007,
+      "area_km2": 1965.198,
       "uncert_km2": 0.971,
       "n_scenes": 2,
       "n_cells": 221079,
@@ -261,7 +263,7 @@
       "partial": false,
       "date": "2024-02-09",
       "scene_area_km2": 1965.25,
-      "overlap_cells": 10,
+      "overlap_cells": 2,
       "map": "area_maps/2024-02-09.png"
     },
     {
@@ -277,7 +279,7 @@
       "map": "area_maps/2024-02-19.png"
     },
     {
-      "area_km2": 1678.756,
+      "area_km2": 1678.776,
       "uncert_km2": 0.852,
       "n_scenes": 2,
       "n_cells": 205531,
@@ -285,11 +287,11 @@
       "partial": false,
       "date": "2024-02-28",
       "scene_area_km2": 1678.776,
-      "overlap_cells": 4,
+      "overlap_cells": 0,
       "map": "area_maps/2024-02-28.png"
     },
     {
-      "area_km2": 1552.434,
+      "area_km2": 1552.533,
       "uncert_km2": 0.756,
       "n_scenes": 2,
       "n_cells": 189358,
@@ -297,7 +299,7 @@
       "partial": false,
       "date": "2024-03-01",
       "scene_area_km2": 1552.565,
-      "overlap_cells": 6,
+      "overlap_cells": 2,
       "map": "area_maps/2024-03-01.png"
     },
     {
@@ -313,7 +315,7 @@
       "map": "area_maps/2024-03-10.png"
     },
     {
-      "area_km2": 1513.24,
+      "area_km2": 1513.31,
       "uncert_km2": 0.661,
       "n_scenes": 2,
       "n_cells": 183008,
@@ -321,7 +323,7 @@
       "partial": false,
       "date": "2024-03-22",
       "scene_area_km2": 1513.357,
-      "overlap_cells": 8,
+      "overlap_cells": 4,
       "map": "area_maps/2024-03-22.png"
     },
     {
@@ -337,7 +339,7 @@
       "map": "area_maps/2024-03-31.png"
     },
     {
-      "area_km2": 1868.127,
+      "area_km2": 1868.15,
       "uncert_km2": 0.874,
       "n_scenes": 2,
       "n_cells": 215558,
@@ -345,11 +347,11 @@
       "partial": false,
       "date": "2024-04-10",
       "scene_area_km2": 1868.15,
-      "overlap_cells": 3,
+      "overlap_cells": 0,
       "map": "area_maps/2024-04-10.png"
     },
     {
-      "area_km2": 2017.594,
+      "area_km2": 2017.649,
       "uncert_km2": 1.029,
       "n_scenes": 2,
       "n_cells": 230185,
@@ -357,11 +359,11 @@
       "partial": false,
       "date": "2024-04-12",
       "scene_area_km2": 2017.694,
-      "overlap_cells": 5,
+      "overlap_cells": 3,
       "map": "area_maps/2024-04-12.png"
     },
     {
-      "area_km2": 1803.559,
+      "area_km2": 1803.573,
       "uncert_km2": 1.152,
       "n_scenes": 2,
       "n_cells": 218938,
@@ -369,11 +371,11 @@
       "partial": false,
       "date": "2024-05-01",
       "scene_area_km2": 1803.586,
-      "overlap_cells": 3,
+      "overlap_cells": 2,
       "map": "area_maps/2024-05-01.png"
     },
     {
-      "area_km2": 1757.156,
+      "area_km2": 1757.25,
       "uncert_km2": 0.676,
       "n_scenes": 2,
       "n_cells": 206681,
@@ -381,7 +383,7 @@
       "partial": false,
       "date": "2024-05-02",
       "scene_area_km2": 1757.267,
-      "overlap_cells": 6,
+      "overlap_cells": 1,
       "map": "area_maps/2024-05-02.png"
     },
     {
@@ -397,7 +399,7 @@
       "map": "area_maps/2024-06-02.png"
     },
     {
-      "area_km2": 2179.488,
+      "area_km2": 2179.576,
       "uncert_km2": 0.562,
       "n_scenes": 2,
       "n_cells": 247694,
@@ -405,11 +407,11 @@
       "partial": false,
       "date": "2024-06-12",
       "scene_area_km2": 2179.609,
-      "overlap_cells": 8,
+      "overlap_cells": 3,
       "map": "area_maps/2024-06-12.png"
     },
     {
-      "area_km2": 2187.424,
+      "area_km2": 2187.474,
       "uncert_km2": 0.734,
       "n_scenes": 2,
       "n_cells": 243337,
@@ -417,7 +419,7 @@
       "partial": false,
       "date": "2024-06-13",
       "scene_area_km2": 2187.516,
-      "overlap_cells": 5,
+      "overlap_cells": 3,
       "map": "area_maps/2024-06-13.png"
     },
     {
@@ -433,7 +435,7 @@
       "map": "area_maps/2024-06-23.png"
     },
     {
-      "area_km2": 2151.29,
+      "area_km2": 2151.335,
       "uncert_km2": 0.85,
       "n_scenes": 2,
       "n_cells": 243704,
@@ -441,11 +443,11 @@
       "partial": false,
       "date": "2024-07-03",
       "scene_area_km2": 2151.335,
-      "overlap_cells": 2,
+      "overlap_cells": 0,
       "map": "area_maps/2024-07-03.png"
     },
     {
-      "area_km2": 2230.803,
+      "area_km2": 2230.824,
       "uncert_km2": 0.701,
       "n_scenes": 2,
       "n_cells": 249283,
@@ -453,7 +455,7 @@
       "partial": false,
       "date": "2024-07-04",
       "scene_area_km2": 2230.844,
-      "overlap_cells": 4,
+      "overlap_cells": 1,
       "map": "area_maps/2024-07-04.png"
     },
     {
@@ -469,7 +471,7 @@
       "map": "area_maps/2024-07-14.png"
     },
     {
-      "area_km2": 2146.874,
+      "area_km2": 2146.917,
       "uncert_km2": 0.613,
       "n_scenes": 2,
       "n_cells": 253006,
@@ -477,11 +479,11 @@
       "partial": false,
       "date": "2024-07-23",
       "scene_area_km2": 2146.923,
-      "overlap_cells": 4,
+      "overlap_cells": 1,
       "map": "area_maps/2024-07-23.png"
     },
     {
-      "area_km2": 2155.193,
+      "area_km2": 2155.254,
       "uncert_km2": 0.837,
       "n_scenes": 2,
       "n_cells": 249462,
@@ -489,7 +491,7 @@
       "partial": false,
       "date": "2024-07-25",
       "scene_area_km2": 2155.311,
-      "overlap_cells": 5,
+      "overlap_cells": 3,
       "map": "area_maps/2024-07-25.png"
     },
     {
@@ -504,7 +506,7 @@
       "overlap_cells": 0
     },
     {
-      "area_km2": 1990.137,
+      "area_km2": 1990.151,
       "uncert_km2": 0.662,
       "n_scenes": 2,
       "n_cells": 231665,
@@ -512,11 +514,11 @@
       "partial": false,
       "date": "2024-08-13",
       "scene_area_km2": 1990.151,
-      "overlap_cells": 1,
+      "overlap_cells": 0,
       "map": "area_maps/2024-08-13.png"
     },
     {
-      "area_km2": 2491.879,
+      "area_km2": 2495.872,
       "uncert_km2": 1.725,
       "n_scenes": 3,
       "n_cells": 259384,
@@ -524,11 +526,11 @@
       "partial": false,
       "date": "2024-08-15",
       "scene_area_km2": 2896.517,
-      "overlap_cells": 6983,
+      "overlap_cells": 7426,
       "map": "area_maps/2024-08-15.png"
     },
     {
-      "area_km2": 2118.094,
+      "area_km2": 2118.193,
       "uncert_km2": 0.685,
       "n_scenes": 2,
       "n_cells": 241567,
@@ -536,7 +538,7 @@
       "partial": false,
       "date": "2024-09-05",
       "scene_area_km2": 2118.235,
-      "overlap_cells": 4,
+      "overlap_cells": 2,
       "map": "area_maps/2024-09-05.png"
     },
     {
@@ -551,7 +553,7 @@
       "overlap_cells": 0
     },
     {
-      "area_km2": 1989.127,
+      "area_km2": 1989.13,
       "uncert_km2": 0.671,
       "n_scenes": 2,
       "n_cells": 234216,
@@ -559,11 +561,11 @@
       "partial": false,
       "date": "2024-09-24",
       "scene_area_km2": 1989.161,
-      "overlap_cells": 4,
+      "overlap_cells": 2,
       "map": "area_maps/2024-09-24.png"
     },
     {
-      "area_km2": 2540.275,
+      "area_km2": 2552.635,
       "uncert_km2": 3.465,
       "n_scenes": 4,
       "n_cells": 251202,
@@ -571,7 +573,7 @@
       "partial": false,
       "date": "2024-09-26",
       "scene_area_km2": 3280.014,
-      "overlap_cells": 12513,
+      "overlap_cells": 13210,
       "map": "area_maps/2024-09-26.png"
     },
     {
@@ -586,7 +588,7 @@
       "overlap_cells": 0
     },
     {
-      "area_km2": 1935.521,
+      "area_km2": 1935.554,
       "uncert_km2": 0.643,
       "n_scenes": 2,
       "n_cells": 229978,
@@ -594,7 +596,7 @@
       "partial": false,
       "date": "2024-10-16",
       "scene_area_km2": 1935.583,
-      "overlap_cells": 3,
+      "overlap_cells": 2,
       "map": "area_maps/2024-10-16.png"
     },
     {
@@ -622,7 +624,7 @@
       "map": "area_maps/2024-11-05.png"
     },
     {
-      "area_km2": 1731.839,
+      "area_km2": 1731.89,
       "uncert_km2": 0.776,
       "n_scenes": 2,
       "n_cells": 205108,
@@ -630,11 +632,11 @@
       "partial": false,
       "date": "2025-05-12",
       "scene_area_km2": 1731.907,
-      "overlap_cells": 4,
+      "overlap_cells": 1,
       "map": "area_maps/2025-05-12.png"
     },
     {
-      "area_km2": 1762.732,
+      "area_km2": 1762.811,
       "uncert_km2": 1.66,
       "n_scenes": 2,
       "n_cells": 205257,
@@ -642,11 +644,11 @@
       "partial": false,
       "date": "2025-05-13",
       "scene_area_km2": 1762.825,
-      "overlap_cells": 4,
+      "overlap_cells": 1,
       "map": "area_maps/2025-05-13.png"
     },
     {
-      "area_km2": 1385.158,
+      "area_km2": 1385.145,
       "uncert_km2": 0.648,
       "n_scenes": 2,
       "n_cells": 187633,
@@ -654,11 +656,11 @@
       "partial": false,
       "date": "2025-06-01",
       "scene_area_km2": 1385.266,
-      "overlap_cells": 7,
+      "overlap_cells": 6,
       "map": "area_maps/2025-06-01.png"
     },
     {
-      "area_km2": 2349.799,
+      "area_km2": 2344.996,
       "uncert_km2": 4.147,
       "n_scenes": 4,
       "n_cells": 277273,
@@ -666,11 +668,11 @@
       "partial": false,
       "date": "2025-06-03",
       "scene_area_km2": 3812.093,
-      "overlap_cells": 22567,
+      "overlap_cells": 24347,
       "map": "area_maps/2025-06-03.png"
     },
     {
-      "area_km2": 1880.008,
+      "area_km2": 1880.211,
       "uncert_km2": 0.755,
       "n_scenes": 2,
       "n_cells": 226804,
@@ -678,11 +680,11 @@
       "partial": false,
       "date": "2025-06-22",
       "scene_area_km2": 1880.373,
-      "overlap_cells": 19,
+      "overlap_cells": 11,
       "map": "area_maps/2025-06-22.png"
     },
     {
-      "area_km2": 2121.546,
+      "area_km2": 2121.539,
       "uncert_km2": 0.769,
       "n_scenes": 2,
       "n_cells": 238858,
@@ -694,7 +696,7 @@
       "map": "area_maps/2025-06-24.png"
     },
     {
-      "area_km2": 1804.116,
+      "area_km2": 1804.161,
       "uncert_km2": 0.705,
       "n_scenes": 2,
       "n_cells": 220361,
@@ -702,11 +704,11 @@
       "partial": false,
       "date": "2025-07-13",
       "scene_area_km2": 1804.161,
-      "overlap_cells": 3,
+      "overlap_cells": 0,
       "map": "area_maps/2025-07-13.png"
     },
     {
-      "area_km2": 2243.53,
+      "area_km2": 2243.636,
       "uncert_km2": 0.538,
       "n_scenes": 2,
       "n_cells": 249503,
@@ -714,11 +716,11 @@
       "partial": false,
       "date": "2025-07-15",
       "scene_area_km2": 2243.7,
-      "overlap_cells": 5,
+      "overlap_cells": 3,
       "map": "area_maps/2025-07-15.png"
     },
     {
-      "area_km2": 2190.799,
+      "area_km2": 2190.862,
       "uncert_km2": 0.79,
       "n_scenes": 2,
       "n_cells": 245801,
@@ -730,7 +732,7 @@
       "map": "area_maps/2025-08-05.png"
     },
     {
-      "area_km2": 2144.857,
+      "area_km2": 2155.407,
       "uncert_km2": 3.433,
       "n_scenes": 4,
       "n_cells": 232277,
@@ -738,11 +740,11 @@
       "partial": false,
       "date": "2025-08-24",
       "scene_area_km2": 3001.809,
-      "overlap_cells": 14585,
+      "overlap_cells": 15378,
       "map": "area_maps/2025-08-24.png"
     },
     {
-      "area_km2": 2193.845,
+      "area_km2": 2193.927,
       "uncert_km2": 0.881,
       "n_scenes": 2,
       "n_cells": 245527,
@@ -750,11 +752,11 @@
       "partial": false,
       "date": "2025-08-25",
       "scene_area_km2": 2194.038,
-      "overlap_cells": 10,
+      "overlap_cells": 6,
       "map": "area_maps/2025-08-25.png"
     },
     {
-      "area_km2": 1895.635,
+      "area_km2": 1895.837,
       "uncert_km2": 1.494,
       "n_scenes": 4,
       "n_cells": 436838,
@@ -762,11 +764,11 @@
       "partial": false,
       "date": "2025-09-14",
       "scene_area_km2": 3791.914,
-      "overlap_cells": 37951,
+      "overlap_cells": 40626,
       "map": "area_maps/2025-09-14.png"
     },
     {
-      "area_km2": 2177.681,
+      "area_km2": 2177.849,
       "uncert_km2": 0.595,
       "n_scenes": 2,
       "n_cells": 248492,
@@ -774,11 +776,11 @@
       "partial": false,
       "date": "2025-09-15",
       "scene_area_km2": 2177.92,
-      "overlap_cells": 14,
+      "overlap_cells": 5,
       "map": "area_maps/2025-09-15.png"
     },
     {
-      "area_km2": 2439.727,
+      "area_km2": 2448.936,
       "uncert_km2": 4.443,
       "n_scenes": 8,
       "n_cells": 532290,
@@ -786,11 +788,11 @@
       "partial": false,
       "date": "2025-10-05",
       "scene_area_km2": 6870.96,
-      "overlap_cells": 44781,
+      "overlap_cells": 47933,
       "map": "area_maps/2025-10-05.png"
     },
     {
-      "area_km2": 2441.664,
+      "area_km2": 2445.57,
       "uncert_km2": 3.237,
       "n_scenes": 4,
       "n_cells": 256688,
@@ -798,11 +800,11 @@
       "partial": false,
       "date": "2025-10-06",
       "scene_area_km2": 3118.058,
-      "overlap_cells": 11924,
+      "overlap_cells": 12701,
       "map": "area_maps/2025-10-06.png"
     },
     {
-      "area_km2": 1991.062,
+      "area_km2": 1991.184,
       "uncert_km2": 1.132,
       "n_scenes": 4,
       "n_cells": 456704,
@@ -810,11 +812,11 @@
       "partial": false,
       "date": "2025-10-26",
       "scene_area_km2": 3982.542,
-      "overlap_cells": 38449,
+      "overlap_cells": 41101,
       "map": "area_maps/2025-10-26.png"
     },
     {
-      "area_km2": 1705.973,
+      "area_km2": 1706.022,
       "uncert_km2": 1.153,
       "n_scenes": 2,
       "n_cells": 195192,
@@ -822,11 +824,11 @@
       "partial": false,
       "date": "2025-10-27",
       "scene_area_km2": 1706.035,
-      "overlap_cells": 2,
+      "overlap_cells": 1,
       "map": "area_maps/2025-10-27.png"
     },
     {
-      "area_km2": 2097.35,
+      "area_km2": 2099.5,
       "uncert_km2": 1.927,
       "n_scenes": 3,
       "n_cells": 229426,
@@ -834,7 +836,7 @@
       "partial": false,
       "date": "2025-11-15",
       "scene_area_km2": 2480.447,
-      "overlap_cells": 5995,
+      "overlap_cells": 6378,
       "map": "area_maps/2025-11-15.png"
     },
     {
@@ -850,7 +852,7 @@
       "map": "area_maps/2025-11-17.png"
     },
     {
-      "area_km2": 1947.272,
+      "area_km2": 1947.322,
       "uncert_km2": 0.661,
       "n_scenes": 2,
       "n_cells": 233042,
@@ -858,11 +860,11 @@
       "partial": false,
       "date": "2025-12-06",
       "scene_area_km2": 1947.369,
-      "overlap_cells": 7,
+      "overlap_cells": 3,
       "map": "area_maps/2025-12-06.png"
     },
     {
-      "area_km2": 1881.208,
+      "area_km2": 1881.278,
       "uncert_km2": 0.533,
       "n_scenes": 2,
       "n_cells": 219056,
@@ -886,7 +888,7 @@
       "map": "area_maps/2025-12-29.png"
     },
     {
-      "area_km2": 1473.81,
+      "area_km2": 1473.814,
       "uncert_km2": 1.195,
       "n_scenes": 4,
       "n_cells": 381684,
@@ -894,11 +896,11 @@
       "partial": false,
       "date": "2026-01-17",
       "scene_area_km2": 2947.73,
-      "overlap_cells": 33169,
+      "overlap_cells": 35583,
       "map": "area_maps/2026-01-17.png"
     },
     {
-      "area_km2": 1687.818,
+      "area_km2": 1687.9,
       "uncert_km2": 1.627,
       "n_scenes": 4,
       "n_cells": 415342,
@@ -906,11 +908,11 @@
       "partial": false,
       "date": "2026-01-18",
       "scene_area_km2": 3375.889,
-      "overlap_cells": 34844,
+      "overlap_cells": 37159,
       "map": "area_maps/2026-01-18.png"
     },
     {
-      "area_km2": 2812.548,
+      "area_km2": 2812.738,
       "uncert_km2": 1.269,
       "n_scenes": 4,
       "n_cells": 764768,
@@ -918,11 +920,11 @@
       "partial": false,
       "date": "2026-02-07",
       "scene_area_km2": 5625.69,
-      "overlap_cells": 59174,
+      "overlap_cells": 63254,
       "map": "area_maps/2026-02-07.png"
     },
     {
-      "area_km2": 2515.436,
+      "area_km2": 2515.418,
       "uncert_km2": 1.029,
       "n_scenes": 4,
       "n_cells": 684418,
@@ -930,11 +932,11 @@
       "partial": false,
       "date": "2026-02-08",
       "scene_area_km2": 5031.234,
-      "overlap_cells": 50998,
+      "overlap_cells": 54649,
       "map": "area_maps/2026-02-08.png"
     },
     {
-      "area_km2": 2340.582,
+      "area_km2": 2340.687,
       "uncert_km2": 1.044,
       "n_scenes": 4,
       "n_cells": 574198,
@@ -942,11 +944,11 @@
       "partial": false,
       "date": "2026-02-28",
       "scene_area_km2": 4681.663,
-      "overlap_cells": 49309,
+      "overlap_cells": 52810,
       "map": "area_maps/2026-02-28.png"
     },
     {
-      "area_km2": 2776.22,
+      "area_km2": 2776.302,
       "uncert_km2": 0.947,
       "n_scenes": 4,
       "n_cells": 718636,
@@ -954,11 +956,11 @@
       "partial": false,
       "date": "2026-03-01",
       "scene_area_km2": 5552.947,
-      "overlap_cells": 54285,
+      "overlap_cells": 58302,
       "map": "area_maps/2026-03-01.png"
     },
     {
-      "area_km2": 2312.656,
+      "area_km2": 2312.676,
       "uncert_km2": 0.558,
       "n_scenes": 2,
       "n_cells": 284044,
@@ -966,11 +968,11 @@
       "partial": false,
       "date": "2026-03-21",
       "scene_area_km2": 2312.691,
-      "overlap_cells": 4,
+      "overlap_cells": 2,
       "map": "area_maps/2026-03-21.png"
     },
     {
-      "area_km2": 2301.423,
+      "area_km2": 2301.571,
       "uncert_km2": 0.751,
       "n_scenes": 2,
       "n_cells": 269636,
@@ -978,11 +980,11 @@
       "partial": false,
       "date": "2026-03-22",
       "scene_area_km2": 2301.607,
-      "overlap_cells": 7,
+      "overlap_cells": 2,
       "map": "area_maps/2026-03-22.png"
     },
     {
-      "area_km2": 2043.99,
+      "area_km2": 2044.014,
       "uncert_km2": 0.955,
       "n_scenes": 4,
       "n_cells": 482288,
@@ -990,7 +992,7 @@
       "partial": false,
       "date": "2026-04-10",
       "scene_area_km2": 4088.045,
-      "overlap_cells": 42751,
+      "overlap_cells": 45855,
       "map": "area_maps/2026-04-10.png"
     },
     {
@@ -1006,7 +1008,7 @@
       "map": "area_maps/2026-04-12.png"
     },
     {
-      "area_km2": 1864.739,
+      "area_km2": 1864.925,
       "uncert_km2": 0.646,
       "n_scenes": 2,
       "n_cells": 221675,
@@ -1014,11 +1016,11 @@
       "partial": false,
       "date": "2026-05-01",
       "scene_area_km2": 1865.056,
-      "overlap_cells": 15,
+      "overlap_cells": 7,
       "map": "area_maps/2026-05-01.png"
     },
     {
-      "area_km2": 1991.2,
+      "area_km2": 1991.282,
       "uncert_km2": 1.755,
       "n_scenes": 2,
       "n_cells": 231104,
@@ -1026,11 +1028,11 @@
       "partial": false,
       "date": "2026-05-03",
       "scene_area_km2": 1991.37,
-      "overlap_cells": 11,
+      "overlap_cells": 6,
       "map": "area_maps/2026-05-03.png"
     },
     {
-      "area_km2": 2098.012,
+      "area_km2": 2098.233,
       "uncert_km2": 0.702,
       "n_scenes": 2,
       "n_cells": 249329,
@@ -1038,11 +1040,11 @@
       "partial": false,
       "date": "2026-05-22",
       "scene_area_km2": 2098.354,
-      "overlap_cells": 17,
+      "overlap_cells": 7,
       "map": "area_maps/2026-05-22.png"
     },
     {
-      "area_km2": 2201.768,
+      "area_km2": 2201.99,
       "uncert_km2": 0.721,
       "n_scenes": 2,
       "n_cells": 257488,
@@ -1050,11 +1052,11 @@
       "partial": false,
       "date": "2026-05-24",
       "scene_area_km2": 2202.059,
-      "overlap_cells": 15,
+      "overlap_cells": 5,
       "map": "area_maps/2026-05-24.png"
     },
     {
-      "area_km2": 2118.345,
+      "area_km2": 2118.491,
       "uncert_km2": 0.623,
       "n_scenes": 2,
       "n_cells": 243351,
@@ -1062,11 +1064,11 @@
       "partial": false,
       "date": "2026-06-12",
       "scene_area_km2": 2118.601,
-      "overlap_cells": 11,
+      "overlap_cells": 6,
       "map": "area_maps/2026-06-12.png"
     },
     {
-      "area_km2": 2217.91,
+      "area_km2": 2218.001,
       "uncert_km2": 0.766,
       "n_scenes": 2,
       "n_cells": 247351,
@@ -1074,11 +1076,11 @@
       "partial": false,
       "date": "2026-06-13",
       "scene_area_km2": 2218.048,
-      "overlap_cells": 6,
+      "overlap_cells": 4,
       "map": "area_maps/2026-06-13.png"
     },
     {
-      "area_km2": 2061.061,
+      "area_km2": 2061.039,
       "uncert_km2": 0.674,
       "n_scenes": 2,
       "n_cells": 249511,
@@ -1086,11 +1088,11 @@
       "partial": false,
       "date": "2026-07-03",
       "scene_area_km2": 2061.088,
-      "overlap_cells": 1,
+      "overlap_cells": 3,
       "map": "area_maps/2026-07-03.png"
     },
     {
-      "area_km2": 1897.647,
+      "area_km2": 1897.79,
       "uncert_km2": 0.844,
       "n_scenes": 2,
       "n_cells": 228333,
@@ -1098,11 +1100,11 @@
       "partial": false,
       "date": "2026-07-04",
       "scene_area_km2": 1897.83,
-      "overlap_cells": 6,
+      "overlap_cells": 2,
       "map": "area_maps/2026-07-04.png"
     },
     {
-      "area_km2": 2046.501,
+      "area_km2": 2046.534,
       "uncert_km2": 0.46,
       "n_scenes": 2,
       "n_cells": 235192,
@@ -1110,11 +1112,11 @@
       "partial": false,
       "date": "2026-07-24",
       "scene_area_km2": 2046.555,
-      "overlap_cells": 3,
+      "overlap_cells": 2,
       "map": "area_maps/2026-07-24.png"
     },
     {
-      "area_km2": 2017.982,
+      "area_km2": 2018.07,
       "uncert_km2": 0.627,
       "n_scenes": 2,
       "n_cells": 243139,
@@ -1122,7 +1124,7 @@
       "partial": false,
       "date": "2026-07-25",
       "scene_area_km2": 2018.153,
-      "overlap_cells": 10,
+      "overlap_cells": 5,
       "map": "area_maps/2026-07-25.png"
     }
   ]

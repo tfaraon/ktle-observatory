@@ -127,13 +127,26 @@ scenarios:
   # ce qui surestime le tirant d'eau et modifie vagues et courants.
   wlvl_rounding: "down"
 
+  # ---- REFERENTIEL VERTICAL ----------------------------------
+  # SWOT diffuse ses hauteurs par rapport au geoide EGM2008. Les
+  # bathymetries australiennes (LC12, WOLP) et les courbes de niveau de
+  # Bye et al. utilisees pour construire le modele sont en AHD, obtenu
+  # via AUSGeoid2020 :
+  #     hauteur_AHD = hauteur_ellipsoidale - AUSGeoid
+  # Comparer une WSE EGM2008 a un wlvl AHD introduit donc un biais
+  # systematique. wlvl_offset est AJOUTE a la WSE SWOT pour obtenir le
+  # niveau du modele : c'est ici qu'il faut porter cet ecart.
+  #
+  # Rai et al. (2026) ont mesure leurs elevations 0,45 a 0,55 m plus
+  # hautes que des releves DGPS de terrain et applique un decalage
+  # uniforme de 0,50 m. Cette valeur concerne leur bathymetrie SDPB, pas
+  # directement EGM2008 -> AHD : elle donne un ORDRE DE GRANDEUR, a
+  # verifier sur vos propres donnees avant publication.
+  wlvl_offset: 0.0
+
   # Site SWOT fournissant le niveau d'eau pour l'appariement.
   # null = premier site de la liste disposant d'une observation.
   wlvl_site: "Belt Bay"
-
-  # Decalage AJOUTE a la WSE SWOT pour obtenir le niveau du modele
-  # (0.0 si les deux sont dans le meme datum).
-  wlvl_offset: 0.0
 
   # Salinite retenue pour l'appariement (non observee en temps reel).
   # null = ignorer ce parametre dans la recherche.
@@ -247,6 +260,10 @@ area:
   resolution: "100"               # granules 100 m
   boundary: "model"               # "model" = domaine Delft3D ; null = tout
   min_coverage: 0.15              # en deca, passage juge partiel
+  # Resolution du raster de masque, en METRES. Une grille dimensionnee
+  # en nombre de cases donnerait des mailles anisotropes, et le rapport
+  # non entier avec le pas source (100 m) produirait un moire.
+  map_resolution_m: 300.0
   workers: null                   # null = coeurs - 1 ; 1 = sequentiel
 
 display:

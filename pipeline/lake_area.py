@@ -400,9 +400,30 @@ def _process_one(path):
 # Masque spatial : un raster lon/lat par date
 # ------------------------------------------------------------------
 
-def new_accumulator(size):
+def grid_shape(bounds, metres=300.0):
+    """Nombre de cases d'une grille ISOTROPE couvrant l'emprise.
+
+    Une grille carree en nombre de cases sur une emprise rectangulaire
+    donne des mailles allongees : le rapport entre pas source (100 m) et
+    pas cible differe alors selon l'axe, et le decoupage produit des
+    bandes regulieres — le moire visible sur les cartes. Dimensionner la
+    grille en METRES, et plus grossierement que la source, supprime
+    l'artefact.
+    """
+    lat0, lat1, lon0, lon1 = bounds
+    mid = math.radians((lat0 + lat1) / 2)
+    height_m = (lat1 - lat0) * 110540.0
+    width_m = (lon1 - lon0) * 111320.0 * math.cos(mid)
+    ny = max(32, int(round(height_m / metres)))
+    nx = max(32, int(round(width_m / metres)))
+    return ny, nx
+
+
+def new_accumulator(shape):
     """Grilles cumulees d'une date."""
-    z = lambda: np.zeros((size, size))          # noqa: E731
+    if isinstance(shape, int):
+        shape = (shape, shape)
+    z = lambda: np.zeros(shape)                 # noqa: E731
     return {"frac": z(), "area": z(), "wet": z(), "scene": z()}
 
 
@@ -576,7 +597,8 @@ def build(cfg, limit=None, out_path=OUT_FILE):
     south = scfg.get("southern_hemisphere", True)
 
     map_bounds = boundary_bounds(boundary)
-    map_size = int(acfg.get("map_size", 420))
+    map_res = float(acfg.get("map_resolution_m", 300.0))
+    map_shape = grid_shape(map_bounds, map_res) if map_bounds else None
     want_mask = map_bounds is not None      # requis aussi pour la surface
     maps = {}          # date -> grilles cumulees
 
@@ -622,7 +644,7 @@ def build(cfg, limit=None, out_path=OUT_FILE):
             by_date.setdefault(day, []).append(res)
             if want_mask and res.get("mask"):
                 if day not in maps:
-                    maps[day] = new_accumulator(map_size)
+                    maps[day] = new_accumulator(map_shape)
                 accumulate_mask(maps[day], *res["mask"], map_bounds)
             res.pop("mask", None)
         elif res:
@@ -666,6 +688,9 @@ def build(cfg, limit=None, out_path=OUT_FILE):
         "doi": "10.1016/j.jhydrol.2026.135652",
         "note": "Spatial constraint from the Delft3D domain replaces the "
                 "Sentinel-3 optical mask; the area is an upper bound",
+        "datum_note": "SWOT heights are referenced to EGM2008. Australian "
+                      "bathymetries and contours use AHD via AUSGeoid2020; "
+                      "set scenarios.wlvl_offset to reconcile them",
         "uncertainty_note": "uncert_km2 is the quadrature sum of per-cell "
                             "uncertainties reported by the product. It is a "
                             "formal precision, not a validated accuracy: the "
@@ -678,6 +703,7 @@ def build(cfg, limit=None, out_path=OUT_FILE):
         "map_bounds": ([[map_bounds[0], map_bounds[2]],
                         [map_bounds[1], map_bounds[3]]]
                        if map_bounds else None),
+        "map_resolution_m": map_res,
         "series": series,
     }
     out_path.parent.mkdir(parents=True, exist_ok=True)
