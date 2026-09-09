@@ -465,10 +465,13 @@ main {
   background: linear-gradient(to right, #30123b, #4145ab, #4675ed,
     #39a2fc, #1bcfd4, #62fc6b, #d2e935, #fe9b2d, #ea4a13, #7a0403);
 }
-#legend-min { grid-area: min; }
-#legend-max { grid-area: min; justify-self: end; }
-.map-legend { grid-template-areas: "title title" "bar bar" "min max";
-              grid-template-columns: 1fr 1fr; }
+#legend-min { grid-area: min; justify-self: start; }
+#legend-max { grid-area: max; justify-self: end; }
+.map-legend {
+  grid-template-areas: "title title" "bar bar" "min max";
+  grid-template-columns: auto auto;
+  justify-content: stretch;
+}
 .legend-bar { width: 100%; }
 
 /* Barre fond de carte / imagerie */

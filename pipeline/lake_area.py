@@ -727,6 +727,77 @@ def build(cfg, limit=None, out_path=OUT_FILE):
     return payload
 
 
+def diagnose(cfg, date, out_dir=None):
+    """Ecrit le masque d'une date SANS aucun re-echantillonnage.
+
+    Chaque granule est rendu dans SA PROPRE grille, telle que le produit
+    la livre. Si le moire apparait aussi ici, il est dans la donnee —
+    le chatoiement de KaRIn sur croute de sel, que les auteurs
+    documentent. S'il n'apparait que sur la carte, il vient du passage
+    a la grille lon/lat.
+    """
+    from PIL import Image
+    from update_swot import list_nc_files, resolve_path
+
+    acfg = dict(DEFAULTS, **(cfg.get("area") or {}))
+    out_dir = Path(out_dir or (ROOT / "data" / "diagnose"))
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    all_files = list_nc_files(str(resolve_path(cfg["paths"]["swot_data"])),
+                              acfg.get("resolution"))
+    files = [f for f in all_files
+             if (granule_datetime(f) or datetime(1900, 1, 1))
+             .strftime("%Y-%m-%d") == date]
+    if not files:
+        raise SystemExit(f"Aucun granule pour {date}")
+
+    print(f"{len(files)} granule(s) le {date}")
+    written = 0
+    for path in files:
+        ds = open_dataset(path)
+        try:
+            frac = _get(ds, "water_frac")
+            qual = _get(ds, "water_area_qual")
+        finally:
+            ds.close()
+        if frac is None:
+            continue
+
+        raw = water_mask(frac, qual,
+                         frac_range=tuple(acfg["water_frac_range"]),
+                         max_qual=acfg["max_qual"], median_size=0)
+        filt = water_mask(frac, qual,
+                          frac_range=tuple(acfg["water_frac_range"]),
+                          max_qual=acfg["max_qual"],
+                          median_size=acfg["median_size"])
+        if not raw.any():
+            continue
+
+        name = os.path.basename(path)[:-3]
+        print(f"  {name[:56]}")
+        print(f"    grille {frac.shape} · {int(raw.sum()):,} mailles avant "
+              f"filtre, {int(filt.sum()):,} après")
+        good = np.isfinite(frac) & (frac > 0)
+        if good.any():
+            print(f"    water_frac : médiane {np.median(frac[good]):.2f} · "
+                  f"écart-type {np.std(frac[good]):.2f}")
+
+        for label, mask in (("brut", raw), ("filtre", filt)):
+            alpha = np.where(mask, np.clip(np.nan_to_num(frac), 0, 1) * 230, 0)
+            rgb = np.zeros(frac.shape + (3,), dtype="uint8")
+            rgb[..., 0], rgb[..., 1], rgb[..., 2] = 30, 95, 107
+            Image.fromarray(np.dstack([rgb, alpha.astype("uint8")]),
+                            "RGBA").save(out_dir / f"{name}_{label}.png",
+                                         "PNG", optimize=True)
+        written += 1
+
+    print(f"\n{written * 2} image(s) écrite(s) dans {out_dir}")
+    print("Elles sont dans la grille native du produit, sans aucun")
+    print("ré-échantillonnage : des rayures visibles ici viennent de la")
+    print("donnée ; absentes ici mais présentes sur la carte, elles viennent")
+    print("du passage en lon/lat.")
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Surface en eau SWOT (méthode Rai et al. 2026)")
@@ -734,10 +805,16 @@ def main():
     parser.add_argument("--limit", type=int, default=None)
     parser.add_argument("--workers", type=int, default=None,
                         help="Processus parallèles (défaut : cœurs - 1)")
+    parser.add_argument("--diagnose", metavar="YYYY-MM-DD", default=None,
+                        help="Écrit les masques d'une date sans "
+                             "ré-échantillonnage, pour situer un artefact")
     args = parser.parse_args()
 
     with open(args.config, "r", encoding="utf-8") as f:
         cfg = yaml.safe_load(f)
+    if args.diagnose:
+        diagnose(cfg, args.diagnose)
+        return
     if args.workers is not None:
         cfg.setdefault("area", {})["workers"] = args.workers
     build(cfg, limit=args.limit)

@@ -187,6 +187,24 @@ about how well SWOT separates shallow water from wet salt. The source paper
 reports around 15 % error against optical water masks, which is the figure to
 quote.
 
+### Cross-checking the area
+
+```bash
+python pipeline/hypsometry.py --level -12.9
+```
+
+The bed is reconstructed from a WAVE output as `scenario level − simulated
+depth`, which yields an area–level curve for the modelled domain. This is an
+independent check on the SWOT areas: the two share nothing, one counting cells
+a radar classified as water, the other integrating a surface below a level. The
+result is written to `data/hypsometry.json`.
+
+A marked disagreement points at one of two things: the vertical datum, since
+the model bathymetry is AHD and SWOT levels are EGM2008, or over-detection of
+saturated salt crust as water — the very problem the Sentinel-3 constraint
+solves in the published method. Both are worth separating before quoting an
+area.
+
 ### BOM observations
 
 ```bash
@@ -389,6 +407,7 @@ python tests/test_compact.py             # compact dataset encoding
 python tests/test_export_static.py       # static export
 python tests/test_startup.py             # first-run sequence
 python tests/test_lake_area.py           # water area from SWOT
+python tests/test_hypsometry.py          # area-level curve from bathymetry
 python tests/test_language.py            # interface strings stay in English
 node tests/test_windrose.js              # solar elevation and wind roses
 node tests/test_download.js              # CSV export
