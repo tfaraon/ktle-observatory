@@ -1,5 +1,5 @@
 {
-  "fetched_at": "2026-09-09T23:48:38Z",
+  "fetched_at": "2026-09-10T00:07:45Z",
   "demo": false,
   "stale": false,
   "history_hours": 168,
@@ -1761,16 +1761,16 @@
       "ok": true,
       "latest": {
         "src": "bom",
-        "utc": "20260909233000",
-        "air_temp": 13.7,
-        "rel_hum": 49.0,
+        "utc": "20260910000000",
+        "air_temp": 13.8,
+        "rel_hum": 48.0,
         "wind_dir": "E",
         "wind_dir_deg": 90,
-        "wind_spd_kmh": 37.0,
-        "gust_kmh": 48.0,
-        "rain_since_9am": 0.8,
-        "press_hpa": 1030.9,
-        "local_time": "20260910090000"
+        "wind_spd_kmh": 35.0,
+        "gust_kmh": 50.0,
+        "rain_since_9am": 0.0,
+        "press_hpa": 1030.8,
+        "local_time": "20260910093000"
       },
       "history": [
         {
@@ -3572,6 +3572,18 @@
           "gust_kmh": 48.0,
           "rain_since_9am": 0.8,
           "press_hpa": 1030.9
+        },
+        {
+          "src": "bom",
+          "utc": "20260910000000",
+          "air_temp": 13.8,
+          "rel_hum": 48.0,
+          "wind_dir": "E",
+          "wind_dir_deg": 90,
+          "wind_spd_kmh": 35.0,
+          "gust_kmh": 50.0,
+          "rain_since_9am": 0.0,
+          "press_hpa": 1030.8
         }
       ]
     },
