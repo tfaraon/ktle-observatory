@@ -151,6 +151,26 @@ def api_config():
 AREA_FILE = ROOT / "data" / "lake_area.json"
 
 
+EXTENT_FILE = ROOT / "data" / "water_extent.json"
+
+
+@app.get("/api/extent")
+def api_extent():
+    """Etendue de la nappe deduite du niveau SWOT."""
+    if not EXTENT_FILE.exists():
+        return jsonify({
+            "error": "no_data",
+            "message": "No extent series yet: run pipeline/water_extent.py",
+        }), 404
+    with open(EXTENT_FILE, "r", encoding="utf-8") as f:
+        return jsonify(json.load(f))
+
+
+@app.get("/data/extent_maps/<path:name>")
+def extent_map_file(name):
+    return send_from_directory(str(ROOT / "data" / "extent_maps"), name)
+
+
 @app.get("/data/area_maps/<path:name>")
 def area_map_file(name):
     """Masques d'eau produits par lake_area.py."""

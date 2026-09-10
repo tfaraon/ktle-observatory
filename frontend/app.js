@@ -29,7 +29,7 @@
     manifest: null, staticIndex: null, paramGrid: null,
     staticArrows: null, staticArrowsKey: null,
     methodsLoaded: false,
-    weather: null, area: null,
+    weather: null, area: null, extent: null,
     rosePeriod: "h24",
     canvasRenderer: null,
     timeline: [],      // BOM timestamps available for time travel
@@ -374,6 +374,19 @@
   }
 
   // ── Lake surface area (Rai et al. 2026) ──────────────────
+
+  async function loadExtent() {
+    const sources = state.staticMode
+      ? ["data/water_extent.json"]
+      : ["/api/extent", "data/water_extent.json"];
+    for (const url of sources) {
+      try {
+        const res = await fetch(url, { cache: "no-store" });
+        if (res.ok) return await res.json();
+      } catch (_) { /* source suivante */ }
+    }
+    return null;
+  }
 
   async function loadArea() {
     const sources = state.staticMode
@@ -1432,8 +1445,8 @@
   // ── SWOT water extent on the map ─────────────────────────
 
   function areaDates() {
-    const a = state.area;
-    return (a && a.series) ? a.series.filter((r) => r.map) : [];
+    const e = state.extent;
+    return (e && e.series) ? e.series.filter((r) => r.map) : [];
   }
 
   function areaBase() {
@@ -1445,10 +1458,10 @@
     clearModelLayer();
     hideMapMessage();
     const dates = areaDates();
-    const a = state.area;
-    if (!dates.length || !a.map_bounds) {
-      showMapMessage("No SWOT water extent available — run "
-        + "pipeline/lake_area.py");
+    const a = state.extent;
+    if (!dates.length || !a || !a.map_bounds) {
+      showMapMessage("No water extent available — run "
+        + "pipeline/water_extent.py");
       return;
     }
     const idx = Math.min(Math.max(0, state.areaIdx), dates.length - 1);
@@ -1459,9 +1472,9 @@
       areaBase() + entry.map, a.map_bounds,
       { opacity: 1, interactive: false }).addTo(state.map);
 
-    $("legend-title").textContent = "SWOT water extent";
-    $("legend-min").textContent = "dry";
-    $("legend-max").textContent = "open water";
+    $("legend-title").textContent = "Water depth (m)";
+    $("legend-min").textContent = "shallow";
+    $("legend-max").textContent = "deep";
     $("map-legend").hidden = false;
     // La palette du modèle n'a pas de sens ici : une seule teinte,
     // dont l'opacité suit la fraction d'eau de la maille.
@@ -1472,9 +1485,13 @@
     }
 
     buildAreaDateControls(dates, idx, entry);
-    setModelNote(`SWOT water extent · ${entry.date} · `
-      + `${entry.area_km2.toLocaleString("en-GB")} km²`
-      + (entry.partial ? " · partial pass" : ""), Boolean(entry.partial));
+    // L'étendue vient du niveau mesuré, pas de la classification du
+    // radar : c'est ce que la note doit dire.
+    setModelNote(`${entry.date} · level ${entry.level_m.toFixed(2)} m · `
+      + `${entry.area_km2.toLocaleString("en-GB")} km² · `
+      + `${entry.volume_km3.toFixed(3)} km³ · derived from the SWOT level`
+      + (a.wlvl_offset ? "" : " · datum offset not yet applied"),
+      !a.wlvl_offset);
   }
 
   function buildAreaDateControls(dates, idx, entry) {
@@ -1499,7 +1516,7 @@
   function buildModelButtons() {
     const seg = $("model-seg");
     const specs = [
-      { id: "water", label: "SWOT water" },
+      { id: "water", label: "Water extent" },
       { id: "currents", label: "Currents" },
       { id: "hsign", label: "Wave height" },
       { id: "wlength", label: "Wavelength" },
@@ -1879,6 +1896,7 @@
     }
 
     state.area = await loadArea();
+    state.extent = await loadExtent();
     refreshDownloadButtons();
     state.imagery = await loadImageryConfig();
     initMap(data.lake, data.sites);

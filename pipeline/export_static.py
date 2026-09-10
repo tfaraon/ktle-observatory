@@ -332,15 +332,17 @@ def build(cfg, out_dir=SITE, colors=64, limit=None, sample=40):
     with open(data_dir / "scenarios.json", "w", encoding="utf-8") as f:
         json.dump(slim, f, separators=(",", ":"))
 
-    for name in ("swot_wse.json", "weather.json", "lake_area.json"):
+    for name in ("swot_wse.json", "weather.json", "lake_area.json",
+                 "water_extent.json"):
         src_file = ROOT / "data" / name
         if src_file.exists():
             shutil.copy(src_file, data_dir / name)
 
     # Masques d'eau : un PNG par date, quelques kilo-octets chacun
-    maps_src = ROOT / "data" / "area_maps"
-    if maps_src.is_dir():
-        shutil.copytree(maps_src, data_dir / "area_maps", dirs_exist_ok=True)
+    for folder in ("area_maps", "extent_maps"):
+        maps_src = ROOT / "data" / folder
+        if maps_src.is_dir():
+            shutil.copytree(maps_src, data_dir / folder, dirs_exist_ok=True)
 
     for name in ("index.html", "style.css", "app.js", "methods.js",
                  "windrose.js", "download.js"):

@@ -254,7 +254,11 @@ scenarios:
 # qui epouse le lac. Contrainte spatiale et non spectrale : la surface
 # obtenue est plutot un majorant.
 area:
-  water_frac_range: [0.1, 0.99]   # fraction d'eau retenue par maille
+  # Fraction d'eau retenue par maille. La borne haute doit rester nulle
+  # sur le produit Raster : l'article applique 0.1-0.99 au nuage PIXC,
+  # mais sur le Raster l'eau libre vaut 1.0 a un bruit pres, et ce seuil
+  # en rejetterait environ 60 % au hasard, produisant un tramage.
+  water_frac_range: [0.1, null]
   max_qual: 1                     # water_area_qual : 0 bon, 1 suspect
   median_size: 5                  # filtre median 5x5 (Eq. 2 de l'article)
   resolution: "100"               # granules 100 m

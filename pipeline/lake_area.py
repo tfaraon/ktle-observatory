@@ -65,7 +65,8 @@ CACHE_FILE = ROOT / "data" / "area_cache.json"
 
 # Valeurs par defaut, reprises de l'article
 DEFAULTS = {
-    "water_frac_range": [0.1, 0.99],   # Fig. 4 : fraction d'eau retenue
+    # Fraction d'eau retenue. Pas de borne haute : voir water_mask().
+    "water_frac_range": [0.1, None],
     "max_qual": 1,                     # 0 = bon, 1 = suspect
     "median_size": 5,                  # filtre median 5x5 (Eq. 2)
     "resolution": "100",               # agregation a 100 m
@@ -104,17 +105,26 @@ def median_filter_mask(mask, size=5):
     return frac > 0.5
 
 
-def water_mask(water_frac, qual=None, frac_range=(0.1, 0.99), max_qual=1,
+def water_mask(water_frac, qual=None, frac_range=(0.1, None), max_qual=1,
                median_size=5):
     """Mailles retenues comme etant en eau.
 
-    La borne basse ecarte les mailles majoritairement seches, la borne
-    haute les mailles saturees a 1.0, souvent issues d'une detection
-    degradee plutot que d'une eau franche.
+    La borne basse ecarte les mailles majoritairement seches.
+
+    La borne haute doit rester ABSENTE (None) sur le produit Raster.
+    L'article applique 0.1-0.99 au nuage de points PIXC ; transposee au
+    Raster, cette borne coupe au beau milieu de la distribution de
+    l'eau libre, dont la fraction vaut 1.0 a un bruit pres. Elle en
+    rejette alors environ 60 %, au hasard du bruit, ce qui produit un
+    tramage caracteristique : une maille sur deux ou trois retenue, en
+    bandes suivant la fauchee. Une borne generreuse (1.3 par exemple)
+    ne sert qu'a ecarter des valeurs aberrantes.
     """
     lo, hi = frac_range
     frac = np.asarray(water_frac, dtype="float64")
-    mask = np.isfinite(frac) & (frac >= lo) & (frac <= hi)
+    mask = np.isfinite(frac) & (frac >= lo)
+    if hi is not None:
+        mask &= frac <= hi
     if qual is not None:
         q = np.asarray(qual)
         mask &= np.isfinite(q) & (q <= max_qual)
@@ -777,10 +787,14 @@ def diagnose(cfg, date, out_dir=None):
         print(f"  {name[:56]}")
         print(f"    grille {frac.shape} · {int(raw.sum()):,} mailles avant "
               f"filtre, {int(filt.sum()):,} après")
-        good = np.isfinite(frac) & (frac > 0)
+        good = np.isfinite(frac) & (frac >= 0.1)
         if good.any():
             print(f"    water_frac : médiane {np.median(frac[good]):.2f} · "
                   f"écart-type {np.std(frac[good]):.2f}")
+            above = int((frac[good] > 0.99).sum())
+            print(f"    dont {above:,} au-dessus de 0,99 "
+                  f"({100 * above / good.sum():.0f} %) — une borne haute à "
+                  "0,99 les rejetterait, d'où le tramage")
 
         for label, mask in (("brut", raw), ("filtre", filt)):
             alpha = np.where(mask, np.clip(np.nan_to_num(frac), 0, 1) * 230, 0)

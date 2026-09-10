@@ -31,11 +31,30 @@ CELL = 100.0 * 100.0          # maille de 100 m -> 10 000 m2
 # ── Bornes de fraction d'eau ─────────────────────────────────
 
 frac = np.array([[0.0, 0.05, 0.5], [0.95, 1.0, np.nan]])
-mask = la.water_mask(frac, frac_range=(0.1, 0.99), median_size=0)
-assert mask.tolist() == [[False, False, True], [True, False, False]], mask
-# 1.0 est ecarte : une maille saturee traduit souvent une detection
-# degradee plutot qu'une eau franche.
-assert not mask[1, 1]
+mask = la.water_mask(frac, frac_range=(0.1, None), median_size=0)
+assert mask.tolist() == [[False, False, True], [True, True, False]], mask
+# Une fraction de 1.0 est de l'eau libre franche : elle DOIT être retenue.
+assert mask[1, 1]
+
+# Sur le produit Raster, une borne haute à 0,99 couperait au milieu de la
+# distribution de l'eau libre et en rejetterait la majeure partie, au
+# hasard du bruit — d'où le tramage observé sur les cartes.
+rng_f = np.random.default_rng(0)
+open_water = np.clip(rng_f.normal(1.0, 0.03, (200, 200)), 0, 1.6)
+kept_bounded = la.water_mask(open_water, frac_range=(0.1, 0.99),
+                             median_size=0).mean()
+kept_free = la.water_mask(open_water, frac_range=(0.1, None),
+                          median_size=0).mean()
+assert kept_bounded < 0.5, kept_bounded
+assert kept_free > 0.99, kept_free
+
+# Une borne haute reste possible pour écarter des valeurs aberrantes
+absurd = np.full((40, 40), 1.8)
+assert not la.water_mask(absurd, frac_range=(0.1, 1.3), median_size=0).any()
+assert la.water_mask(absurd, frac_range=(0.1, None), median_size=0).all()
+
+# Le défaut de configuration ne doit pas réintroduire la borne
+assert la.DEFAULTS["water_frac_range"][1] is None
 
 # Drapeau qualite
 qual = np.array([[0, 3, 0], [1, 0, 0]])

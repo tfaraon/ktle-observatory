@@ -65,6 +65,34 @@ const METHODS_HTML = `
     Note also that a dry lake yields no valid elevation at all &mdash;
     early gaps reflect a dry basin, not a sensor failure.</p>
 
+    <h3>Water extent</h3>
+
+    <p>SWOT measures one quantity reliably: the <strong>elevation</strong>
+    of the water surface. Its pixel-by-pixel water classification is a
+    different matter over a playa, where wet salt crust and very shallow
+    water return almost the same backscatter to KaRIn
+    (roughly 0&ndash;15&nbsp;dB); read directly, it carries speckle,
+    layover and the geometry of the swath.</p>
+
+    <p>The extent shown here is therefore <em>derived</em> from the
+    level rather than read from the radar: the cells of the model
+    bathymetry lying below the observed water surface. The outline is
+    continuous and inherits the resolution of the bathymetry instead of
+    the noise of the instrument, and depth and volume follow from the
+    same intersection.</p>
+
+    <p>Only the pool <strong>hydraulically connected</strong> to the low
+    point is kept. A hollow lying below the same level but cut off by a
+    sill is not flooded, and the lake genuinely fragments into
+    sub-basins as it dries &mdash; a behaviour a simple threshold would
+    miss.</p>
+
+    <p class="caveat">The bathymetry is AHD and SWOT levels are EGM2008,
+    so the intersection is only as good as
+    <code>scenarios.wlvl_offset</code>. Until that offset is
+    established, extents are consistent with one another but their
+    absolute level is not tied down.</p>
+
     <h3>Surface water area</h3>
 
     <p>Water area follows the method of <strong>Rai, Cohen, Armon and
@@ -74,9 +102,17 @@ const METHODS_HTML = `
     <a href="https://doi.org/10.1016/j.jhydrol.2026.135652">doi:10.1016/j.jhydrol.2026.135652</a> &mdash; the same
     lake, and the first study to estimate its storage from SWOT without
     a hypsometric curve. Cells are retained where the water fraction
-    falls between 0.1 and 0.99 and the area quality flag is good or
-    suspect; a 5&nbsp;&times;&nbsp;5 median filter then removes isolated
+    reaches 0.1 and the area quality flag is good or suspect; a 5&nbsp;&times;&nbsp;5 median filter then removes isolated
     detections, and the retained cell areas are summed.</p>
+
+    <p class="caveat">One threshold from the published method does not
+    transfer. Working on the pixel cloud, the authors keep water
+    fractions between 0.1 and 0.99. On the gridded Raster product the
+    same upper bound cuts through the middle of the open-water
+    distribution, whose fraction is 1.0 give or take noise, discarding
+    roughly 60&nbsp;% of it at random and leaving a dither: one cell in
+    two or three retained, in bands following the swath. No upper bound
+    is applied here.</p>
 
     <p>The median filter matters more than it might seem. Over a salt
     crust, speckle scatters false detections across the dry playa; on a

@@ -53,7 +53,7 @@ echo "Frontend : $copied fichier(s) mis à jour"
 # ── Donnees ─────────────────────────────────────────────────
 mkdir -p site/data
 data_copied=0
-for name in swot_wse.json weather.json lake_area.json; do
+for name in swot_wse.json weather.json lake_area.json water_extent.json; do
   if [ -f "data/$name" ]; then
     if ! cmp -s "data/$name" "site/data/$name"; then
       cp "data/$name" "site/data/"
@@ -64,13 +64,14 @@ done
 echo "Données  : $data_copied fichier(s) mis à jour"
 
 # Masques d'eau SWOT : un PNG par date
-if [ -d data/area_maps ]; then
-  mkdir -p site/data/area_maps
-  if ! diff -rq data/area_maps site/data/area_maps >/dev/null 2>&1; then
-    cp data/area_maps/*.png site/data/area_maps/ 2>/dev/null || true
-    echo "Masques : $(ls -1 site/data/area_maps/*.png 2>/dev/null | wc -l | tr -d ' ') date(s)"
+for folder in area_maps extent_maps; do
+  [ -d "data/$folder" ] || continue
+  mkdir -p "site/data/$folder"
+  if ! diff -rq "data/$folder" "site/data/$folder" >/dev/null 2>&1; then
+    cp "data/$folder"/*.png "site/data/$folder/" 2>/dev/null || true
+    echo "Masques $folder : $(ls -1 "site/data/$folder"/*.png 2>/dev/null | wc -l | tr -d ' ') date(s)"
   fi
-fi
+done
 
 # Rappel : les images du modele ne sont regenerees que par l'export.
 if [ ! -d site/img ] || [ -z "$(ls -A site/img 2>/dev/null)" ]; then

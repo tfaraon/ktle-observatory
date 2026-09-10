@@ -147,8 +147,8 @@ Water area is computed from the SWOT granules already on disk, following:
 > Rai, A.K., Cohen, T.J., Armon, M. & Marx, S.K. (2026). Volumetric analysis of
 > a playa lake using SWOT data: an improved understanding of the inflows to
 > Kati Thanda–Lake Eyre. *Journal of Hydrology* **676**, 135652.
-> https://doi.org/10.1016/j.jhydrol.2026.135652 Cells are kept where the water fraction lies between
-0.1 and 0.99 and the quality flag is good or suspect; a 5×5 median filter
+> https://doi.org/10.1016/j.jhydrol.2026.135652 Cells are kept where the water fraction reaches 0.1 and
+the quality flag is good or suspect; a 5×5 median filter
 removes isolated detections; retained cell areas are summed and uncertainties
 combined in quadrature. The series is written to `data/lake_area.json` and
 shown in its own panel and downloadable as CSV with the reference in its
@@ -161,6 +161,13 @@ margins read paler than open water.
 > a playa lake using SWOT data: an improved understanding of the inflows to
 > Kati Thanda–Lake Eyre. *Journal of Hydrology* **676**, 135652.
 > <https://doi.org/10.1016/j.jhydrol.2026.135652> — open access, CC BY.
+
+One threshold does not transfer between products. The paper filters PIXC water
+fractions to 0.1–0.99; applied to the gridded Raster, that upper bound cuts
+through the open-water distribution, whose fraction is 1.0 within noise. It
+discards about 60 % of open water at random, producing a visible dither. No
+upper bound is used here; `area.water_frac_range` accepts one if needed to
+reject absurd values.
 
 Two departures from the published method are worth knowing. The paper works on
 the PIXC point cloud, whereas this uses the Raster product already downloaded.
@@ -186,6 +193,24 @@ validated accuracy**: it will look implausibly small, because it says nothing
 about how well SWOT separates shallow water from wet salt. The source paper
 reports around 15 % error against optical water masks, which is the figure to
 quote.
+
+### Water extent from the level
+
+```bash
+python pipeline/water_extent.py
+python pipeline/water_extent.py --level -12.9    # a single extent
+```
+
+SWOT measures elevation reliably; its per-pixel water classification is not
+robust over a salt playa. The extent is therefore derived from the level — the
+bathymetry cells below the observed water surface — rather than read from the
+radar. The outline is continuous and inherits the bathymetry's resolution
+instead of KaRIn speckle, and depth and volume come from the same intersection.
+
+Only the pool hydraulically connected to the low point is retained, so a hollow
+below the same level but cut off by a sill is not counted; `--all-depressions`
+disables this. Results go to `data/water_extent.json` with one PNG per date in
+`data/extent_maps/`, shown by the **Water extent** layer.
 
 ### Cross-checking the area
 
@@ -373,7 +398,8 @@ The main routes are:
 | `/api/wse` | complete SWOT time series |
 | `/api/wse/latest` | latest observation for each site |
 | `/api/weather` | BOM observations |
-| `/api/area` | water area time series |
+| `/api/area` | water area from SWOT detection |
+| `/api/extent` | water extent derived from the level |
 | `/api/config` | imagery layers used by the frontend |
 | `/api/scenarios` | simulation index |
 | `/api/scenario/match` | closest scenario |
@@ -408,6 +434,7 @@ python tests/test_export_static.py       # static export
 python tests/test_startup.py             # first-run sequence
 python tests/test_lake_area.py           # water area from SWOT
 python tests/test_hypsometry.py          # area-level curve from bathymetry
+python tests/test_water_extent.py        # extent derived from the level
 python tests/test_language.py            # interface strings stay in English
 node tests/test_windrose.js              # solar elevation and wind roses
 node tests/test_download.js              # CSV export
