@@ -89,9 +89,14 @@ const METHODS_HTML = `
 
     <p class="caveat">The bathymetry is AHD and SWOT levels are EGM2008,
     so the intersection is only as good as
-    <code>scenarios.wlvl_offset</code>. Until that offset is
-    established, extents are consistent with one another but their
-    absolute level is not tied down.</p>
+    <code>scenarios.wlvl_offset</code>. That offset is established from
+    the data rather than assumed: Sentinel-2 SWIR imagery gives an
+    optical shoreline, which by definition sits at the true water
+    level, and the level best reproducing it — compared with the SWOT
+    reading for the same date — yields the offset empirically. Where
+    the shore slopes gently, several levels fit equally well and the
+    estimate is correspondingly loose; the calibration reports that
+    plateau instead of hiding it.</p>
 
     <h3>Surface water area</h3>
 

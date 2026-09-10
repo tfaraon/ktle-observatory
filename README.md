@@ -212,6 +212,32 @@ below the same level but cut off by a sill is not counted; `--all-depressions`
 disables this. Results go to `data/water_extent.json` with one PNG per date in
 `data/extent_maps/`, shown by the **Water extent** layer.
 
+### Constraining the extent with SWIR imagery
+
+The companion SWIR toolbox classifies Sentinel-2 scenes into water and non-water
+at 10 m. That optical view is independent of the backscatter ambiguities that
+make KaRIn's own classification unreliable over a salt crust — the role
+Sentinel-3 plays in the published method.
+
+```bash
+python pipeline/swir_extent.py --masks results_spit/masks
+python pipeline/swir_extent.py --masks results_spit/masks --apply
+```
+
+Beyond validation, this settles a question nothing else could: **the vertical
+datum offset**. The observed shoreline sits, by definition, at the true water
+level. Searching for the level that best reproduces it — by Jaccard overlap
+against the bathymetry — and comparing that to the SWOT reading for the same
+date gives an empirical estimate of the offset between AHD and EGM2008, from the
+data alone and without a geoid grid. `--apply` writes the median into
+`config.yaml`.
+
+The report includes a plateau width per date. A wide plateau means several
+levels explain the shoreline equally well, which happens on gently sloping
+shores: the calibration is then weakly constrained and should be read as such
+rather than quoted as a single figure. A large spread between dates points at
+the SWIR threshold, scene quality, or a mismatch between image and pass dates.
+
 ### Cross-checking the area
 
 ```bash
@@ -435,6 +461,7 @@ python tests/test_startup.py             # first-run sequence
 python tests/test_lake_area.py           # water area from SWOT
 python tests/test_hypsometry.py          # area-level curve from bathymetry
 python tests/test_water_extent.py        # extent derived from the level
+python tests/test_swir_extent.py         # SWIR calibration of the datum
 python tests/test_language.py            # interface strings stay in English
 node tests/test_windrose.js              # solar elevation and wind roses
 node tests/test_download.js              # CSV export
