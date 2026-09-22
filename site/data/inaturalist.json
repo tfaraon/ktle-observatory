@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-09-22T13:29:40Z",
+ "fetched_at": "2026-09-22T23:14:34Z",
  "demo": false,
  "stale": false,
  "errors": [],
@@ -15,7 +15,7 @@
  "attribution": "Observations and photos from iNaturalist, each photo under the licence chosen by its observer.",
  "totals": {
   "observations": 2597,
-  "species": 580,
+  "species": 579,
   "observers": 297
  },
  "top_species": 12,
@@ -44,14 +44,14 @@
    "id": 402438496,
    "url": "https://www.inaturalist.org/observations/402438496",
    "observed_on": "2026-09-16",
-   "quality": "needs_id",
+   "quality": "research",
    "taxon": {
-    "name": "Pogona",
-    "common": "Bearded Dragons",
-    "rank": "genus",
+    "name": "Pogona vitticeps",
+    "common": "Central Bearded Dragon",
+    "rank": "species",
     "group": "Reptilia"
    },
-   "guess": "Agames Barbus",
+   "guess": "Agame barbu du centre",
    "observer": "thomas64548",
    "obscured": false,
    "coords": [
@@ -64,14 +64,14 @@
    "id": 402438488,
    "url": "https://www.inaturalist.org/observations/402438488",
    "observed_on": "2026-09-16",
-   "quality": "needs_id",
+   "quality": "research",
    "taxon": {
-    "name": "Pogona",
-    "common": "Bearded Dragons",
-    "rank": "genus",
+    "name": "Pogona vitticeps",
+    "common": "Central Bearded Dragon",
+    "rank": "species",
     "group": "Reptilia"
    },
-   "guess": "Agames Barbus",
+   "guess": "Agame barbu du centre",
    "observer": "thomas64548",
    "obscured": false,
    "coords": [
@@ -84,7 +84,7 @@
    "id": 402438482,
    "url": "https://www.inaturalist.org/observations/402438482",
    "observed_on": "2026-09-16",
-   "quality": "needs_id",
+   "quality": "research",
    "taxon": {
     "name": "Varanus gouldii",
     "common": "Sand Monitor",
@@ -104,14 +104,14 @@
    "id": 402438479,
    "url": "https://www.inaturalist.org/observations/402438479",
    "observed_on": "2026-09-16",
-   "quality": "needs_id",
+   "quality": "research",
    "taxon": {
     "name": "Anarhynchus ruficapillus",
     "common": "Red-capped Plover",
     "rank": "species",
     "group": "Aves"
    },
-   "guess": "Pluvier à Tête Rousse",
+   "guess": "Pluvier à tête rousse",
    "observer": "thomas64548",
    "obscured": false,
    "coords": [
@@ -146,12 +146,12 @@
    "observed_on": "2026-09-16",
    "quality": "needs_id",
    "taxon": {
-    "name": "Himantopus",
-    "common": "Typical Stilts",
-    "rank": "genus",
+    "name": "Himantopus leucocephalus",
+    "common": "Pied Stilt",
+    "rank": "species",
     "group": "Aves"
    },
-   "guess": "Himantopus",
+   "guess": "Échasse d'Australie",
    "observer": "thomas64548",
    "obscured": false,
    "coords": [
@@ -189,7 +189,7 @@
    "id": 402438464,
    "url": "https://www.inaturalist.org/observations/402438464",
    "observed_on": "2026-09-15",
-   "quality": "needs_id",
+   "quality": "research",
    "taxon": {
     "name": "Elanus axillaris",
     "common": "Black-shouldered Kite",
@@ -209,14 +209,14 @@
    "id": 402438461,
    "url": "https://www.inaturalist.org/observations/402438461",
    "observed_on": "2026-09-15",
-   "quality": "needs_id",
+   "quality": "research",
    "taxon": {
     "name": "Pogona vitticeps",
     "common": "Central Bearded Dragon",
     "rank": "species",
     "group": "Reptilia"
    },
-   "guess": "Agame Barbu du Centre",
+   "guess": "Agame barbu du centre",
    "observer": "thomas64548",
    "obscured": false,
    "coords": [
@@ -316,12 +316,12 @@
    "observed_on": "2026-09-14",
    "quality": "needs_id",
    "taxon": {
-    "name": "Botaurus",
-    "common": "Bitterns",
-    "rank": "genus",
+    "name": "Ardeidae",
+    "common": "Herons, Egrets, and Bitterns",
+    "rank": "family",
     "group": "Aves"
    },
-   "guess": "Butors Et Blongios",
+   "guess": "Hérons et Aigrettes",
    "observer": "thomas64548",
    "obscured": false,
    "coords": [
@@ -334,14 +334,14 @@
    "id": 402438530,
    "url": "https://www.inaturalist.org/observations/402438530",
    "observed_on": "2026-09-14",
-   "quality": "needs_id",
+   "quality": "research",
    "taxon": {
     "name": "Melopsittacus undulatus",
     "common": "Budgerigar",
     "rank": "species",
     "group": "Aves"
    },
-   "guess": "Melopsittacus",
+   "guess": "Perruche ondulée",
    "observer": "thomas64548",
    "obscured": false,
    "coords": [
@@ -404,14 +404,14 @@
    "id": 402438524,
    "url": "https://www.inaturalist.org/observations/402438524",
    "observed_on": "2026-09-14",
-   "quality": "needs_id",
+   "quality": "research",
    "taxon": {
     "name": "Pogona vitticeps",
     "common": "Central Bearded Dragon",
     "rank": "species",
     "group": "Reptilia"
    },
-   "guess": "Agame Barbu du Centre",
+   "guess": "Agame barbu du centre",
    "observer": "thomas64548",
    "obscured": false,
    "coords": [
@@ -594,7 +594,7 @@
    "photo": null
   },
   {
-   "count": 30,
+   "count": 32,
    "taxon_id": 31411,
    "url": "https://www.inaturalist.org/taxa/31411",
    "taxon": {
@@ -1192,6 +1192,23 @@
   },
   {
    "count": 11,
+   "taxon_id": 4832,
+   "url": "https://www.inaturalist.org/taxa/4832",
+   "taxon": {
+    "name": "Himantopus leucocephalus",
+    "common": "Pied Stilt",
+    "rank": "species",
+    "group": "Aves"
+   },
+   "photo": {
+    "square": "https://inaturalist-open-data.s3.amazonaws.com/photos/152322352/square.jpg",
+    "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/152322352/medium.jpg",
+    "license": "CC-BY",
+    "attribution": "(c) Andrew Allen, some rights reserved (CC BY), uploaded by Andrew Allen"
+   }
+  },
+  {
+   "count": 11,
    "taxon_id": 4966,
    "url": "https://www.inaturalist.org/taxa/4966",
    "taxon": {
@@ -1307,23 +1324,6 @@
     "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/322953749/medium.png",
     "license": "CC-BY-NC",
     "attribution": "(c) Joel Poyitt, some rights reserved (CC BY-NC), uploaded by Joel Poyitt"
-   }
-  },
-  {
-   "count": 10,
-   "taxon_id": 4832,
-   "url": "https://www.inaturalist.org/taxa/4832",
-   "taxon": {
-    "name": "Himantopus leucocephalus",
-    "common": "Pied Stilt",
-    "rank": "species",
-    "group": "Aves"
-   },
-   "photo": {
-    "square": "https://inaturalist-open-data.s3.amazonaws.com/photos/152322352/square.jpg",
-    "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/152322352/medium.jpg",
-    "license": "CC-BY",
-    "attribution": "(c) Andrew Allen, some rights reserved (CC BY), uploaded by Andrew Allen"
    }
   },
   {
