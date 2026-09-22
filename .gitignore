@@ -47,3 +47,5 @@ data/*.npz
 data/extent_maps/
 data/area_maps/
 data/diagnose/
+deploy/local.env
+logs/

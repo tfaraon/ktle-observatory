@@ -181,6 +181,38 @@ The default collection is `SWOT_L2_HR_Raster_D`. Version C granules may still
 be kept as an archive, but a single processing version should be used for data
 intended for publication.
 
+### One-command update from this machine
+
+```bash
+cp deploy/local.env.example deploy/local.env   # once: eBird key, Python, site address
+./update.sh                                    # refresh everything, publish, check it is live
+./update.sh --quick                            # without SWOT and water area
+```
+
+`update.sh` checks first what would make a long run fail (Python and its
+libraries, the SWOT disk, access to the GitHub repository), asks before
+publishing files modified outside the data, runs `deploy/refresh.sh`, then
+waits until GitHub Pages serves the new version. If the SWOT disk is not
+mounted, it skips SWOT and water area and updates the rest. The full log is
+kept in `logs/`; `deploy/local.env` and `logs/` are never committed.
+
+If the check of the GitHub repository fails, `update.sh` prints Git's own
+message and a hint. A network that blocks SSH on port 22 (common on
+university and public Wi-Fi) is solved by sending SSH through port 443, in
+`~/.ssh/config`:
+
+```
+Host github.com
+  Hostname ssh.github.com
+  Port 443
+  User git
+```
+
+To move to a custom domain later: set it in the repository's Settings, Pages,
+Custom domain (the site is published by a GitHub Actions workflow, so no
+`CNAME` file is needed), add the DNS record (a CNAME to `tfaraon.github.io`
+for a subdomain), then change `SITE_URL` in `deploy/local.env`.
+
 ### Self-hosted server that updates itself
 
 `deploy/SERVEUR.md` installs the site on an always-on Linux machine: Flask
