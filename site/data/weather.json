@@ -1,5 +1,5 @@
 {
-  "fetched_at": "2026-09-22T04:35:43Z",
+  "fetched_at": "2026-09-22T05:39:02Z",
   "demo": false,
   "stale": false,
   "history_hours": 168,
@@ -12,16 +12,16 @@
       "ok": true,
       "latest": {
         "src": "bom",
-        "utc": "20260922043000",
-        "air_temp": 26.9,
-        "rel_hum": 25.0,
-        "wind_dir": "S",
-        "wind_dir_deg": 180,
-        "wind_spd_kmh": 11.0,
+        "utc": "20260922053000",
+        "air_temp": 27.5,
+        "rel_hum": 21.0,
+        "wind_dir": "SSE",
+        "wind_dir_deg": 157.5,
+        "wind_spd_kmh": 13.0,
         "gust_kmh": 20.0,
         "rain_since_9am": 0.0,
-        "press_hpa": 1023.4,
-        "local_time": "20260922140000"
+        "press_hpa": 1022.8,
+        "local_time": "20260922150000"
       },
       "history": [
         {
@@ -1847,6 +1847,30 @@
           "gust_kmh": 20.0,
           "rain_since_9am": 0.0,
           "press_hpa": 1023.4
+        },
+        {
+          "src": "bom",
+          "utc": "20260922050000",
+          "air_temp": 27.9,
+          "rel_hum": 24.0,
+          "wind_dir": "SE",
+          "wind_dir_deg": 135,
+          "wind_spd_kmh": 11.0,
+          "gust_kmh": 19.0,
+          "rain_since_9am": 0.0,
+          "press_hpa": 1023.1
+        },
+        {
+          "src": "bom",
+          "utc": "20260922053000",
+          "air_temp": 27.5,
+          "rel_hum": 21.0,
+          "wind_dir": "SSE",
+          "wind_dir_deg": 157.5,
+          "wind_spd_kmh": 13.0,
+          "gust_kmh": 20.0,
+          "rain_since_9am": 0.0,
+          "press_hpa": 1022.8
         }
       ]
     },
@@ -1857,16 +1881,16 @@
       "ok": true,
       "latest": {
         "src": "bom",
-        "utc": "20260922043000",
-        "air_temp": 28.7,
-        "rel_hum": 29.0,
+        "utc": "20260922053000",
+        "air_temp": 29.7,
+        "rel_hum": 27.0,
         "wind_dir": "ESE",
         "wind_dir_deg": 112.5,
-        "wind_spd_kmh": 15.0,
-        "gust_kmh": 22.0,
+        "wind_spd_kmh": 19.0,
+        "gust_kmh": 30.0,
         "rain_since_9am": 0.0,
-        "press_hpa": 1021.9,
-        "local_time": "20260922140000"
+        "press_hpa": 1021.3,
+        "local_time": "20260922150000"
       },
       "history": [
         {
@@ -3620,6 +3644,30 @@
           "gust_kmh": 22.0,
           "rain_since_9am": 0.0,
           "press_hpa": 1021.9
+        },
+        {
+          "src": "bom",
+          "utc": "20260922050000",
+          "air_temp": 30.0,
+          "rel_hum": 26.0,
+          "wind_dir": "ESE",
+          "wind_dir_deg": 112.5,
+          "wind_spd_kmh": 17.0,
+          "gust_kmh": 26.0,
+          "rain_since_9am": 0.0,
+          "press_hpa": 1021.5
+        },
+        {
+          "src": "bom",
+          "utc": "20260922053000",
+          "air_temp": 29.7,
+          "rel_hum": 27.0,
+          "wind_dir": "ESE",
+          "wind_dir_deg": 112.5,
+          "wind_spd_kmh": 19.0,
+          "gust_kmh": 30.0,
+          "rain_since_9am": 0.0,
+          "press_hpa": 1021.3
         }
       ]
     },
@@ -3630,16 +3678,16 @@
       "ok": true,
       "latest": {
         "src": "bom",
-        "utc": "20260922043000",
-        "air_temp": 28.6,
-        "rel_hum": 27.0,
+        "utc": "20260922053000",
+        "air_temp": 28.9,
+        "rel_hum": 25.0,
         "wind_dir": "SE",
         "wind_dir_deg": 135,
         "wind_spd_kmh": 22.0,
-        "gust_kmh": 32.0,
+        "gust_kmh": 33.0,
         "rain_since_9am": 0.0,
-        "press_hpa": 1021.1,
-        "local_time": "20260922140000"
+        "press_hpa": 1020.6,
+        "local_time": "20260922150000"
       },
       "history": [
         {
@@ -5561,6 +5609,30 @@
           "gust_kmh": 32.0,
           "rain_since_9am": 0.0,
           "press_hpa": 1021.1
+        },
+        {
+          "src": "bom",
+          "utc": "20260922050000",
+          "air_temp": 29.0,
+          "rel_hum": 26.0,
+          "wind_dir": "ESE",
+          "wind_dir_deg": 112.5,
+          "wind_spd_kmh": 24.0,
+          "gust_kmh": 33.0,
+          "rain_since_9am": 0.0,
+          "press_hpa": 1020.8
+        },
+        {
+          "src": "bom",
+          "utc": "20260922053000",
+          "air_temp": 28.9,
+          "rel_hum": 25.0,
+          "wind_dir": "SE",
+          "wind_dir_deg": 135,
+          "wind_spd_kmh": 22.0,
+          "gust_kmh": 33.0,
+          "rain_since_9am": 0.0,
+          "press_hpa": 1020.6
         }
       ]
     }
