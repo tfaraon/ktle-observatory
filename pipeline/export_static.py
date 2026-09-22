@@ -51,6 +51,27 @@ TURBO = [(0.00, (48, 18, 59)), (0.13, (65, 69, 171)), (0.25, (70, 117, 237)),
 ALPHA = 205
 
 
+
+def matching_config(cfg):
+    """Reglages d'appariement embarques dans le manifeste du site.
+
+    Partages entre l'export complet et la synchronisation legere
+    (sync_manifest.py) : une seule definition, pour que publier un
+    nouveau decalage de datum ne produise jamais un manifeste different
+    de celui qu'aurait ecrit l'export.
+    """
+    scfg = cfg.get("scenarios") or {}
+    return {
+        "weights": scfg.get("weights") or {},
+        "normalize": scfg.get("normalize", "range"),
+        "wlvl_rounding": scfg.get("wlvl_rounding", "nearest"),
+        "wind_station": scfg.get("wind_station"),
+        "wind_dir_convention": scfg.get("wind_dir_convention", "from"),
+        "wlvl_offset": scfg.get("wlvl_offset", 0.0),
+        "wlvl_site": scfg.get("wlvl_site"),
+        "salinity": scfg.get("salinity"),
+    }
+
 def turbo_rgb(t):
     """Valeurs normalisees [0,1] -> RGB, comme turboColour() cote client."""
     t = np.clip(np.nan_to_num(t, nan=0.0), 0.0, 1.0)
@@ -302,16 +323,7 @@ def build(cfg, out_dir=SITE, colors=64, limit=None, sample=40):
         "layers": [{"id": k, "label": v["label"], "units": v["units"],
                     "source": v["source"], "mode": v["mode"]}
                    for k, v in sfield.MAP_LAYERS.items()],
-        "matching": {
-            "weights": scfg.get("weights") or {},
-            "normalize": scfg.get("normalize", "range"),
-            "wlvl_rounding": scfg.get("wlvl_rounding", "nearest"),
-            "wind_station": scfg.get("wind_station"),
-            "wind_dir_convention": scfg.get("wind_dir_convention", "from"),
-            "wlvl_offset": scfg.get("wlvl_offset", 0.0),
-            "wlvl_site": scfg.get("wlvl_site"),
-            "salinity": scfg.get("salinity"),
-        },
+        "matching": matching_config(cfg),
         "imagery": cfg.get("imagery") or {},
         "lake": cfg.get("lake") or {},
         "datum_label": (cfg.get("display") or {}).get("datum_label", "WSE (m)"),
@@ -345,7 +357,7 @@ def build(cfg, out_dir=SITE, colors=64, limit=None, sample=40):
             shutil.copytree(maps_src, data_dir / folder, dirs_exist_ok=True)
 
     for name in ("index.html", "style.css", "app.js", "methods.js",
-                 "windrose.js", "download.js"):
+                 "windrose.js", "download.js", "natural_history.js"):
         shutil.copy(ROOT / "frontend" / name, out_dir / name)
     (out_dir / ".nojekyll").write_text("", encoding="utf-8")
 

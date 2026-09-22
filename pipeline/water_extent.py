@@ -165,37 +165,20 @@ def load_levels(cfg):
 
 
 def build(cfg, level=None, connected=True, out_path=OUT_FILE):
-    index_path = ROOT / "data" / "scenarios.json"
-    if not index_path.exists():
-        raise SystemExit("Index absent : lancez pipeline/scenario_index.py")
-    with open(index_path, "r", encoding="utf-8") as f:
-        idx = json.load(f)
-    if idx.get("demo"):
-        raise SystemExit("Index de démonstration : relancez "
-                         "pipeline/scenario_index.py")
-
-    entry = next((s for s in idx["scenarios"]
-                  if (s.get("files") or {}).get("wave")), None)
-    if entry is None:
-        raise SystemExit("Aucune sortie WAVE dans l'index.")
-
     scfg = cfg.get("scenarios") or {}
     centre = (cfg.get("lake") or {}).get("center") or {}
     zone = scfg.get("utm_zone") or geo.infer_zone(centre.get("lon", 137.5))
     south = scfg.get("southern_hemisphere", True)
 
-    print(f"Bathymétrie : {entry['key']}")
-    bed, areas, _ = hyp.bed_from_wave(entry["files"]["wave"],
-                                      entry["params"]["wlvl"])
+    bathy = hyp.load_bathymetry()
+    bed, areas, xv, yv = (bathy["bed"], bathy["areas"], bathy["xv"],
+                          bathy["yv"])
+    entry = {"key": bathy["source"]}
+    print(f"Bathymétrie : {entry['key']}"
+          + (" (cache)" if bathy["cached"] else ""))
     print(f"  fond de {np.nanmin(bed):.2f} à {np.nanmax(bed):.2f} m · "
           f"{int(np.isfinite(bed).sum()):,} mailles")
 
-    ds = sfield.open_dataset(entry["files"]["wave"])
-    try:
-        names = list(ds.variables)
-        _, _, xv, yv, _, _ = sfield.read_coords(ds, names, z_shape=bed.shape)
-    finally:
-        ds.close()
     lon, lat = to_lonlat(xv, yv, zone, south)
 
     pad = 0.03

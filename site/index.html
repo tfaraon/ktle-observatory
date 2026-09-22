@@ -25,7 +25,7 @@
 
   <header class="site-header">
     <div class="header-left">
-      <p class="eyebrow">Hydrodynamic observatory</p>
+      <p class="eyebrow">Natural history and hydrodynamic observatory</p>
       <h1>Kati Thanda – Lake Eyre</h1>
     </div>
     <div class="header-right">
@@ -38,9 +38,16 @@
     </div>
   </header>
 
-  <nav class="tabs" role="tablist" aria-label="Sections">
+  <nav class="sections" aria-label="Site">
+    <button type="button" class="section-btn" data-section="natural-history">
+      <span class="section-kicker">The lake</span>Natural History</button>
+    <button type="button" class="section-btn active" data-section="observatory">
+      <span class="section-kicker">Now</span>Observatory</button>
+  </nav>
+
+  <nav class="tabs" id="observatory-tabs" role="tablist" aria-label="Observatory">
     <button class="tab active" role="tab" data-tab="observatory"
-            aria-selected="true">Observatory</button>
+            aria-selected="true">Dashboard</button>
     <button class="tab" role="tab" data-tab="methods"
             aria-selected="false">Methods</button>
     <button class="tab" role="tab" data-tab="publications"
@@ -219,162 +226,9 @@
 
     </section>
 
-    <section id="dashboard" hidden>
-
-      <!-- Panel 1: current level + map -->
-      
-        <article class="panel level-card">
-          <div class="level-card-head">
-            <p class="eyebrow">Current water level</p>
-            <label class="site-select-wrap">
-              <span class="visually-hidden">Extraction site</span>
-              <select id="site-select" class="site-select"></select>
-            </label>
-          </div>
-
-          <div class="level-reading">
-            <div class="level-value-block">
-              <p class="level-value"><span id="wse-value">—</span><span class="level-unit"> m</span></p>
-              <p id="datum-label" class="level-datum mono">—</p>
-              <dl class="level-meta mono">
-                <div><dt>Observed</dt><dd id="latest-date">—</dd></div>
-                <div><dt>Age</dt><dd id="latest-age">—</dd></div>
-                <div><dt>Coordinates</dt><dd id="site-coords">—</dd></div>
-                <div><dt>Series</dt><dd id="series-span">—</dd></div>
-                <div id="last-granule-row" hidden><dt>Latest granule</dt><dd id="last-granule">—</dd></div>
-              </dl>
-            </div>
-            <figure class="gauge-wrap" aria-label="Staff gauge">
-              <svg id="gauge" viewBox="0 0 120 300" role="img"></svg>
-            </figure>
-          </div>
-        </article>
-
-        <article class="panel map-card">
-          <div class="map-bar">
-            <div class="seg" id="base-seg" role="group" aria-label="Base map">
-              <button type="button" class="seg-btn active" data-base="topo">Map</button>
-            </div>
-            <div class="seg" id="model-seg" role="group" aria-label="Model layer">
-              <button type="button" class="seg-btn active" data-model="none">No model</button>
-            </div>
-            <div id="model-controls" class="imagery-controls mono" hidden>
-              <select id="model-layer-idx" class="site-select" aria-label="Vertical layer"></select>
-              <select id="model-time" class="site-select" aria-label="Time step"></select>
-              <button type="button" id="scale-toggle" class="date-btn active"
-                      title="Auto: scale fitted to this scenario. Fixed: same scale for all scenarios.">Auto scale</button>
-              <label class="arrow-size-wrap">Arrows
-                <input type="range" id="arrow-size" min="6" max="42" step="2"
-                       value="16" aria-label="Arrow size">
-              </label>
-            </div>
-            <div id="imagery-controls" class="imagery-controls mono" hidden>
-              <button type="button" id="imagery-prev" class="date-btn" aria-label="Previous day">◀</button>
-              <input type="date" id="imagery-date" aria-label="Imagery date">
-              <button type="button" id="imagery-next" class="date-btn" aria-label="Next day">▶</button>
-              <button type="button" id="imagery-latest" class="date-btn date-btn-latest active">Latest</button>
-            </div>
-          </div>
-          <div class="map-wrap">
-            <div id="map" aria-label="Map of SWOT extraction sites"></div>
-            <div id="map-message" class="map-message mono" hidden></div>
-            <div id="map-readout" class="map-readout mono" hidden></div>
-            <div id="map-legend" class="map-legend mono" hidden>
-              <span id="legend-title"></span>
-              <span class="legend-bar"><i></i></span>
-              <span id="legend-min"></span><span id="legend-max"></span>
-            </div>
-          </div>
-        </article>
-
-      <!-- Panel 2: BOM weather -->
-      <article class="panel weather-card">
-        <div class="panel-head weather-head">
-          <div>
-            <p class="eyebrow">Conditions around the lake</p>
-            <h2>BOM weather stations</h2>
-          </div>
-          <div class="head-actions">
-            <button type="button" id="dl-weather" class="dl-btn"
-                    title="Full local archive for every station, as CSV">Download CSV</button>
-            <p id="weather-updated" class="weather-updated mono"></p>
-          </div>
-        </div>
-        <div id="weather-strip" class="weather-strip">
-          <p class="weather-empty mono">Loading observations…</p>
-        </div>
-        <div id="weather-history" class="weather-history" hidden></div>
-
-        <div id="rose-block" class="rose-block" hidden>
-          <div class="rose-head">
-            <p class="eyebrow">Wind roses</p>
-            <div class="seg" id="rose-seg" role="group" aria-label="Period"></div>
-          </div>
-          <div id="rose-legend" class="rose-legend"></div>
-          <p id="rose-note" class="rose-note mono"></p>
-          <div id="rose-grid" class="rose-grid"></div>
-        </div>
-      </article>
-
-      <!-- Panel 3: time series -->
-      <article class="panel chart-card">
-        <div class="panel-head head-row">
-          <div>
-            <p class="eyebrow">Time series</p>
-            <h2 id="chart-title">SWOT water surface elevation</h2>
-          </div>
-          <span class="head-actions">
-            <button type="button" id="dl-wse" class="dl-btn"
-                    title="All sites, all observations, as CSV">Water levels</button>
-            <button type="button" id="dl-area" class="dl-btn" hidden
-                    title="Surface water area, method of Rai et al. (2026)">Water area</button>
-          </span>
-        </div>
-        <div id="chart" class="chart"></div>
-        <p class="chart-note">Each point is a SWOT observation (L2 HR Raster) extracted at the selected site — no observation, no point: sampling follows the satellite pass cycle. Water area, where available, follows the method of Rai et al. (2026); open circles mark passes that covered only part of the lake.</p>
-      </article>
-
-      <!-- Panel 3b: surface water area -->
-      <article class="panel chart-card" id="area-card" hidden>
-        <div class="panel-head head-row">
-          <div>
-            <p class="eyebrow">Surface water</p>
-            <h2>Lake water area</h2>
-          </div>
-          <button type="button" id="dl-area2" class="dl-btn">Download CSV</button>
-        </div>
-        <div id="area-chart" class="chart"></div>
-        <p class="chart-note">Derived from SWOT following Rai et&nbsp;al. (2026). Open circles mark passes that covered only part of the lake. The shaded band is the formal precision of the sum, not a validated accuracy — the source paper reports around 15&nbsp;% error against optical water masks.</p>
-      </article>
-
-      <!-- Panel 4: matched Delft3D scenario -->
-      <article class="panel model-card">
-        <div class="panel-head scenario-head">
-          <div>
-            <p class="eyebrow">Modelling</p>
-            <h2>Matching Delft3D scenario</h2>
-          </div>
-          <div class="scenario-actions">
-            <button type="button" id="dl-layer" class="dl-btn" hidden>Download layer</button>
-            <button type="button" id="scenario-reset" class="date-btn" hidden>Observed conditions</button>
-          </div>
-        </div>
-
-        <div class="timeline mono" id="timeline" hidden>
-          <button type="button" id="tl-play" class="date-btn" aria-label="Play through time">▶</button>
-          <input type="range" id="tl-range" min="0" max="0" step="1" value="0"
-                 aria-label="Time of the observed conditions">
-          <span id="tl-label">now</span>
-          <button type="button" id="tl-now" class="date-btn active">Now</button>
-        </div>
-
-        <div id="scenario-body">
-          <p class="scenario-empty mono">Loading scenarios…</p>
-        </div>
-      </article>
-
     </section>
-    </section>
+
+    <section id="tab-natural-history" class="tab-panel prose" role="tabpanel" hidden></section>
 
     <section id="tab-methods" class="tab-panel prose" role="tabpanel" hidden></section>
 
@@ -393,6 +247,7 @@
   </main>
 
   <footer class="site-footer mono">
+    <span>Kati Thanda&ndash;Lake Eyre lies on Arabana country. We acknowledge the Arabana as Traditional Owners and pay our respects to their Elders past and present.</span>
     <span>Data: SWOT L2 HR Raster (NASA / CNES) · Weather © Bureau of Meteorology · Imagery NASA EOSDIS GIBS / Worldview</span>
     <span>Base map: © OpenTopoMap (CC-BY-SA) · © OpenStreetMap</span>
   </footer>
@@ -400,6 +255,7 @@
   <script src="windrose.js"></script>
   <script src="download.js"></script>
   <script src="methods.js"></script>
+  <script src="natural_history.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

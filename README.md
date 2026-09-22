@@ -14,9 +14,26 @@ The data processing is handled in Python. The frontend only reads the files
 generated in `data/`, so observations can be updated without changing the
 interface itself.
 
-The interface is organised in three tabs: **Observatory** for the data views,
-**Methods** for the technical documentation shown on the site, and
-**Publications**.
+The site has two parts. **Natural History** is a continuous, referenced account
+of the lake: its country and people, geology and landscape, deep history, water
+and climate, plants and animals. **Observatory** holds the live **Dashboard**,
+the **Methods** and the **Publications**. Sections of Natural History can be
+linked directly, for example `#nh-geology` or `#ref-kotwicki1986`.
+
+The Natural History text is generated from `tools/build_natural_history.py`,
+where the prose and the reference list live side by side. Each citation is a
+key checked against the list, so a reference that does not exist, or one never
+cited, stops the build:
+
+```bash
+python tools/build_natural_history.py
+python tests/test_natural_history.py
+```
+
+The Country and people section concerns Arabana country and knowledge. It
+draws only on public sources and states that cultural knowledge belongs to the
+Arabana; it should nonetheless be reviewed with the Arabana Aboriginal
+Corporation before wide publicity.
 
 ## Installation
 
@@ -193,6 +210,15 @@ validated accuracy**: it will look implausibly small, because it says nothing
 about how well SWOT separates shallow water from wet salt. The source paper
 reports around 15 % error against optical water masks, which is the figure to
 quote.
+
+### Bathymetry cache
+
+The extent, hypsometry and SWIR calibration scripts all need the model
+bathymetry, reconstructed from a WAVE output on the simulations disk. It never
+changes, so the first run writes it to `data/bathymetry.npz` and later runs no
+longer need the disk mounted — the same reasoning as the compact file. The cache
+is tied to the source scenario and is rebuilt if the index points at a different
+WAVE file.
 
 ### Water extent from the level
 
@@ -471,7 +497,10 @@ python tests/test_hypsometry.py          # area-level curve from bathymetry
 python tests/test_water_extent.py        # extent derived from the level
 python tests/test_swir_extent.py         # SWIR calibration of the datum
 python tests/test_export_levels.py       # level export for the SWIR toolbox
+python tests/test_sync_manifest.py       # matching settings on the static site
+python tests/test_bathymetry_cache.py    # bathymetry cached off the external disk
 python tests/test_language.py            # interface strings stay in English
+python tests/test_natural_history.py     # references, contents and style
 node tests/test_windrose.js              # solar elevation and wind roses
 node tests/test_download.js              # CSV export
 ```

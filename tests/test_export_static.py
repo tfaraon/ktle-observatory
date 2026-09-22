@@ -123,7 +123,8 @@ ex.build(cfg, out_dir=SITE, colors=64)
 
 # ── Structure ────────────────────────────────────────────────
 for name in ("manifest.json", "index.html", "app.js", "style.css",
-             "methods.js", "windrose.js", "download.js", ".nojekyll",
+             "methods.js", "windrose.js", "download.js", "natural_history.js",
+             ".nojekyll",
              "data/scenarios.json"):
     assert (SITE / name).exists(), f"{name} manquant"
 

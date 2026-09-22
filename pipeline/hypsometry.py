@@ -103,6 +103,75 @@ def bed_from_wave(path, wlvl):
     return bed, cell_areas(xv, yv), wet
 
 
+CACHE_FILE = ROOT / "data" / "bathymetry.npz"
+
+
+def _wave_entry(root=None):
+    """Premier scenario de l'index disposant d'une sortie WAVE."""
+    index_path = (root or ROOT) / "data" / "scenarios.json"
+    if not index_path.exists():
+        raise SystemExit("Index absent : lancez pipeline/scenario_index.py")
+    with open(index_path, "r", encoding="utf-8") as f:
+        idx = json.load(f)
+    if idx.get("demo"):
+        raise SystemExit("Index de démonstration : relancez "
+                         "pipeline/scenario_index.py")
+    entry = next((s for s in idx["scenarios"]
+                  if (s.get("files") or {}).get("wave")), None)
+    if entry is None:
+        raise SystemExit("Aucune sortie WAVE dans l'index.")
+    return entry
+
+
+def load_bathymetry(cache_path=None, refresh=False):
+    """Fond, aires et coordonnees du modele, avec mise en cache.
+
+    La bathymetrie ne change jamais d'une execution a l'autre, mais la
+    reconstituer exige de lire une sortie WAVE sur le disque externe des
+    simulations. Elle est donc ecrite une fois dans data/bathymetry.npz ;
+    les executions suivantes n'ont plus besoin du disque, comme le
+    fichier compact en dispense deja le tableau de bord.
+
+    Le cache est lie au scenario source : si l'index designe un autre
+    fichier WAVE, il est reconstruit.
+    """
+    cache_path = Path(cache_path or CACHE_FILE)
+    entry = _wave_entry()
+    key = entry["key"]
+
+    if cache_path.exists() and not refresh:
+        with np.load(cache_path, allow_pickle=False) as npz:
+            if str(npz["source"]) == key:
+                return {"bed": npz["bed"], "areas": npz["areas"],
+                        "xv": npz["xv"], "yv": npz["yv"], "source": key,
+                        "cached": True}
+
+    path = entry["files"]["wave"]
+    if not Path(path).exists():
+        root = Path(path).parts[:3]
+        hint = ""
+        if len(root) == 3 and root[1] == "Volumes":
+            hint = (f"\nLe disque « {root[2]} » est-il monté ? La bathymétrie "
+                    "n'est lue qu'une fois : ensuite, le cache data/"
+                    "bathymetry.npz dispense de ce disque.")
+        raise SystemExit(f"Sortie WAVE introuvable : {path}{hint}")
+
+    bed, areas, _ = bed_from_wave(path, entry["params"]["wlvl"])
+    ds = sfield.open_dataset(path)
+    try:
+        _, _, xv, yv, _, _ = sfield.read_coords(ds, list(ds.variables),
+                                                z_shape=bed.shape)
+    finally:
+        ds.close()
+
+    cache_path.parent.mkdir(parents=True, exist_ok=True)
+    np.savez_compressed(cache_path, bed=bed, areas=areas, xv=xv, yv=yv,
+                        source=np.array(key))
+    print(f"Bathymétrie mise en cache : {cache_path}")
+    return {"bed": bed, "areas": areas, "xv": xv, "yv": yv, "source": key,
+            "cached": False}
+
+
 def curve(bed, areas, levels):
     """Surface et volume en fonction du niveau."""
     out = []
@@ -126,26 +195,11 @@ def area_at(rows, level):
 
 
 def build(cfg, level=None, out_path=OUT_FILE):
-    index_path = ROOT / "data" / "scenarios.json"
-    if not index_path.exists():
-        raise SystemExit("Index absent : lancez pipeline/scenario_index.py")
-    with open(index_path, "r", encoding="utf-8") as f:
-        idx = json.load(f)
-    if idx.get("demo"):
-        raise SystemExit("Index de démonstration : relancez "
-                         "pipeline/scenario_index.py")
-
-    entry = next((s for s in idx["scenarios"]
-                  if (s.get("files") or {}).get("wave")), None)
-    if entry is None:
-        raise SystemExit("Aucune sortie WAVE dans l'index.")
-
-    wlvl = entry["params"].get("wlvl")
-    if wlvl is None:
-        raise SystemExit("Niveau du scénario introuvable dans son nom.")
-
-    print(f"Bathymétrie reconstituée depuis {entry['key']}")
-    bed, areas, wet = bed_from_wave(entry["files"]["wave"], wlvl)
+    bathy = load_bathymetry()
+    bed, areas = bathy["bed"], bathy["areas"]
+    entry = {"key": bathy["source"]}
+    print(f"Bathymétrie : {entry['key']}"
+          + (" (cache)" if bathy["cached"] else ""))
     n = int(np.isfinite(bed).sum())
     print(f"  {n:,} mailles en eau · fond de {np.nanmin(bed):.2f} "
           f"à {np.nanmax(bed):.2f} m")

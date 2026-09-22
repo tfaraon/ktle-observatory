@@ -218,27 +218,15 @@ def build(cfg, masks_dir, span=1.5, step_m=0.05, apply_offset=False,
         raise SystemExit(f"Aucun masque *_water_class.tif dans {masks_dir}")
     print(f"{len(masks)} masque(s) SWIR")
 
-    index_path = ROOT / "data" / "scenarios.json"
-    with open(index_path, "r", encoding="utf-8") as f:
-        idx = json.load(f)
-    entry = next((s for s in idx["scenarios"]
-                  if (s.get("files") or {}).get("wave")), None)
-    if entry is None:
-        raise SystemExit("Aucune sortie WAVE dans l'index.")
-
     scfg = cfg.get("scenarios") or {}
     centre = (cfg.get("lake") or {}).get("center") or {}
     zone = scfg.get("utm_zone") or geo.infer_zone(centre.get("lon", 137.5))
     south = scfg.get("southern_hemisphere", True)
 
-    bed_model, _, _ = hyp.bed_from_wave(entry["files"]["wave"],
-                                        entry["params"]["wlvl"])
-    ds = sfield.open_dataset(entry["files"]["wave"])
-    try:
-        _, _, xv, yv, _, _ = sfield.read_coords(ds, list(ds.variables),
-                                                z_shape=bed_model.shape)
-    finally:
-        ds.close()
+    bathy = hyp.load_bathymetry()
+    bed_model, xv, yv = bathy["bed"], bathy["xv"], bathy["yv"]
+    print(f"Bathymétrie : {bathy['source']}"
+          + (" (cache)" if bathy["cached"] else ""))
     model_lon, model_lat = geo.utm_to_lonlat_array(xv, yv, zone, south)
 
     site, current_offset, _ = wex.load_levels(cfg)

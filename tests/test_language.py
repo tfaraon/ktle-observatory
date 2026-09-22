@@ -171,6 +171,19 @@ for word in set(FRENCH_WORDS.findall(methods_text)):
 for m in set(ACCENTS.findall(methods_text)):
     problems.append(f"methods.js [accent] {m}")
 
+# La partie Natural History. « La Niña » et « El Niño » sont des termes
+# anglais consacrés : on les retire avant l'analyse, faute de quoi « La »
+# passerait pour un article français.
+nh = (ROOT / "frontend" / "natural_history.js").read_text(encoding="utf-8")
+nh_text = re.sub(r"<[^>]+>", " ", nh)
+nh_text = re.sub(r"La Ni(?:ñ|&ntilde;)a|El Ni(?:ñ|&ntilde;)o", " ", nh_text)
+nh_text = re.sub(r"&[a-z]+;", " ", nh_text)
+nh_text = nh_text.split("const NATURAL_HISTORY_HTML", 1)[-1]
+for word in set(FRENCH_WORDS.findall(nh_text)):
+    problems.append(f"natural_history.js [mot français] {word}")
+for m in set(ACCENTS.findall(nh_text)):
+    problems.append(f"natural_history.js [accent] {m}")
+
 # ══════════════════════════════════════════════════════════════
 
 if problems:

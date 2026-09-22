@@ -29,6 +29,8 @@
     manifest: null, staticIndex: null, paramGrid: null,
     staticArrows: null, staticArrowsKey: null,
     methodsLoaded: false,
+    naturalLoaded: false,
+    lastObsTab: "observatory",
     weather: null, area: null, extent: null,
     rosePeriod: "h24",
     canvasRenderer: null,
@@ -1786,7 +1788,23 @@
 
   // ── Tabs ─────────────────────────────────────────────────
 
-  function showTab(name) {
+  // Deux parties : Natural History, une lecture continue, et Observatory,
+  // qui regroupe le tableau de bord, les méthodes et les publications.
+  const OBS_TABS = ["observatory", "methods", "publications"];
+
+  function showTab(name, anchor) {
+    const natural = name === "natural-history";
+    if (!natural && !OBS_TABS.includes(name)) name = "observatory";
+    if (!natural) state.lastObsTab = name;
+
+    document.querySelectorAll(".section-btn").forEach((b) => {
+      const on = b.dataset.section === (natural ? "natural-history" : "observatory");
+      b.classList.toggle("active", on);
+      b.setAttribute("aria-current", on ? "page" : "false");
+    });
+    const obsNav = $("observatory-tabs");
+    if (obsNav) obsNav.hidden = natural;
+
     document.querySelectorAll(".tab").forEach((b) => {
       const on = b.dataset.tab === name;
       b.classList.toggle("active", on);
@@ -1805,6 +1823,26 @@
       state.methodsLoaded = true;
     }
 
+    if (natural && !state.naturalLoaded) {
+      const box = $("tab-natural-history");
+      box.innerHTML = typeof NATURAL_HISTORY_HTML === "string"
+        ? NATURAL_HISTORY_HTML
+        : '<article class="panel"><div class="prose-body">'
+          + "<p>Natural history content unavailable.</p></div></article>";
+      // Sommaire et renvois bibliographiques : défilement doux dans la
+      // page, et adresse mise à jour pour qu'un lien reste partageable.
+      box.addEventListener("click", (e) => {
+        const a = e.target.closest('a[href^="#"]');
+        if (!a) return;
+        const target = document.getElementById(a.getAttribute("href").slice(1));
+        if (!target) return;
+        e.preventDefault();
+        target.scrollIntoView({ behavior: "smooth", block: "start" });
+        try { history.replaceState(null, "", a.getAttribute("href")); } catch (_) { /* ignore */ }
+      });
+      state.naturalLoaded = true;
+    }
+
     // Leaflet et Plotly calculent leurs dimensions au moment du rendu :
     // masqués, ils mesurent zéro et restent figés au retour.
     if (name === "observatory") {
@@ -1820,15 +1858,36 @@
       });
     }
 
-    try { history.replaceState(null, "", "#" + name); } catch (_) { /* ignore */ }
+    const hash = anchor || name;
+    try { history.replaceState(null, "", "#" + hash); } catch (_) { /* ignore */ }
+    if (anchor) {
+      requestAnimationFrame(() => {
+        const el = document.getElementById(anchor);
+        if (el) el.scrollIntoView({ block: "start" });
+      });
+    } else if (natural) {
+      window.scrollTo({ top: 0 });
+    }
   }
 
   function wireTabs() {
     document.querySelectorAll(".tab").forEach((b) =>
       b.addEventListener("click", () => showTab(b.dataset.tab)));
+    document.querySelectorAll(".section-btn").forEach((b) =>
+      b.addEventListener("click", () => {
+        showTab(b.dataset.section === "natural-history"
+          ? "natural-history" : (state.lastObsTab || "observatory"));
+      }));
+
+    // Adresses reconnues : #natural-history, une section (#nh-geology) ou
+    // une référence (#ref-kotwicki1986) de cette partie, et les onglets
+    // de l'observatoire.
     const initial = (location.hash || "").replace("#", "");
-    if (["methods", "publications"].includes(initial)) showTab(initial);
+    if (initial === "natural-history") showTab("natural-history");
+    else if (/^(nh|ref)-/.test(initial)) showTab("natural-history", initial);
+    else if (["methods", "publications"].includes(initial)) showTab(initial);
   }
+
 
   // ── Initialisation ───────────────────────────────────────
 

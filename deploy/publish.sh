@@ -73,6 +73,13 @@ for folder in area_maps extent_maps; do
   fi
 done
 
+# Reglages d'appariement du site : decalage de datum, arrondi du niveau.
+# Le manifeste n'est ecrit que par l'export complet ; sans cette etape,
+# un nouveau wlvl_offset resterait sans effet en ligne.
+if [ -f site/manifest.json ]; then
+  python3 pipeline/sync_manifest.py || echo "Attention : manifeste non synchronisé"
+fi
+
 # Rappel : les images du modele ne sont regenerees que par l'export.
 if [ ! -d site/img ] || [ -z "$(ls -A site/img 2>/dev/null)" ]; then
   echo "Attention : site/img est vide — les couches du modèle ne"
