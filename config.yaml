@@ -327,6 +327,12 @@ weather:
 ebird:
   back_days: 30          # 1 a 30, plafond de l'API
   dist_km: 50            # 1 a 50, plafond de l'API
+  # Emprise couverte (ouest, sud, est, nord) : lac, Marree, Muloorina,
+  # William Creek, Coward Springs. Une grille de points la couvre sans trou
+  # et remplace la liste de points ci-dessous.
+  area: [136.3, -29.9, 138.4, -27.5]
+  hotspots: true         # tous les hotspots eBird de l'emprise
+  pause_s: 0.3           # pause entre requetes
   points:
     - { name: "Lake Eyre North", lat: -28.20, lon: 137.30 }
     - { name: "Belt Bay",        lat: -28.89, lon: 137.03 }
@@ -356,3 +362,24 @@ inaturalist:
   recent: 24             # observations recentes affichees (60 au plus)
   top_species: 12        # especes les plus observees (50 au plus)
   max_species: 300       # toutes les especes, rangees par groupe (500 au plus)
+
+# ============================================================
+# Bassin versant : contour, pluie (SILO) et rivieres (Water Data Online)
+# ============================================================
+# Contour du bassin : par defaut un contour SIMPLIFIE (pipeline/basin_outline.py).
+# Pour le contour officiel (Geofabric du Bureau of Meteorology, division
+# « Lake Eyre Basin »), l'exporter en GeoJSON et decommenter :
+catchment:
+  # boundary_geojson: data/leb_boundary.geojson
+
+# Pluie quotidienne SILO (CC BY 4.0), une grille GeoTIFF par jour
+rainfall:
+  days: 30               # fenetre affichee (7 a 90 jours)
+  revisit_days: 3        # jours recents retelecharges, SILO pouvant les reviser
+  image_width: 540       # largeur des images de la carte, en pixels
+
+# Stations de jaugeage, Water Data Online (Bureau of Meteorology)
+rivers:
+  stations: auto         # « auto » : stations actives du bassin ; ou une liste de numeros
+  active_days: 60        # une station est active si elle a transmis dans ce delai
+  history_days: 365      # longueur des hydrogrammes

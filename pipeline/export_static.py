@@ -346,13 +346,13 @@ def build(cfg, out_dir=SITE, colors=64, limit=None, sample=40):
 
     for name in ("swot_wse.json", "weather.json", "lake_area.json",
                  "water_extent.json", "ebird.json",
-                 "inaturalist.json"):
+                 "inaturalist.json", "rainfall.json", "rivers.json"):
         src_file = ROOT / "data" / name
         if src_file.exists():
             shutil.copy(src_file, data_dir / name)
 
     # Masques d'eau : un PNG par date, quelques kilo-octets chacun
-    for folder in ("area_maps", "extent_maps"):
+    for folder in ("area_maps", "extent_maps", "rain_maps"):
         maps_src = ROOT / "data" / folder
         if maps_src.is_dir():
             shutil.copytree(maps_src, data_dir / folder, dirs_exist_ok=True)
@@ -361,7 +361,8 @@ def build(cfg, out_dir=SITE, colors=64, limit=None, sample=40):
                  "windrose.js", "download.js", "natural_history.js",
                  "aboriginal_culture.js", "ebird.js",
                  "catchment.js", "stories.js", "fauna_flora.js",
-                 "inaturalist.js"):
+                 "inaturalist.js",
+                 "catchment_live.js"):
         shutil.copy(ROOT / "frontend" / name, out_dir / name)
     (out_dir / ".nojekyll").write_text("", encoding="utf-8")
 

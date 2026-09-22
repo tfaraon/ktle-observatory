@@ -62,16 +62,30 @@ with sync_playwright() as p:
     vis = pg.evaluate("() => { const r = document.getElementById('acref-dodd2012').getBoundingClientRect(); return r.top >= -2 && r.top < innerHeight; }")
     check("référence amenée à l'écran", vis)
 
-    pg.click('.section-btn[data-section="natural-history"]'); pg.wait_for_timeout(200)
+    pg.click('.section-btn[data-section="lake"]'); pg.wait_for_timeout(200)
     s = state(pg)
-    check("clic Natural History", s["panel"] == ["tab-natural-history"] and s["navs"] == [], s)
+    check("clic The lake : Natural history", s["panel"] == ["tab-natural-history"] and s["navs"] == ["lake"], s)
 
-    pg.click('.section-btn[data-section="observatory"]'); pg.wait_for_timeout(200)
     pg.click('.tab[data-tab="methods"]'); pg.wait_for_timeout(200)
     pg.click('.section-btn[data-section="culture"]'); pg.wait_for_timeout(200)
-    pg.click('.section-btn[data-section="observatory"]'); pg.wait_for_timeout(200)
+    pg.click('.section-btn[data-section="lake"]'); pg.wait_for_timeout(200)
     s = state(pg)
-    check("retour sur le dernier onglet de l'Observatory", s["panel"] == ["tab-methods"], s)
+    check("retour sur le dernier onglet de The lake", s["panel"] == ["tab-methods"], s)
+    pg.click('.tab[data-tab="modelling"]'); pg.wait_for_timeout(200)
+    s = state(pg)
+    check("sous-onglet Modelling", s["panel"] == ["tab-modelling"] and s["navs"] == ["lake"], s)
+    pg.click('.section-btn[data-section="climate"]'); pg.wait_for_timeout(200)
+    s = state(pg)
+    check("clic Climate and meteorology : Weather", s["panel"] == ["tab-weather"] and s["navs"] == ["climate"], s)
+    check("panneau BOM dans Weather",
+          pg.evaluate("() => document.getElementById('tab-weather').contains(document.getElementById('weather-strip'))"))
+    pg.click('.tab[data-tab="rainfall"]'); pg.wait_for_timeout(200)
+    s = state(pg)
+    check("sous-onglet Rainfall", s["panel"] == ["tab-rainfall"] and s["navs"] == ["climate"], s)
+    for old_hash, want in (("#observatory", "tab-modelling"), ("#rain-rivers", "tab-river-flow")):
+        pg.goto(BASE + old_hash); pg.wait_for_timeout(400)
+        s = state(pg)
+        check(f"ancienne adresse {old_hash}", s["panel"] == [want], s)
 
     for h, want in (("#nh-geology", "tab-natural-history"), ("#acref-qldparl2023", "tab-culture"),
                     ("#culture", "tab-culture"), ("#publications", "tab-publications"),
@@ -79,7 +93,9 @@ with sync_playwright() as p:
                     ("#stories", "tab-stories"), ("#st-arabana", "tab-stories"),
                     ("#home", "tab-home"), ("#fauna-flora", "tab-fauna-flora"),
                     ("#ff-animals", "tab-fauna-flora"), ("#birds", "tab-birds"),
-                    ("#inaturalist", "tab-inaturalist")):
+                    ("#inaturalist", "tab-inaturalist"), ("#river-flow", "tab-river-flow"),
+                    ("#weather", "tab-weather"), ("#rainfall", "tab-rainfall"),
+                    ("#modelling", "tab-modelling")):
         pg.goto(BASE + h); pg.wait_for_timeout(500)
         s = state(pg)
         check(f"lien direct {h}", s["panel"] == [want] and s["hash"] == h, s)
@@ -106,10 +122,16 @@ with sync_playwright() as p:
     pg.click('.tab[data-tab="fauna-flora"]'); pg.wait_for_timeout(300)
     n = pg.evaluate("() => document.querySelectorAll('#tab-fauna-flora .obs-block').length")
     check("sept groupes avec observations", n == 7, n)
+    pg.goto(BASE + "#catchment"); pg.wait_for_timeout(400)
+    pg.click('.tab[data-tab="river-flow"]'); pg.wait_for_timeout(300)
+    s = state(pg)
+    check("onglet River flow", s["panel"] == ["tab-river-flow"] and s["navs"] == ["catchment"], s)
+    pg.goto(BASE + "#fauna-flora"); pg.wait_for_timeout(400)
+    pg.click('.tab[data-tab="birds"]'); pg.wait_for_timeout(300)
     pg.click('.tab[data-tab="inaturalist"]'); pg.wait_for_timeout(300)
     s = state(pg)
     check("onglet iNaturalist", s["panel"] == ["tab-inaturalist"] and s["navs"] == ["fauna-flora"], s)
-    check("plus de couche Birds sur la carte de l'Observatory",
+    check("plus de couche Birds sur la carte du Modelling",
           pg.evaluate("() => !document.getElementById('birds-seg')"))
 
     real = [e for e in errors if "fetch" not in e.lower() and "json" not in e.lower()]

@@ -1,0 +1,346 @@
+{
+ "fetched_at": "2026-09-22T12:16:40Z",
+ "demo": false,
+ "stale": false,
+ "errors": [],
+ "source": "SILO, Queensland Government",
+ "licence": "CC BY 4.0",
+ "source_url": "https://www.longpaddock.qld.gov.au/silo/",
+ "outline": {
+  "kind": "coarse",
+  "coords": [
+   [
+    -23.2,
+    132.3
+   ],
+   [
+    -22.4,
+    133.5
+   ],
+   [
+    -21.3,
+    135.0
+   ],
+   [
+    -20.2,
+    136.8
+   ],
+   [
+    -19.3,
+    138.0
+   ],
+   [
+    -20.0,
+    139.5
+   ],
+   [
+    -20.5,
+    140.5
+   ],
+   [
+    -20.9,
+    142.0
+   ],
+   [
+    -20.6,
+    144.0
+   ],
+   [
+    -21.0,
+    145.3
+   ],
+   [
+    -22.5,
+    146.0
+   ],
+   [
+    -24.2,
+    146.2
+   ],
+   [
+    -25.8,
+    145.7
+   ],
+   [
+    -26.3,
+    144.5
+   ],
+   [
+    -27.0,
+    143.2
+   ],
+   [
+    -28.2,
+    142.0
+   ],
+   [
+    -29.5,
+    141.2
+   ],
+   [
+    -30.8,
+    140.2
+   ],
+   [
+    -31.5,
+    139.2
+   ],
+   [
+    -31.3,
+    138.2
+   ],
+   [
+    -30.8,
+    137.3
+   ],
+   [
+    -30.2,
+    136.3
+   ],
+   [
+    -29.6,
+    135.0
+   ],
+   [
+    -28.6,
+    133.8
+   ],
+   [
+    -27.2,
+    132.8
+   ],
+   [
+    -25.5,
+    132.2
+   ]
+  ]
+ },
+ "bounds": [
+  [
+   -31.775,
+   131.875
+  ],
+  [
+   -18.975,
+   146.525
+  ]
+ ],
+ "scale": {
+  "breaks_mm": [
+   1,
+   5,
+   10,
+   25,
+   50,
+   100,
+   200
+  ],
+  "colours": [
+   "#C9E7F2",
+   "#8CC8E0",
+   "#4FA3CF",
+   "#2A73B8",
+   "#3F4FA8",
+   "#6A3D9A",
+   "#A0307E"
+  ]
+ },
+ "days": [
+  {
+   "date": "2026-09-21",
+   "mean_mm": 0.0,
+   "max_mm": 0.1,
+   "png": "rain_maps/20260921.png"
+  },
+  {
+   "date": "2026-09-20",
+   "mean_mm": 0.0,
+   "max_mm": 0.3,
+   "png": "rain_maps/20260920.png"
+  },
+  {
+   "date": "2026-09-19",
+   "mean_mm": 0.0,
+   "max_mm": 0.0,
+   "png": "rain_maps/20260919.png"
+  },
+  {
+   "date": "2026-09-18",
+   "mean_mm": 0.02,
+   "max_mm": 1.0,
+   "png": "rain_maps/20260918.png"
+  },
+  {
+   "date": "2026-09-17",
+   "mean_mm": 0.0,
+   "max_mm": 0.2,
+   "png": "rain_maps/20260917.png"
+  },
+  {
+   "date": "2026-09-16",
+   "mean_mm": 0.0,
+   "max_mm": 0.0,
+   "png": "rain_maps/20260916.png"
+  },
+  {
+   "date": "2026-09-15",
+   "mean_mm": 0.0,
+   "max_mm": 0.0,
+   "png": "rain_maps/20260915.png"
+  },
+  {
+   "date": "2026-09-14",
+   "mean_mm": 0.0,
+   "max_mm": 0.1,
+   "png": "rain_maps/20260914.png"
+  },
+  {
+   "date": "2026-09-13",
+   "mean_mm": 0.02,
+   "max_mm": 1.0,
+   "png": "rain_maps/20260913.png"
+  },
+  {
+   "date": "2026-09-12",
+   "mean_mm": 0.03,
+   "max_mm": 0.7,
+   "png": "rain_maps/20260912.png"
+  },
+  {
+   "date": "2026-09-11",
+   "mean_mm": 0.05,
+   "max_mm": 3.2,
+   "png": "rain_maps/20260911.png"
+  },
+  {
+   "date": "2026-09-10",
+   "mean_mm": 0.38,
+   "max_mm": 7.2,
+   "png": "rain_maps/20260910.png"
+  },
+  {
+   "date": "2026-09-09",
+   "mean_mm": 0.86,
+   "max_mm": 10.3,
+   "png": "rain_maps/20260909.png"
+  },
+  {
+   "date": "2026-09-08",
+   "mean_mm": 0.06,
+   "max_mm": 2.9,
+   "png": "rain_maps/20260908.png"
+  },
+  {
+   "date": "2026-09-07",
+   "mean_mm": 0.01,
+   "max_mm": 0.8,
+   "png": "rain_maps/20260907.png"
+  },
+  {
+   "date": "2026-09-06",
+   "mean_mm": 0.0,
+   "max_mm": 0.1,
+   "png": "rain_maps/20260906.png"
+  },
+  {
+   "date": "2026-09-05",
+   "mean_mm": 0.04,
+   "max_mm": 3.5,
+   "png": "rain_maps/20260905.png"
+  },
+  {
+   "date": "2026-09-04",
+   "mean_mm": 0.01,
+   "max_mm": 0.6,
+   "png": "rain_maps/20260904.png"
+  },
+  {
+   "date": "2026-09-03",
+   "mean_mm": 0.0,
+   "max_mm": 0.0,
+   "png": "rain_maps/20260903.png"
+  },
+  {
+   "date": "2026-09-02",
+   "mean_mm": 0.0,
+   "max_mm": 0.1,
+   "png": "rain_maps/20260902.png"
+  },
+  {
+   "date": "2026-09-01",
+   "mean_mm": 0.0,
+   "max_mm": 0.2,
+   "png": "rain_maps/20260901.png"
+  },
+  {
+   "date": "2026-08-31",
+   "mean_mm": 0.0,
+   "max_mm": 0.0,
+   "png": "rain_maps/20260831.png"
+  },
+  {
+   "date": "2026-08-30",
+   "mean_mm": 0.01,
+   "max_mm": 0.3,
+   "png": "rain_maps/20260830.png"
+  },
+  {
+   "date": "2026-08-29",
+   "mean_mm": 0.0,
+   "max_mm": 0.1,
+   "png": "rain_maps/20260829.png"
+  },
+  {
+   "date": "2026-08-28",
+   "mean_mm": 0.01,
+   "max_mm": 0.4,
+   "png": "rain_maps/20260828.png"
+  },
+  {
+   "date": "2026-08-27",
+   "mean_mm": 0.0,
+   "max_mm": 0.0,
+   "png": "rain_maps/20260827.png"
+  },
+  {
+   "date": "2026-08-26",
+   "mean_mm": 0.81,
+   "max_mm": 29.5,
+   "png": "rain_maps/20260826.png"
+  },
+  {
+   "date": "2026-08-25",
+   "mean_mm": 3.0,
+   "max_mm": 19.0,
+   "png": "rain_maps/20260825.png"
+  },
+  {
+   "date": "2026-08-24",
+   "mean_mm": 2.12,
+   "max_mm": 42.2,
+   "png": "rain_maps/20260824.png"
+  },
+  {
+   "date": "2026-08-23",
+   "mean_mm": 0.22,
+   "max_mm": 7.9,
+   "png": "rain_maps/20260823.png"
+  }
+ ],
+ "sum7": {
+  "from": "2026-09-15",
+  "to": "2026-09-21",
+  "n_days": 7,
+  "mean_mm": 0.03,
+  "max_mm": 1.0,
+  "png": "rain_maps/sum7.png"
+ },
+ "sum30": {
+  "from": "2026-08-23",
+  "to": "2026-09-21",
+  "n_days": 30,
+  "mean_mm": 7.66,
+  "max_mm": 60.9,
+  "png": "rain_maps/sum30.png"
+ }
+}

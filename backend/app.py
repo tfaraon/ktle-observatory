@@ -171,6 +171,31 @@ def extent_map_file(name):
     return send_from_directory(str(ROOT / "data" / "extent_maps"), name)
 
 
+@app.get("/api/rainfall")
+def api_rainfall():
+    """Pluie SILO sur le bassin, produite par pipeline/fetch_rainfall.py."""
+    f = ROOT / "data" / "rainfall.json"
+    if not f.exists():
+        return jsonify({"error": "no_data",
+                        "message": "No rainfall yet: run pipeline/fetch_rainfall.py"}), 404
+    return jsonify(json.loads(f.read_text(encoding="utf-8")))
+
+
+@app.get("/api/rivers")
+def api_rivers():
+    """Stations de jaugeage, produites par pipeline/fetch_rivers.py."""
+    f = ROOT / "data" / "rivers.json"
+    if not f.exists():
+        return jsonify({"error": "no_data",
+                        "message": "No river data yet: run pipeline/fetch_rivers.py"}), 404
+    return jsonify(json.loads(f.read_text(encoding="utf-8")))
+
+
+@app.get("/data/rain_maps/<path:name>")
+def rain_map(name):
+    return send_from_directory(str(ROOT / "data" / "rain_maps"), name)
+
+
 @app.get("/data/area_maps/<path:name>")
 def area_map_file(name):
     """Masques d'eau produits par lake_area.py."""

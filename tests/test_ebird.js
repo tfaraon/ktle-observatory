@@ -73,5 +73,27 @@ assert.strictEqual(empty.nSpecies, 0);
 assert.strictEqual(empty.latestAge, null);
 assert.deepStrictEqual(E.locationGroups(undefined), []);
 
+// ── Hotspots : tous listés, actifs d'abord ────────────────
+const hsData = {
+  hotspots: [
+    { locId: "L200", name: "Halligan Bay", lat: -28.5, lng: 137.0, latestObsDt: "2024-05-02 10:00",
+      numSpeciesAllTime: 41, recent: [] },
+    { locId: "L100", name: "Muloorina Station", lat: -29.24, lng: 137.91, latestObsDt: "2026-09-18 07:00",
+      numSpeciesAllTime: 131, recent: [{ speciesCode: "bansti1", indicator: true }, { speciesCode: "x" }] },
+  ],
+  species: [
+    { speciesCode: "a", locId: "L100", locName: "Muloorina Station", lat: -29.24, lng: 137.91, obsDt: "2026-09-18" },
+    { speciesCode: "b", locId: "L999", locName: "Roadside stop", lat: -29.5, lng: 138.0, obsDt: "2026-09-17" },
+  ],
+};
+const hl = E.hotspotList(hsData);
+assert.deepStrictEqual(hl.map((h) => h.locId), ["L100", "L200"], "actifs d'abord");
+assert.strictEqual(hl[0].active, true);
+assert.strictEqual(hl[0].waterbirds, 1);
+assert.strictEqual(hl[1].active, false);
+assert.strictEqual(hl[0].url, "https://ebird.org/hotspot/L100");
+assert.deepStrictEqual(E.otherLocations(hsData).map((g) => g.key), ["L999"], "lieux hors hotspots seulement");
+assert.deepStrictEqual(E.hotspotList({}), []);
+
 console.log("OK — ages, effectifs « présent », ordre indicateurs puis notables, "
   + "lieux privés absents de la carte, résumé.");

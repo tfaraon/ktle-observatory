@@ -2,7 +2,8 @@
 #
 # Rafraichit les donnees puis publie.
 #
-#   ./deploy/refresh.sh                  # tout : SWOT, meteo, surface, etendue, eBird, iNaturalist, puis publie
+#   ./deploy/refresh.sh                  # tout : SWOT, meteo, surface, etendue, eBird, iNaturalist,
+#                                        # pluie et rivieres du bassin, puis publie
 #   ./deploy/refresh.sh --no-swot        # sans telechargement SWOT (rapide)
 #   ./deploy/refresh.sh --only-area      # surface seule, puis publie
 #   ./deploy/refresh.sh --no-birds       # sans eBird
@@ -23,7 +24,7 @@ cd "$(dirname "$0")/.."
 ROOT="$(pwd)"
 PY="${PYTHON:-python3}"
 
-DO_SWOT=1; DO_WEATHER=1; DO_AREA=1; DO_EXTENT=1; DO_BIRDS=1; DO_PUBLISH=1
+DO_SWOT=1; DO_WEATHER=1; DO_AREA=1; DO_EXTENT=1; DO_BIRDS=1; DO_CATCHMENT=1; DO_PUBLISH=1
 MESSAGE=""
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -32,8 +33,9 @@ while [ $# -gt 0 ]; do
     --no-area) DO_AREA=0 ;;
     --no-extent) DO_EXTENT=0 ;;
     --no-birds) DO_BIRDS=0 ;;
+    --no-catchment) DO_CATCHMENT=0 ;;
     --no-publish) DO_PUBLISH=0 ;;
-    --only-area) DO_SWOT=0; DO_WEATHER=0; DO_EXTENT=0; DO_BIRDS=0 ;;
+    --only-area) DO_SWOT=0; DO_WEATHER=0; DO_EXTENT=0; DO_BIRDS=0; DO_CATCHMENT=0 ;;
     -m) shift; MESSAGE="${1:-}" ;;
     -h|--help) sed -n '2,20p' "$0"; exit 0 ;;
     *) echo "Option inconnue : $1"; exit 2 ;;
@@ -80,6 +82,10 @@ if [ "$DO_BIRDS" -eq 1 ]; then
   fi
   run_step "Observations iNaturalist" "$PY" pipeline/fetch_inaturalist.py
 fi
+
+# Bassin versant : pluie SILO et stations de jaugeage
+[ "$DO_CATCHMENT" -eq 1 ] && run_step "Pluie sur le bassin (SILO)" "$PY" pipeline/fetch_rainfall.py
+[ "$DO_CATCHMENT" -eq 1 ] && run_step "Rivières (Water Data Online)" "$PY" pipeline/fetch_rivers.py
 
 echo
 if [ "$CHANGED" -eq 0 ]; then

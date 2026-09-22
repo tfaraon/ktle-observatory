@@ -18,16 +18,17 @@ The site opens on a **home page** that shows the lake as it is now, as a map
 sheet: the latest MODIS image from NASA GIBS with a graticule, place names, a
 scale bar and the SWOT sites drawn at their coordinates, a gauge placing the
 SWOT water surface at Belt Bay within its own record, and a few sentences
-written from the data. Five parts follow. **The lake** is a continuous,
-referenced natural history. **Catchment** follows the rivers of the Lake Eyre
-Basin, their wetlands and their protection. **Fauna and flora** has three pages:
-*Plants and animals*, referenced prose arranged by group (plants and algae,
-invertebrates, fish, frogs, reptiles, birds, mammals), each group followed by the
-species observed around the lake on iNaturalist and, for birds, on eBird; *Bird sightings*, the eBird
-observations with their own map and a button to submit a checklist; and *iNaturalist*, which invites visitors to
-share their own observations and shows what the community has already shared. **Aboriginal culture** has two pages, *Peoples*
-and *Stories*. **Observatory** holds the live **Dashboard**, the **Methods** and the
-**Publications**. Any section can be linked directly, for example `#ct-rivers`,
+written from the data. Five parts follow, each answering one question.
+**The lake** describes the lake and models it: *Natural history*, referenced
+prose; *Modelling*, the water level, extent and area from SWOT and the matched
+Delft3D scenarios with their map layers; *Methods* and *Publications*.
+**Catchment** follows the rivers that feed it: *The basin*, referenced prose, and
+*River flow*, the gauges still operating with their hydrographs.
+**Climate and meteorology** gathers rain and weather: *Weather*, the Bureau of
+Meteorology stations with wind roses, and *Rainfall*, the SILO rainfall map of
+the basin. **Fauna and flora** has *Plants and animals*, *Bird sightings* and
+*iNaturalist*. **Aboriginal culture** has *Peoples* and *Stories*. Links to the
+former addresses `#observatory` and `#rain-rivers` still work. Any section can be linked directly, for example `#ct-rivers`,
 `#st-arabana` or `#nh-geology`.
 
 The *Stories* page lists only stories that Aboriginal knowledge holders, or
@@ -179,6 +180,64 @@ should never be added to this repository.
 The default collection is `SWOT_L2_HR_Raster_D`. Version C granules may still
 be kept as an archive, but a single processing version should be used for data
 intended for publication.
+
+### Self-hosted server that updates itself
+
+`deploy/SERVEUR.md` installs the site on an always-on Linux machine: Flask
+behind nginx, data stored locally in `data/`, and two systemd timers that
+refresh them without intervention (BOM weather every hour, everything else
+daily, followed by a dated, compressed copy of each data file in
+`data/archive/`). `tests/test_deploy_units.py` checks that the deployment
+files agree with one another.
+
+### Rain and rivers of the catchment
+
+```bash
+python pipeline/fetch_rainfall.py          # SILO daily rainfall over the basin
+python pipeline/fetch_rivers.py            # river gauges, Water Data Online
+python pipeline/fetch_rivers.py --discover # list the gauges selected
+python pipeline/fetch_rainfall.py --demo   # synthetic data, no network
+```
+
+The *Rain and rivers* tab of the Catchment part shows daily rainfall over the
+whole basin, as 7-day and 30-day totals or day by day, with the basin-average
+rain of each day, and the river gauges still operating, coloured by what they
+last reported, with a one-year hydrograph for each.
+
+Rainfall comes from SILO (Queensland Government, CC BY 4.0): one GeoTIFF per
+day, so only missing days are downloaded, cropped to the basin, cached in
+`data/rain_cache/`, and rendered as map images reprojected row by row to
+Mercator so that they sit exactly on the map. The last few days are fetched
+again on each run, because SILO may revise them. The grids are interpolated
+from rain gauges that are sparse in this desert, which the page says.
+
+River data come from Water Data Online (Bureau of Meteorology), which gathers
+the State agencies' gauges and updates daily, not in real time. Many gauges in
+the basin have closed, so no list is frozen: by default the pipeline keeps the
+gauges inside the basin outline that reported within `rivers.active_days`.
+`--discover` prints that selection; an explicit list of station numbers in
+`config.yaml` can replace `auto`, and keeps closed gauges available for their
+history.
+
+The basin outline is a simplified polygon (`pipeline/basin_outline.py`), good
+enough to select gauges and average rainfall; the page marks it as
+approximate. Export the official Geofabric boundary as GeoJSON and set
+`catchment.boundary_geojson` to use it instead.
+
+Both are refreshed daily by `.github/workflows/catchment.yml` and by
+`deploy/refresh.sh` (skip with `--no-catchment`). Neither needs a key.
+
+#### eBird coverage and hotspots
+
+The eBird API limits each nearby search to a 50 km radius, and the four fixed
+query points first used left hotspots such as Muloorina Station just out of
+reach. The pipeline now covers an area around the lake (`ebird.area` in
+`config.yaml`: from William Creek to Marree) with a grid of query points spaced
+so that their circles overlap without gaps. It also lists every eBird hotspot
+in that area, visited recently or not, and fetches the recent observations of
+those visited within the window. The map shows every hotspot, filled if active,
+and a table lists them with their last visit and species counts.
+`tests/test_ebird_hotspots.py` checks the coverage and the hotspot handling.
 
 ### Community observations (iNaturalist)
 
@@ -596,6 +655,9 @@ python tests/test_navigation.py          # headless browser, skipped without Pla
 python tests/test_ebird.py               # eBird fetch, privacy and key hygiene
 python tests/test_inaturalist.py         # iNaturalist fetch, licences and blurred locations
 python tests/test_fauna_flora.py         # Plants and animals: groups and live observation slots
+python tests/test_rainfall.py            # SILO grids, basin mask, Mercator alignment, cache
+python tests/test_rivers.py              # gauge selection, closed stations, states
+node tests/test_catchment_live.js        # Rain and rivers display logic
 python tests/test_catchment_stories.py   # Catchment sources, Stories custodianship rule
 node tests/test_ebird.js                 # bird panel display logic
 node tests/test_windrose.js              # solar elevation and wind roses

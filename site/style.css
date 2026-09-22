@@ -1705,3 +1705,36 @@ nav.tabs, .subbar { max-width: calc(var(--page) - 56px); padding-left: 0; paddin
 .submit-btn:hover { background: var(--flood-deep); }
 .submit-row p { margin: 0; font-family: var(--font-read); font-size: 0.98rem; line-height: 1.55; color: var(--basin); }
 @media (max-width: 700px) { .submit-row { flex-direction: column; gap: 12px; } }
+
+/* ── Catchment : pluie et rivières ─────────────────────────── */
+
+.rr-page { padding: 12px 0 56px; }
+.rr-intro h2 {
+  font-family: var(--font-display); font-stretch: 116%; font-weight: 600;
+  font-size: clamp(2rem, 3.6vw, 3rem); line-height: 1.05; margin: 18px 0 12px;
+}
+.rr-intro > p, .rr-now p {
+  font-family: var(--font-read); font-size: 1.05rem; line-height: 1.65; max-width: var(--measure);
+}
+.rr-now { padding-left: 18px; border-left: 3px solid var(--flood); margin: 18px 0 8px; }
+.rr-now p { margin: 0 0 8px; font-size: 1rem; }
+.rr-plate { margin: 26px 0 36px; }
+.rr-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin-bottom: 10px; }
+.rr-controls input[type="range"] { width: min(320px, 100%); accent-color: var(--flood); }
+.rr-period { font-family: var(--font-display); font-size: 0.9rem; color: var(--dune); font-variant-numeric: tabular-nums; }
+.rr-map { height: 520px; border: 1px solid var(--panel-edge); background: var(--grid); }
+.rr-legend { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 10px 0 4px; font-family: var(--font-display); font-size: 0.82rem; color: var(--dune); }
+.rr-legend i { display: inline-block; width: 14px; height: 10px; margin-right: 6px; vertical-align: -1px; }
+.rr-plate figcaption { font-family: var(--font-read); font-style: italic; font-size: 0.9rem; color: var(--dune); margin-top: 8px; max-width: var(--measure); }
+.rr-block { margin: 0 0 40px; }
+.rr-block h3 { font-family: var(--font-display); font-stretch: 110%; font-weight: 600; font-size: 1.3rem; margin: 0 0 10px; }
+.rr-note { font-family: var(--font-read); color: var(--dune); font-size: 0.95rem; margin: 0 0 8px; }
+.rr-chart { min-height: 60px; }
+.rr-table { width: 100%; border-collapse: collapse; font-family: var(--font-display); font-size: 0.9rem; margin-top: 12px; }
+.rr-table th { text-align: left; font-weight: 600; font-size: 0.82rem; background: var(--grid); padding: 8px 10px; }
+.rr-table td { padding: 8px 10px; border-bottom: 1px solid var(--grid); vertical-align: top; font-variant-numeric: tabular-nums; }
+.rr-link { background: none; border: none; padding: 0; font: inherit; font-weight: 600; color: var(--flood-deep); cursor: pointer; text-align: left; }
+.rr-link:hover { text-decoration: underline; }
+.rr-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 7px; vertical-align: -1px; }
+.rr-date { display: block; font-size: 0.78rem; color: var(--dune); }
+@media (max-width: 700px) { .rr-map { height: 380px; } }

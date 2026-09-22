@@ -53,7 +53,7 @@ echo "Frontend : $copied fichier(s) mis à jour"
 # ── Donnees ─────────────────────────────────────────────────
 mkdir -p site/data
 data_copied=0
-for name in swot_wse.json weather.json lake_area.json water_extent.json ebird.json inaturalist.json; do
+for name in swot_wse.json weather.json lake_area.json water_extent.json ebird.json inaturalist.json rainfall.json rivers.json; do
   if [ -f "data/$name" ]; then
     if ! cmp -s "data/$name" "site/data/$name"; then
       cp "data/$name" "site/data/"
@@ -64,7 +64,7 @@ done
 echo "Données  : $data_copied fichier(s) mis à jour"
 
 # Masques d'eau SWOT : un PNG par date
-for folder in area_maps extent_maps; do
+for folder in area_maps extent_maps rain_maps; do
   [ -d "data/$folder" ] || continue
   mkdir -p "site/data/$folder"
   if ! diff -rq "data/$folder" "site/data/$folder" >/dev/null 2>&1; then

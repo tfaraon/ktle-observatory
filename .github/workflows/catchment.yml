@@ -1,0 +1,50 @@
+# Rafraichit chaque jour la pluie sur le bassin (SILO) et les stations de
+# jaugeage (Water Data Online), puis publie.
+#
+# Aucune cle : SILO est public (CC BY 4.0) et Water Data Online libre
+# d'acces. SILO publie la veille dans la matinee, heure de l'Australie,
+# et Water Data Online se met a jour une fois par jour : une execution
+# quotidienne suffit.
+name: Refresh catchment rain and rivers
+
+on:
+  schedule:
+    - cron: "15 22 * * *"      # 22:15 UTC, en matinee en Australie
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - run: pip install PyYAML numpy Pillow rasterio
+      - name: Restore rainfall cache
+        uses: actions/cache@v4
+        with:
+          path: data/rain_cache
+          key: rain-cache-${{ github.run_id }}
+          restore-keys: rain-cache-
+      - name: Fetch rain and river data
+        run: |
+          cd pipeline
+          python fetch_rainfall.py || echo "Pluie : échec, données précédentes conservées"
+          python fetch_rivers.py || echo "Rivières : échec, données précédentes conservées"
+          cd ..
+          if [ -d site/data ]; then
+            cp -f data/rainfall.json data/rivers.json site/data/ 2>/dev/null || true
+            mkdir -p site/data/rain_maps && rm -f site/data/rain_maps/*.png
+            cp -f data/rain_maps/*.png site/data/rain_maps/ 2>/dev/null || true
+          fi
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -f site/data/rainfall.json site/data/rivers.json site/data/rain_maps 2>/dev/null || true
+          git diff --staged --quiet || git commit -m "Catchment rain and rivers refresh"
+          git push

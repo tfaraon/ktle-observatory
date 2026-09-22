@@ -1,0 +1,10 @@
+[Unit]
+Description=KTLE observatory: hourly BOM weather
+
+[Timer]
+OnCalendar=hourly
+Persistent=true
+RandomizedDelaySec=5m
+
+[Install]
+WantedBy=timers.target

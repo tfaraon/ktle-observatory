@@ -10,3 +10,6 @@ site/data/lake_area.json  merge=ours
 site/data/water_extent.json  merge=ours
 site/data/ebird.json      merge=ours
 site/data/inaturalist.json  merge=ours
+site/data/rainfall.json    merge=ours
+site/data/rivers.json      merge=ours
+site/data/rain_maps/*.png  merge=ours binary

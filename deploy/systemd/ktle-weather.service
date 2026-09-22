@@ -1,0 +1,18 @@
+# Observations BOM, toutes les heures. Lancee par ktle-weather.timer.
+[Unit]
+Description=KTLE observatory: hourly BOM weather
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=lakeeyre
+WorkingDirectory=/srv/lake-eyre-dashboard
+Environment=HOME=/srv/lake-eyre-dashboard/data/.home
+ExecStart=/srv/lake-eyre-dashboard/.venv/bin/python pipeline/fetch_weather.py
+TimeoutStartSec=10m
+
+ProtectSystem=strict
+ReadWritePaths=/srv/lake-eyre-dashboard/data
+PrivateTmp=true
+NoNewPrivileges=true

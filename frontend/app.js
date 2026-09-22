@@ -32,7 +32,9 @@
     loadedPages: {},
     ebird: null,
     birdsLayer: null,
-    lastTab: { observatory: "observatory", culture: "culture", "fauna-flora": "fauna-flora" },
+    lastTab: { lake: "natural-history", catchment: "catchment", climate: "weather",
+               "fauna-flora": "fauna-flora", culture: "culture" },
+    rain: null, rivers: null, rainMap: null, flowMap: null, rainOverlay: null, flowStations: null, rrView: "sum7",
     birdsMap: null,
     inat: null,
     inatMap: null,
@@ -1803,17 +1805,22 @@
   // méthodes et les publications. Chaque onglet appartient à une partie.
   const SECTION_OF = {
     home: "home",
-    "natural-history": "natural-history",
+    "natural-history": "lake",
+    modelling: "lake",
+    methods: "lake",
+    publications: "lake",
     catchment: "catchment",
+    "river-flow": "catchment",
+    weather: "climate",
+    rainfall: "climate",
     "fauna-flora": "fauna-flora",
     birds: "fauna-flora",
     inaturalist: "fauna-flora",
     culture: "culture",
     stories: "culture",
-    observatory: "observatory",
-    methods: "observatory",
-    publications: "observatory",
   };
+  // Anciennes adresses, pour que les liens déjà partagés continuent de marcher
+  const ALIASES = { observatory: "modelling", "rain-rivers": "river-flow" };
   // Contenus injectés à la première ouverture, et préfixes des ancres
   // qu'ils portent : sections et références de chaque page.
   // Un « const » global n'est pas une propriété de window : window[nom]
@@ -1868,6 +1875,7 @@
   }
 
   function showTab(name, anchor) {
+    name = ALIASES[name] || name;
     if (!SECTION_OF[name]) name = "home";
     const section = SECTION_OF[name];
     state.lastTab[section] = name;
@@ -1901,18 +1909,11 @@
 
     // Leaflet et Plotly calculent leurs dimensions au moment du rendu :
     // masqués, ils mesurent zéro et restent figés au retour.
-    if (name === "observatory") {
-      requestAnimationFrame(() => {
-        if (state.map) state.map.invalidateSize();
-        ["chart", "area-chart", "weather-history"].forEach((id) => {
-          const el = $(id);
-          if (el && el.data) Plotly.Plots.resize(el);
-        });
-        document.querySelectorAll(".rose-plot").forEach((el) => {
-          if (el.data) Plotly.Plots.resize(el);
-        });
-      });
-    }
+    requestAnimationFrame(() => {
+      if (name === "modelling" && state.map) state.map.invalidateSize();
+      const panel = $("tab-" + name);
+      if (panel) panel.querySelectorAll(".js-plotly-plot").forEach((el) => Plotly.Plots.resize(el));
+    });
 
     try { history.replaceState(null, "", "#" + (anchor || name)); } catch (_) { /* ignore */ }
     if (anchor) {
@@ -1925,6 +1926,18 @@
     }
     if (name === "catchment" && state.catchmentMap) {
       requestAnimationFrame(() => state.catchmentMap.invalidateSize());
+    }
+    if (name === "rainfall") {
+      requestAnimationFrame(() => {
+        initRainMap();
+        if (state.rainMap) state.rainMap.invalidateSize();
+      });
+    }
+    if (name === "river-flow") {
+      requestAnimationFrame(() => {
+        initFlowMap();
+        if (state.flowMap) state.flowMap.invalidateSize();
+      });
     }
     if (name === "inaturalist") {
       requestAnimationFrame(() => {
@@ -1946,7 +1959,8 @@
   function route(hash) {
     const h = (hash || "").replace("#", "");
     if (!h) return false;
-    if (SECTION_OF[h]) { showTab(h); return true; }
+    const t = ALIASES[h] || h;
+    if (SECTION_OF[t]) { showTab(t); return true; }
     for (const [name, spec] of Object.entries(LAZY_PAGES)) {
       if (spec.anchors.test(h)) { showTab(name, h); return true; }
     }
@@ -2008,11 +2022,17 @@
     $("birds-updated").textContent = data.fetched_at
       ? "fetched " + data.fetched_at.replace("T", " ").replace("Z", " UTC") : "";
 
+    const where = data.area ? "around the lake, from William Creek to Marree,"
+      : `within ${esc(data.dist_km)} km of ${(data.points || []).length} points on the lake`;
     const notes = [
-      `The most recent sighting of each species within ${esc(data.dist_km)} km of `
-      + `${(data.points || []).length} points on the lake over the last `
+      `The most recent sighting of each species ${where} over the last `
       + `${esc(data.back_days)} days: a list of species reported, not a count of birds.`,
     ];
+    const nHot = (data.hotspots || []).length;
+    if (nHot) {
+      notes.push(`${spell(nHot)} eBird hotspot${nHot > 1 ? "s lie" : " lies"} in this area; those visited `
+        + "in the period are filled on the map.");
+    }
     if (sum.nPrivate) {
       notes.push(sum.nPrivate === 1
         ? "One sighting from a private location is listed without its location."
@@ -2045,6 +2065,13 @@
         + `<td>${esc(EBird.formatDate(sp.obsDt))}<span class="sci">${ageText}</span></td>`
         + `<td>${esc(EBird.formatCount(sp.howMany))}</td><td>${where}</td></tr>`;
     });
+    const hot = EBird.hotspotList(data);
+    $("birds-hotspots").innerHTML = hot.map((h) =>
+      `<tr><td><a href="${esc(h.url)}" target="_blank" rel="noopener">${esc(h.name)}</a></td>`
+      + `<td>${esc(EBird.formatDate(h.latest))}</td>`
+      + `<td>${h.active ? h.recent.length : ""}${h.waterbirds ? `<span class="rr-date">${h.waterbirds} waterbird${h.waterbirds > 1 ? "s" : ""}</span>` : ""}</td>`
+      + `<td>${esc(h.allTime)}</td></tr>`).join("");
+    $("birds-hotspot-block").hidden = !hot.length;
     $("birds-body").innerHTML = rows.join("")
       || '<tr><td colspan="4">No sightings reported in this period.</td></tr>';
 
@@ -2069,17 +2096,37 @@
     state.birdsLayer = null;
     if (!state.ebird || typeof EBird === "undefined") return;
     const layer = L.layerGroup();
-    EBird.locationGroups(state.ebird.species).forEach((g) => {
-      const list = g.species.slice(0, 8).map((sp) => esc(sp.comName)).join(", ")
-        + (g.species.length > 8 ? `, and ${g.species.length - 8} more` : "");
+    const back = esc(state.ebird.back_days || 30);
+    // Every hotspot in the area: filled if visited in the period, hollow otherwise
+    EBird.hotspotList(state.ebird).forEach((h) => {
+      const list = h.recent.slice(0, 10).map((r) => esc(r.comName)).join(", ")
+        + (h.recent.length > 10 ? `, and ${h.recent.length - 10} more` : "");
+      const body = h.active
+        ? `${h.recent.length} species in the last ${back} days<br><small>${list}</small>`
+        : `Last visited ${esc(EBird.formatDate(h.latest)) || "some time ago"}`;
+      L.circleMarker([h.lat, h.lng], {
+        radius: h.active ? Math.min(6 + h.recent.length / 2, 15) : 6,
+        color: "#134450", weight: 1.8,
+        fillColor: h.active ? "#1F6470" : "#FFFFFF", fillOpacity: h.active ? 0.6 : 0.9,
+      }).bindPopup(`<b>${esc(h.name)}</b><br>${body}<br><small>${esc(h.allTime)} species `
+        + `recorded all time. <a href="${esc(h.url)}" target="_blank" rel="noopener">Open on `
+        + "eBird</a></small>").addTo(layer);
+    });
+    // Public sightings away from hotspots, as small dots
+    EBird.otherLocations(state.ebird).forEach((g) => {
+      const list = g.species.slice(0, 8).map((sp) => esc(sp.comName)).join(", ");
       L.circleMarker([g.lat, g.lng], {
-        radius: Math.min(5 + g.species.length, 14),
-        color: "#134450", weight: 1.5, fillColor: "#1F6470", fillOpacity: 0.55,
-      }).bindPopup(`<b>${esc(g.name)}</b><br>${g.species.length} species, `
-        + `latest ${esc(EBird.formatDate(g.last))}<br><small>${list}</small>`
+        radius: 4, color: "#134450", weight: 1, fillColor: "#134450", fillOpacity: 0.5,
+      }).bindPopup(`<b>${esc(g.name)}</b><br>${g.species.length} species, latest `
+        + `${esc(EBird.formatDate(g.last))}<br><small>${list}</small>`
         + '<br><small>Source: <a href="https://ebird.org" target="_blank" '
         + 'rel="noopener">eBird.org</a></small>').addTo(layer);
     });
+    if (state.ebird.area && !state.birdsFitted) {
+      const [w, sth, e, n] = state.ebird.area;
+      state.birdsMap.fitBounds([[sth, w], [n, e]]);
+      state.birdsFitted = true;
+    }
     layer.addTo(state.birdsMap);
     state.birdsLayer = layer;
   }
@@ -2546,6 +2593,197 @@
     });
   }
 
+  // ── Catchment: rain and rivers ───────────────────────────
+  //
+  // data/rainfall.json (SILO) and data/rivers.json (Water Data Online) are
+  // written daily by the pipeline; nothing is fetched from the browser.
+
+  async function loadJson(apiPath, file) {
+    const sources = state.staticMode ? [`data/${file}`] : [apiPath, `data/${file}`];
+    for (const url of sources) {
+      try {
+        const res = await fetch(url, { cache: "no-store" });
+        if (res.ok) return await res.json();
+      } catch (_) { /* next source */ }
+    }
+    return null;
+  }
+
+  function rainImageUrl(png) {
+    return (state.staticMode ? "data/" : "/data/") + png;
+  }
+
+  function currentRain() {
+    const r = state.rain;
+    if (!r) return null;
+    if (state.rrView === "daily") {
+      const days = (r.days || []).slice().reverse();          // oldest first
+      const i = Math.min(Math.max(0, Number($("rain-day").value) || 0), days.length - 1);
+      const d = days[i];
+      return d ? { png: d.png, text: `${fmtLongDate(d.date)}: ${Catchment.fmtNumber(d.mean_mm)} mm on average over the basin, up to ${Catchment.fmtNumber(d.max_mm)} mm` } : null;
+    }
+    const t = r[state.rrView];
+    return t ? { png: t.png, text: `${fmtLongDate(t.from)} to ${fmtLongDate(t.to)}: ${Catchment.fmtNumber(t.mean_mm)} mm on average over the basin, up to ${Catchment.fmtNumber(t.max_mm)} mm` } : null;
+  }
+
+  function showRain() {
+    const cur = currentRain();
+    $("rain-period").textContent = cur ? cur.text : "";
+    if (!state.rainMap || !state.rain || !cur) return;
+    if (state.rainOverlay) state.rainMap.removeLayer(state.rainOverlay);
+    state.rainOverlay = L.imageOverlay(rainImageUrl(cur.png), state.rain.bounds, {
+      opacity: 0.85,
+      attribution: 'Rainfall &copy; <a href="https://www.longpaddock.qld.gov.au/silo/">SILO</a> (CC BY 4.0)',
+    }).addTo(state.rainMap);
+  }
+
+  function baseCatchmentMap(el) {
+    const map = L.map(el, { scrollWheelZoom: false }).setView([-25.5, 139.0], 5);
+    L.tileLayer("https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png", {
+      maxZoom: 12,
+      attribution: "&copy; OpenTopoMap (CC-BY-SA), &copy; OpenStreetMap contributors",
+    }).addTo(map);
+    return map;
+  }
+
+  // The basin outline comes with the rainfall data; both maps draw it
+  function drawOutline(map) {
+    const o = state.rain && state.rain.outline;
+    if (!o || map._ktleOutline) return;
+    map._ktleOutline = L.polygon(o.coords, {
+      color: "#134450", weight: 1.2, fill: false, dashArray: o.kind === "official" ? null : "4 4",
+    }).addTo(map);
+  }
+
+  function showHydrograph(st) {
+    const q = st.discharge && st.discharge.values && st.discharge.values.length ? st.discharge : null;
+    const series = q || st.level;
+    const el = $("flow-hydro");
+    if (!series || !series.values || !series.values.length) {
+      el.innerHTML = `<p class="rr-note">${esc(st.name)}: no values in the past year.</p>`;
+      return;
+    }
+    const unit = Catchment.unitLabel(series.unit);
+    Plotly.newPlot(el, [{
+      x: series.values.map((v) => v[0]), y: series.values.map((v) => v[1]),
+      type: "scatter", mode: "lines", line: { color: "#1F6470", width: 1.8 },
+      hovertemplate: `%{x}<br>%{y} ${unit}<extra></extra>`,
+    }], {
+      title: { text: `${esc(st.name)}: daily mean ${q ? "flow" : "level"}`, font: { size: 14 } },
+      margin: { l: 56, r: 16, t: 40, b: 40 }, height: 300,
+      yaxis: { title: unit, rangemode: "tozero" }, xaxis: { type: "date" },
+      paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
+    }, { displayModeBar: false, responsive: true });
+  }
+
+  function notesFor(d) {
+    return (d && d.demo ? "<p>These are demonstration data.</p>" : "")
+      + (d && d.stale ? "<p>These data could not be refreshed; the last valid set is shown.</p>" : "");
+  }
+
+  function renderRainfall() {
+    const rain = state.rain;
+    if (!$("rain-now")) return;
+    $("rain-empty").hidden = Boolean(rain);
+    $("rain-now").innerHTML = Catchment.summary(rain, null).map((l) => `<p>${esc(l)}</p>`).join("")
+      + notesFor(rain);
+    if (!rain) return;
+    $("rain-legend").innerHTML = Catchment.legend(rain.scale).map((x) =>
+      `<span><i style="background:${esc(x.colour)}"></i>${esc(x.label)}</span>`).join("");
+    if (rain.outline && rain.outline.kind === "official") {
+      $("rain-caption").textContent = $("rain-caption").textContent.replace(" The basin outline is approximate.", "");
+    }
+    const days = (rain.days || []).slice().reverse();
+    $("rain-day").max = String(Math.max(0, days.length - 1));
+    $("rain-day").value = String(Math.max(0, days.length - 1));
+    Plotly.newPlot($("rain-chart"), [{
+      x: days.map((d) => d.date), y: days.map((d) => d.mean_mm), type: "bar",
+      marker: { color: "#2A73B8" }, hovertemplate: "%{x}<br>%{y:.1f} mm<extra></extra>",
+    }], {
+      margin: { l: 56, r: 16, t: 10, b: 40 }, height: 240,
+      yaxis: { title: "mm, basin average", rangemode: "tozero" }, xaxis: { type: "date" },
+      paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
+    }, { displayModeBar: false, responsive: true });
+    initRainMap();
+  }
+
+  function renderRiverFlow() {
+    const rivers = state.rivers;
+    if (!$("flow-now")) return;
+    $("flow-empty").hidden = Boolean(rivers);
+    $("flow-now").innerHTML = Catchment.summary(null, rivers).map((l) => `<p>${esc(l)}</p>`).join("")
+      + notesFor(rivers);
+    const st = (rivers && rivers.stations) || [];
+    $("flow-stations").innerHTML = st.map((x, i) => {
+      const q = Catchment.latest(x, "discharge"), h = Catchment.latest(x, "level");
+      return `<tr data-i="${i}"><td><button type="button" class="rr-link" data-i="${i}">${esc(x.name)}</button></td>`
+        + `<td><i class="rr-dot" style="background:${Catchment.statusColour(x.status)}"></i>${Catchment.statusLabel(x.status)}</td>`
+        + `<td>${q ? `${Catchment.fmtNumber(q.value)} ${esc(q.unit)}<span class="rr-date">${esc(fmtLongDate(q.date))}</span>` : ""}</td>`
+        + `<td>${h ? `${Catchment.fmtNumber(h.value)} ${esc(h.unit)}<span class="rr-date">${esc(fmtLongDate(h.date))}</span>` : ""}</td></tr>`;
+    }).join("") || '<tr><td colspan="4">No gauges with recent data.</td></tr>';
+    const first = st.find((x) => x.status === "flowing") || st[0];
+    if (first) showHydrograph(first);
+    initFlowMap();
+  }
+
+  function initRainMap() {
+    const el = $("rain-map");
+    if (!el || typeof L === "undefined" || el.offsetParent === null) return;
+    if (!state.rainMap) state.rainMap = baseCatchmentMap(el);
+    drawOutline(state.rainMap);
+    showRain();
+  }
+
+  function initFlowMap() {
+    const el = $("flow-map");
+    if (!el || typeof L === "undefined" || el.offsetParent === null) return;
+    if (!state.flowMap) state.flowMap = baseCatchmentMap(el);
+    drawOutline(state.flowMap);
+    if (state.rivers && !state.flowStations) {
+      const layer = L.layerGroup();
+      state.rivers.stations.forEach((st) => {
+        const q = Catchment.latest(st, "discharge");
+        L.circleMarker([st.lat, st.lon], {
+          radius: 7, color: "#FFFFFF", weight: 2,
+          fillColor: Catchment.statusColour(st.status), fillOpacity: 0.95,
+        }).bindTooltip(`<b>${esc(st.name)}</b><br>${Catchment.statusLabel(st.status)}`
+          + (q ? `<br>${Catchment.fmtNumber(q.value)} ${esc(q.unit)} on ${esc(fmtLongDate(q.date))}` : ""))
+          .on("click", () => showHydrograph(st)).addTo(layer);
+      });
+      layer.addTo(state.flowMap);
+      state.flowStations = layer;
+    }
+  }
+
+  function wireRainRivers() {
+    document.querySelectorAll("[data-rain]").forEach((b) => b.addEventListener("click", () => {
+      state.rrView = b.dataset.rain;
+      document.querySelectorAll("[data-rain]").forEach((x) => x.classList.toggle("active", x === b));
+      $("rain-day").hidden = state.rrView !== "daily";
+      showRain();
+    }));
+    const day = $("rain-day");
+    if (day) day.addEventListener("input", showRain);
+    const body = $("flow-stations");
+    if (body) body.addEventListener("click", (e) => {
+      const b = e.target.closest(".rr-link");
+      if (b && state.rivers) showHydrograph(state.rivers.stations[Number(b.dataset.i)]);
+    });
+  }
+
+  // Data that do not depend on SWOT: weather, birds, community observations,
+  // rain and rivers. They load whether or not the lake data exist.
+  function loadIndependentData(withScenario) {
+    loadWeather().then(() => { if (withScenario) loadScenario(null); });
+    loadEbird().then((d) => { state.ebird = d; renderBirds(d); renderHome(); renderGroupBlocks(); });
+    loadInat().then((d) => { state.inat = d; renderInat(d); renderGroupBlocks(); });
+    Promise.all([loadJson("/api/rainfall", "rainfall.json"), loadJson("/api/rivers", "rivers.json")])
+      .then(([rain, rivers]) => {
+        state.rain = rain; state.rivers = rivers;
+        renderRainfall(); renderRiverFlow();
+      });
+  }
+
   async function init() {
     loadHeroImage();
     const { data, viaApi } = await loadData();
@@ -2553,6 +2791,7 @@
     if (!data || !data.sites) {
       $("empty-state").hidden = false;
       renderHome();
+      loadIndependentData(false);
       return;
     }
 
@@ -2632,15 +2871,14 @@
     wireTimeline();
     state.areaIdx = Math.max(0, areaDates().length - 1);
     drawAreaChart();
-    loadWeather().then(() => loadScenario(null));
-    loadEbird().then((d) => { state.ebird = d; renderBirds(d); renderHome(); renderGroupBlocks(); });
-    loadInat().then((d) => { state.inat = d; renderInat(d); renderGroupBlocks(); });
+    loadIndependentData(true);
   }
 
   document.addEventListener("DOMContentLoaded", () => {
     // Les onglets fonctionnent même si les données manquent
     wireTabs();
     wireDownloads();
+    wireRainRivers();
     init();
   });
 })();

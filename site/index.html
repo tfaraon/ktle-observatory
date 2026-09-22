@@ -25,13 +25,29 @@
   <header class="masthead">
     <a class="wordmark" href="#home">Kati Thanda&ndash;Lake Eyre<span>Observatory</span></a>
     <nav class="sections" aria-label="Site">
-      <button type="button" class="section-btn" data-section="natural-history">The lake</button>
+      <button type="button" class="section-btn" data-section="lake">The lake</button>
       <button type="button" class="section-btn" data-section="catchment">Catchment</button>
+      <button type="button" class="section-btn" data-section="climate">Climate and meteorology</button>
       <button type="button" class="section-btn" data-section="fauna-flora">Fauna and flora</button>
       <button type="button" class="section-btn" data-section="culture">Aboriginal culture</button>
-      <button type="button" class="section-btn" data-section="observatory">Observatory</button>
     </nav>
   </header>
+
+  <nav class="tabs" id="catchment-tabs" data-for="catchment" role="tablist"
+       aria-label="Catchment" hidden>
+    <button class="tab" role="tab" data-tab="catchment"
+            aria-selected="false">The basin</button>
+    <button class="tab" role="tab" data-tab="river-flow"
+            aria-selected="false">River flow</button>
+  </nav>
+
+  <nav class="tabs" id="climate-tabs" data-for="climate" role="tablist"
+       aria-label="Climate and meteorology" hidden>
+    <button class="tab" role="tab" data-tab="weather"
+            aria-selected="false">Weather</button>
+    <button class="tab" role="tab" data-tab="rainfall"
+            aria-selected="false">Rainfall</button>
+  </nav>
 
   <nav class="tabs" id="fauna-tabs" data-for="fauna-flora" role="tablist"
        aria-label="Fauna and flora" hidden>
@@ -51,10 +67,12 @@
             aria-selected="false">Stories</button>
   </nav>
 
-  <div class="subbar" data-for="observatory" hidden>
-  <nav class="tabs" id="observatory-tabs" role="tablist" aria-label="Observatory">
-      <button class="tab active" role="tab" data-tab="observatory"
-              aria-selected="true">Dashboard</button>
+  <div class="subbar" data-for="lake" hidden>
+  <nav class="tabs" id="lake-tabs" role="tablist" aria-label="The lake">
+      <button class="tab" role="tab" data-tab="natural-history"
+              aria-selected="false">Natural history</button>
+      <button class="tab" role="tab" data-tab="modelling"
+              aria-selected="false">Modelling</button>
       <button class="tab" role="tab" data-tab="methods"
               aria-selected="false">Methods</button>
       <button class="tab" role="tab" data-tab="publications"
@@ -69,7 +87,7 @@
 
   <main>
 
-    <section id="tab-observatory" class="tab-panel" role="tabpanel" hidden>
+    <section id="tab-modelling" class="tab-panel" role="tabpanel" hidden>
 
     <!-- Empty state: shown until the JSON exists -->
     <section id="empty-state" class="panel empty-state" hidden>
@@ -174,33 +192,6 @@
 
       </article>
 
-      <!-- Panel 2: BOM weather -->
-      <article class="panel weather-card">
-        <div class="panel-head weather-head">
-          <div>
-            <h2>BOM weather stations</h2>
-          </div>
-          <div class="head-actions">
-            <button type="button" id="dl-weather" class="dl-btn"
-                    title="Full local archive for every station, as CSV">Download CSV</button>
-            <p id="weather-updated" class="weather-updated mono"></p>
-          </div>
-        </div>
-        <div id="weather-strip" class="weather-strip">
-          <p class="weather-empty mono">Loading observations…</p>
-        </div>
-        <div id="weather-history" class="weather-history" hidden></div>
-
-        <div id="rose-block" class="rose-block" hidden>
-          <div class="rose-head">
-            <div class="seg" id="rose-seg" role="group" aria-label="Period"></div>
-          </div>
-          <div id="rose-legend" class="rose-legend"></div>
-          <p id="rose-note" class="rose-note mono"></p>
-          <div id="rose-grid" class="rose-grid"></div>
-        </div>
-      </article>
-
       <!-- Panel 3b: surface water area -->
       <article class="panel chart-card" id="area-card" hidden>
         <div class="panel-head head-row">
@@ -245,7 +236,7 @@
           <div id="lake-now" class="lake-now" aria-live="polite">
             <p>Reading the latest observations.</p>
           </div>
-          <p class="hero-actions"><a class="text-link" href="#observatory">Open the observatory</a></p>
+          <p class="hero-actions"><a class="text-link" href="#modelling">Water levels and hydrodynamic models</a></p>
         </div>
         <figure class="hero-plate">
           <div class="plate-frame">
@@ -263,21 +254,119 @@
       </div>
       <nav class="explore" aria-label="Parts of this site">
         <a class="explore-row" href="#natural-history"><span class="explore-name">The lake</span>
-          <span class="explore-text">The country, geology, deep history, water and climate of Kati Thanda.</span></a>
+          <span class="explore-text">The lake&rsquo;s country, geology, deep history and water, and its water level, extent and hydrodynamic models, from SWOT and Delft3D.</span></a>
         <a class="explore-row" href="#catchment"><span class="explore-name">Catchment</span>
-          <span class="explore-text">The rivers of the Lake Eyre Basin, from the Channel Country to the lake, and how they are protected.</span></a>
+          <span class="explore-text">The rivers of the Lake Eyre Basin, from the Channel Country to the lake, how they are protected, and the flow measured at their gauges.</span></a>
+        <a class="explore-row" href="#weather"><span class="explore-name">Climate and meteorology</span>
+          <span class="explore-text">Wind, temperature and rain at the weather stations around the lake, and rainfall over the whole basin.</span></a>
         <a class="explore-row" href="#fauna-flora"><span class="explore-name">Fauna and flora</span>
           <span class="explore-text">The plants and animals that live with the lake&rsquo;s cycles of flood and drought, the birds reported this month, and how to share your own observations on iNaturalist.</span></a>
         <a class="explore-row" href="#culture"><span class="explore-name">Aboriginal culture</span>
           <span class="explore-text">The peoples of the lake and its basin, and the stories they have chosen to share.</span></a>
-        <a class="explore-row" href="#observatory"><span class="explore-name">Observatory</span>
-          <span class="explore-text">Water level, extent and area from SWOT, weather and hydrodynamic scenarios.</span></a>
       </nav>
     </section>
 
     <section id="tab-natural-history" class="tab-panel prose" role="tabpanel" hidden></section>
 
     <section id="tab-catchment" class="tab-panel prose" role="tabpanel" hidden></section>
+
+    <section id="tab-weather" class="tab-panel wx-page" role="tabpanel" hidden>
+      <div class="rr-intro">
+        <h2>Weather</h2>
+        <p>Wind drives the shallow water of a filled lake across its bed, piling it against one shore and
+          raising waves, and it is one of the conditions the hydrodynamic scenarios are matched against.
+          The Bureau of Meteorology stations around the lake report wind, temperature and rain every half hour.</p>
+      </div>
+      <article class="panel weather-card">
+        <div class="panel-head weather-head">
+          <div>
+            <h2>BOM weather stations</h2>
+          </div>
+          <div class="head-actions">
+            <button type="button" id="dl-weather" class="dl-btn"
+                    title="Full local archive for every station, as CSV">Download CSV</button>
+            <p id="weather-updated" class="weather-updated mono"></p>
+          </div>
+        </div>
+        <div id="weather-strip" class="weather-strip">
+          <p class="weather-empty mono">Loading observations…</p>
+        </div>
+        <div id="weather-history" class="weather-history" hidden></div>
+
+        <div id="rose-block" class="rose-block" hidden>
+          <div class="rose-head">
+            <div class="seg" id="rose-seg" role="group" aria-label="Period"></div>
+          </div>
+          <div id="rose-legend" class="rose-legend"></div>
+          <p id="rose-note" class="rose-note mono"></p>
+          <div id="rose-grid" class="rose-grid"></div>
+        </div>
+      </article>
+
+    </section>
+
+    <section id="tab-rainfall" class="tab-panel rr-page" role="tabpanel" hidden>
+      <div class="rr-intro">
+        <h2>Rainfall over the basin</h2>
+        <p>Almost all the water that reaches Kati Thanda falls as rain far to the north-east, over the
+          Queensland headwaters of the Diamantina and Cooper. This page follows that rain over the whole basin,
+          day by day.</p>
+        <div id="rain-now" class="rr-now"></div>
+      </div>
+      <figure class="plate rr-plate">
+        <div class="rr-controls">
+          <div class="seg" role="group" aria-label="Rainfall period">
+            <button type="button" class="seg-btn active" data-rain="sum7">7 days</button>
+            <button type="button" class="seg-btn" data-rain="sum30">30 days</button>
+            <button type="button" class="seg-btn" data-rain="daily">Day by day</button>
+          </div>
+          <input type="range" id="rain-day" min="0" max="0" value="0" aria-label="Day" hidden>
+          <span id="rain-period" class="rr-period"></span>
+        </div>
+        <div id="rain-map" class="rr-map" role="img" aria-label="Map of rainfall over the Lake Eyre Basin"></div>
+        <div id="rain-legend" class="rr-legend"></div>
+        <figcaption id="rain-caption">Rainfall from SILO, interpolated from rain gauges that are few and far
+          between in this desert; recent days may be revised. The basin outline is approximate.</figcaption>
+      </figure>
+      <section class="rr-block">
+        <h3>Rain over the basin, day by day</h3>
+        <div id="rain-chart" class="rr-chart"></div>
+      </section>
+      <p id="rain-empty" class="birds-empty" hidden>No rainfall has been fetched yet. Run
+        <code>python pipeline/fetch_rainfall.py</code>.</p>
+      <p class="birds-attribution">Rainfall: <a href="https://www.longpaddock.qld.gov.au/silo/" target="_blank"
+        rel="noopener">SILO</a>, Queensland Government, CC BY 4.0. The flow this rain produces in the rivers is
+        followed under <a href="#river-flow">Catchment, River flow</a>.</p>
+    </section>
+
+    <section id="tab-river-flow" class="tab-panel rr-page" role="tabpanel" hidden>
+      <div class="rr-intro">
+        <h2>River flow</h2>
+        <p>Rain that falls on the Queensland headwaters takes weeks or months to travel down the Channel
+          Country, and only rarely reaches the lake. The river gauges still operating in the basin measure it
+          on the way; many others have closed.</p>
+        <div id="flow-now" class="rr-now"></div>
+      </div>
+      <figure class="plate rr-plate">
+        <div id="flow-map" class="rr-map" role="img" aria-label="Map of the river gauges of the Lake Eyre Basin"></div>
+        <figcaption>River gauges coloured by what they last reported. Select a gauge to see its flow over the
+          past year. The rain that feeds these rivers is mapped under
+          <a href="#rainfall">Climate and meteorology, Rainfall</a>.</figcaption>
+      </figure>
+      <section class="rr-block">
+        <h3>River gauges</h3>
+        <div id="flow-hydro" class="rr-chart"></div>
+        <div class="table-wrap"><table class="rr-table">
+          <thead><tr><th>Gauge</th><th>State</th><th>Latest flow</th><th>Latest level</th></tr></thead>
+          <tbody id="flow-stations"></tbody>
+        </table></div>
+      </section>
+      <p id="flow-empty" class="birds-empty" hidden>No river data have been fetched yet. Run
+        <code>python pipeline/fetch_rivers.py</code>.</p>
+      <p class="birds-attribution">River data: <a href="https://www.bom.gov.au/waterdata/" target="_blank"
+        rel="noopener">Water Data Online</a>, Bureau of Meteorology, from the State agencies that operate the
+        gauges, under Creative Commons Attribution unless the supplier states otherwise.</p>
+    </section>
 
     <section id="tab-fauna-flora" class="tab-panel prose" role="tabpanel" hidden></section>
 
@@ -368,9 +457,17 @@
       <figure class="plate birds-plate">
         <div id="birds-map" class="birds-map" role="img"
              aria-label="Map of the locations where birds were reported around the lake"></div>
-        <figcaption>Locations of recent sightings. Circles grow with the number of species reported;
-          sightings from private locations are listed below but not mapped.</figcaption>
+        <figcaption>Every eBird hotspot around the lake: filled if birds were reported there in the last
+          month, larger with more species, hollow if not visited recently. Small dots mark other public
+          sighting locations; sightings from private locations are listed below but not mapped.</figcaption>
       </figure>
+      <section id="birds-hotspot-block" class="rr-block" hidden>
+        <h3>eBird hotspots</h3>
+        <div class="table-wrap"><table class="rr-table">
+          <thead><tr><th>Hotspot</th><th>Last visit</th><th>Species, last month</th><th>Species, all time</th></tr></thead>
+          <tbody id="birds-hotspots"></tbody>
+        </table></div>
+      </section>
       <p id="birds-empty" class="birds-empty" hidden>No bird observations are available yet.
         Run <code>python pipeline/fetch_ebird.py</code> with an eBird key to add them.</p>
       <article class="panel birds-card" id="birds-card" hidden>
@@ -425,6 +522,7 @@
   <script src="download.js"></script>
   <script src="ebird.js"></script>
   <script src="inaturalist.js"></script>
+  <script src="catchment_live.js"></script>
   <script src="methods.js"></script>
   <script src="natural_history.js"></script>
   <script src="aboriginal_culture.js"></script>

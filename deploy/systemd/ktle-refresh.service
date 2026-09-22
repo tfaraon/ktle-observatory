@@ -1,0 +1,31 @@
+# Mise a jour quotidienne de toutes les donnees, sans publication.
+# Lancee par ktle-refresh.timer ; a copier dans /etc/systemd/system/.
+[Unit]
+Description=KTLE observatory: daily data refresh
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=lakeeyre
+WorkingDirectory=/srv/lake-eyre-dashboard
+# Secrets : EBIRD_API_KEY, EARTHDATA_USERNAME, EARTHDATA_PASSWORD
+EnvironmentFile=/etc/ktle-observatory.env
+Environment=PYTHON=/srv/lake-eyre-dashboard/.venv/bin/python
+# Caches des bibliotheques (earthaccess, matplotlib) dans data/, seul
+# repertoire accessible en ecriture
+Environment=HOME=/srv/lake-eyre-dashboard/data/.home
+Environment=XDG_CACHE_HOME=/srv/lake-eyre-dashboard/data/.cache
+Environment=MPLCONFIGDIR=/srv/lake-eyre-dashboard/data/.cache/matplotlib
+ExecStartPre=/usr/bin/mkdir -p /srv/lake-eyre-dashboard/data/.home /srv/lake-eyre-dashboard/data/.cache
+ExecStart=/srv/lake-eyre-dashboard/deploy/refresh.sh --no-publish
+# Copie datee des donnees : historique conserve localement
+ExecStartPost=/srv/lake-eyre-dashboard/deploy/archive.sh
+TimeoutStartSec=6h
+Nice=10
+IOSchedulingClass=idle
+
+ProtectSystem=strict
+ReadWritePaths=/srv/lake-eyre-dashboard/data
+PrivateTmp=true
+NoNewPrivileges=true

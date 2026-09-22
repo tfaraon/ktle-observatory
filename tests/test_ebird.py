@@ -23,7 +23,7 @@ sys.path.insert(0, str(ROOT / "pipeline"))
 import fetch_ebird as fe  # noqa: E402
 
 KEY = "SECRET-KEY-123"
-CFG = {"ebird": {"back_days": 30, "dist_km": 50, "points": [
+CFG = {"ebird": {"back_days": 30, "dist_km": 50, "hotspots": False, "pause_s": 0, "points": [
     {"name": "A", "lat": -28.9, "lon": 137.0},
     {"name": "B", "lat": -28.9, "lon": 137.5}]}}
 
@@ -138,7 +138,7 @@ with tempfile.TemporaryDirectory() as td:
         seen.update(params)
         return []
     fe.api_get = capture
-    fe.update({"ebird": {"back_days": 90, "dist_km": 200,
+    fe.update({"ebird": {"back_days": 90, "dist_km": 200, "hotspots": False, "pause_s": 0,
                          "points": [{"name": "A", "lat": 0, "lon": 0}]}}, key=KEY)
     assert seen["back"] == 30 and seen["dist"] == 50, seen
 

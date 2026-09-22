@@ -85,8 +85,32 @@
     };
   }
 
+  function hotspotUrl(locId) {
+    return "https://ebird.org/hotspot/" + encodeURIComponent(locId || "");
+  }
+
+  /* Hotspots pour la carte et le tableau : les actifs (observations dans
+   * la fenetre) d'abord, du plus recent au plus ancien, puis les autres. */
+  function hotspotList(data) {
+    return ((data && data.hotspots) || []).map((h) => ({
+      locId: h.locId, name: h.name || "Unnamed hotspot", lat: h.lat, lng: h.lng,
+      latest: h.latestObsDt || "", allTime: h.numSpeciesAllTime || 0,
+      recent: h.recent || [], active: (h.recent || []).length > 0,
+      waterbirds: (h.recent || []).filter((r) => r.indicator).length,
+      url: hotspotUrl(h.locId),
+    })).sort((a, b) => (a.active !== b.active ? (a.active ? -1 : 1)
+      : String(b.latest).localeCompare(String(a.latest))));
+  }
+
+  /* Localites qui ne sont pas des hotspots : observations a un lieu
+   * personnel public, deja dans la liste des especes. */
+  function otherLocations(data) {
+    const hs = new Set(((data && data.hotspots) || []).map((h) => h.locId));
+    return locationGroups((data && data.species) || []).filter((g) => !hs.has(g.key));
+  }
+
   const api = { parseObsDate, daysAgo, formatCount, formatDate, speciesUrl,
-                sortSpecies, locationGroups, summary };
+                sortSpecies, locationGroups, summary, hotspotUrl, hotspotList, otherLocations };
 
   if (typeof module === "object" && module.exports) {
     module.exports = api;

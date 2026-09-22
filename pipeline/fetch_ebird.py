@@ -24,6 +24,8 @@ periode, pas un recensement.
 
 import argparse
 import json
+import time
+import math
 import sys
 import urllib.parse
 import urllib.request
@@ -48,6 +50,15 @@ KEEP = ("speciesCode", "comName", "sciName", "howMany", "obsDt",
 DEFAULTS = {
     "back_days": 30,
     "dist_km": 50,
+    # Emprise couverte (ouest, sud, est, nord). Si elle est donnee, une
+    # grille de points la couvre sans trou, au lieu des points fixes :
+    # l'API plafonne le rayon a 50 km, et quatre points laissaient hors
+    # d'atteinte des spots comme Muloorina.
+    "area": None,
+    # Liste de tous les hotspots eBird de l'emprise, et observations
+    # recentes de ceux visites dans la fenetre
+    "hotspots": True,
+    "pause_s": 0.3,
     "points": [
         {"name": "Lake Eyre North", "lat": -28.20, "lon": 137.30},
         {"name": "Belt Bay", "lat": -28.89, "lon": 137.03},
@@ -155,6 +166,21 @@ def load_previous(demo=False):
     return prev if bool(prev.get("demo")) == bool(demo) else None
 
 
+def demo_hotspots(ecfg):
+    """Hotspots fictifs, marques demonstration : un actif, un ancien."""
+    today = datetime.now(timezone.utc)
+    return [
+        {"locId": "LDEMO1", "name": "Demonstration hotspot, Muloorina", "lat": -29.24, "lng": 137.91,
+         "latestObsDt": (today - timedelta(days=3)).strftime("%Y-%m-%d %H:%M"),
+         "numSpeciesAllTime": 112,
+         "recent": [{"speciesCode": "bansti1", "comName": "Banded Stilt",
+                     "sciName": "Cladorhynchus leucocephalus",
+                     "obsDt": (today - timedelta(days=3)).strftime("%Y-%m-%d %H:%M"), "howMany": 40}]},
+        {"locId": "LDEMO2", "name": "Demonstration hotspot, Halligan Bay", "lat": -28.52, "lng": 137.03,
+         "latestObsDt": "2025-04-11 09:30", "numSpeciesAllTime": 38, "recent": []},
+    ]
+
+
 def make_demo(ecfg):
     now = datetime.now(timezone.utc)
     pool = [
@@ -178,17 +204,104 @@ def make_demo(ecfg):
     return out
 
 
+SLEEP = time.sleep
+
+
+def grid_points(area, dist_km):
+    """Points dont les cercles de rayon dist_km couvrent l'emprise sans trou.
+
+    Mailles carrees de cote dist*sqrt(2)*0.95 : le coin le plus eloigne
+    d'un centre est a 0,95*dist, dans le cercle, avec une marge pour la
+    variation du cosinus de la latitude sur l'emprise.
+    """
+    w, s, e, n = area
+    step = dist_km * math.sqrt(2) * 0.95
+    dlat = step / 111.2
+    dlon = step / (111.2 * math.cos(math.radians((s + n) / 2)))
+    nlat = max(1, math.ceil((n - s) / dlat))
+    nlon = max(1, math.ceil((e - w) / dlon))
+    lat0 = (s + n) / 2 - (nlat - 1) * dlat / 2
+    lon0 = (w + e) / 2 - (nlon - 1) * dlon / 2
+    pts = []
+    for i in range(nlat):
+        for j in range(nlon):
+            pts.append({"name": f"Grid {len(pts) + 1}", "lat": round(lat0 + i * dlat, 4),
+                        "lon": round(lon0 + j * dlon, 4)})
+    return pts
+
+
+def in_area(lat, lng, area):
+    w, s, e, n = area
+    return w <= lng <= e and s <= lat <= n
+
+
+def fetch_hotspots(points, area, dist, back, key, errors):
+    """Tous les hotspots de l'emprise, et les observations recentes des actifs."""
+    found = {}
+    for p in points:
+        try:
+            hs = api_get("/ref/hotspot/geo", {"lat": p["lat"], "lng": p["lon"], "dist": dist,
+                                                "fmt": "json"}, key)
+            SLEEP(PAUSE[0])
+        except Exception as e:
+            errors.append(f"hotspots {p['name']}: {type(e).__name__}: {e}"[:160])
+            continue
+        for h in hs or []:
+            if not isinstance(h, dict) or not h.get("locId"):
+                continue
+            try:
+                lat, lng = float(h["lat"]), float(h["lng"])
+            except (KeyError, TypeError, ValueError):
+                continue
+            if area and not in_area(lat, lng, area):
+                continue
+            found.setdefault(h["locId"], {
+                "locId": h["locId"], "name": h.get("locName"),
+                "lat": round(lat, 5), "lng": round(lng, 5),
+                "latestObsDt": h.get("latestObsDt"),
+                "numSpeciesAllTime": h.get("numSpeciesAllTime"),
+                "recent": [],
+            })
+    horizon = (datetime.now(timezone.utc) - timedelta(days=back)).strftime("%Y-%m-%d")
+    batches = []
+    for h in found.values():
+        if not h["latestObsDt"] or str(h["latestObsDt"])[:10] < horizon:
+            continue
+        try:
+            obs = api_get(f"/data/obs/{h['locId']}/recent", {"back": back, "sppLocale": "en"}, key)
+            SLEEP(PAUSE[0])
+        except Exception as e:
+            errors.append(f"{h['name']}: {type(e).__name__}: {e}"[:160])
+            continue
+        batches.append(obs or [])
+        h["recent"] = sorted(
+            ({"speciesCode": o.get("speciesCode"), "comName": o.get("comName"),
+              "sciName": o.get("sciName"), "obsDt": o.get("obsDt"),
+              "howMany": o.get("howMany")} for o in obs or [] if o.get("speciesCode")),
+            key=lambda r: r["obsDt"] or "", reverse=True)
+    hotspots = sorted(found.values(), key=lambda h: str(h["latestObsDt"] or ""), reverse=True)
+    return hotspots, batches
+
+
+PAUSE = [0.3]
+
+
 def update(cfg, demo=False, key=None, write=True):
     ecfg = dict(DEFAULTS, **(cfg.get("ebird") or {}))
     back = max(1, min(int(ecfg["back_days"]), 30))    # limites de l'API
     dist = max(1, min(int(ecfg["dist_km"]), 50))
     indicators = ecfg["indicator_species"]
+    area = ecfg.get("area")
+    points = grid_points(area, dist) if area else ecfg["points"]
+    PAUSE[0] = float(ecfg.get("pause_s", 0.3))
+    hotspots = []
     now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
     stale = False
     errors = []
     if demo:
         recent, notable = [make_demo(ecfg)], set()
+        hotspots = demo_hotspots(ecfg)
     else:
         if not key:
             raise SystemExit(
@@ -197,7 +310,7 @@ def update(cfg, demo=False, key=None, write=True):
                 "  export EBIRD_API_KEY=votre_clé\n"
                 "Pour le workflow GitHub, déclarez-la comme secret du dépôt.")
         recent, notable = [], set()
-        for p in ecfg["points"]:
+        for p in points:
             q = {"lat": p["lat"], "lng": p["lon"], "dist": dist, "back": back,
                  "sppLocale": "en"}
             try:
@@ -205,6 +318,7 @@ def update(cfg, demo=False, key=None, write=True):
                 nb = api_get("/data/obs/geo/recent/notable",
                              dict(q, detail="simple"), key)
                 notable.update(o.get("speciesCode") for o in nb)
+                SLEEP(PAUSE[0])
             except Exception as e:
                 errors.append(f"{p['name']}: {type(e).__name__}: {e}"[:160])
 
@@ -219,6 +333,9 @@ def update(cfg, demo=False, key=None, write=True):
             if write:
                 _write(prev)
             return prev
+        if ecfg.get("hotspots", True):
+            hotspots, extra = fetch_hotspots(points, area, dist, back, key, errors)
+            recent.extend(extra)
 
     species = annotate(merge_species(recent), notable, indicators)
     payload = {
@@ -230,7 +347,10 @@ def update(cfg, demo=False, key=None, write=True):
         "back_days": back,
         "dist_km": dist,
         "points": [{"name": p["name"], "lat": p["lat"], "lon": p["lon"]}
-                   for p in ecfg["points"]],
+                   for p in points],
+        "area": area,
+        "hotspots": [dict(h, recent=[dict(r, indicator=r.get("sciName") in indicators)
+                                     for r in h["recent"]]) for h in hotspots],
         "n_species": len(species),
         "indicators": summarise(species, indicators),
         "species": species,

@@ -1,0 +1,13 @@
+# Chaque jour a 7 h 30, heure du serveur : SILO a publie la veille, Water
+# Data Online s'est mis a jour. Persistent=true rattrape un passage manque
+# si la machine etait eteinte.
+[Unit]
+Description=KTLE observatory: daily data refresh
+
+[Timer]
+OnCalendar=*-*-* 07:30:00
+Persistent=true
+RandomizedDelaySec=15m
+
+[Install]
+WantedBy=timers.target
