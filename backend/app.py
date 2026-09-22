@@ -197,6 +197,19 @@ def _read_weather_file():
 
 
 EBIRD_FILE = ROOT / "data" / "ebird.json"
+INAT_FILE = ROOT / "data" / "inaturalist.json"
+
+
+@app.get("/api/inaturalist")
+def api_inaturalist():
+    """Observations iNaturalist deja recuperees par pipeline/fetch_inaturalist.py."""
+    if not INAT_FILE.exists():
+        return jsonify({
+            "error": "no_data",
+            "message": "No iNaturalist observations yet: run pipeline/fetch_inaturalist.py",
+        }), 404
+    with open(INAT_FILE, "r", encoding="utf-8") as f:
+        return jsonify(json.load(f))
 
 
 @app.get("/api/ebird")

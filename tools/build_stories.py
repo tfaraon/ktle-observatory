@@ -47,6 +47,9 @@ REFS = {
     "slsadieri": ("SLSA 2026b", "the State Library of South Australia (2026b)",
         "State Library of South Australia (2026b) Aboriginal people of South Australia: Dieri. Research guide.",
         "https://guides.slsa.sa.gov.au/Aboriginal_peopleSA/Dieri"),
+    "stuart1991": ("Stuart 1991", "Stuart (1991)",
+        "Stuart, R. (1991) An Aboriginal viewpoint. In: Badman, F.J., Arnold, B.K. and Bell, S.L. (eds) <i>A Natural History of the Lake Eyre Region: A Visitor&rsquo;s Guide</i>, p. 61. National Parks and Wildlife Service, Northern Consultative Committee, Port Augusta.",
+        None),
 }
 
 DT = "https://www.abc.net.au/news/deeptime/about/"
@@ -111,6 +114,7 @@ ARABANA_BOOKS,
 ]),
 ("Across the basin", "st-basin", [
 "For the basin as a whole, the Lake Eyre Basin Aboriginal Way map gathers stories, songlines, trade routes and significant places as the communities of its 71 language groups chose to share them, after twelve years of consultation {c:lonelyplanet2018,aiatsismap}. It is the place to begin for the stories of other nations.",
+"The natural history of the Lake Eyre region that the National Parks and Wildlife Service published in 1991 includes a chapter by Rex Stuart, then the Service&rsquo;s Aboriginal liaison officer and adviser to the committee that produced the book, drawn from his own experience of the area and its needs {c:stuart1991}. The book is in print only, and the chapter is not summarised here.",
 "We have not found Dieri stories published by Dieri knowledge holders themselves. The State Library of South Australia lists Dieri narratives recorded by missionaries and anthropologists from the nineteenth century onward {c:slsadieri}; following the rule of this page, they are not listed here.",
 "Custodians who would like a story added, corrected or removed can reach the maintainers of this site through its <a href=\"https://github.com/tfaraon/ktle-observatory/issues\" target=\"_blank\" rel=\"noopener\">public repository</a>.",
 ]),

@@ -78,7 +78,8 @@ for outsider in ("Reuther", "Howitt", "Gason", "Siebert", "Spencer and Gillen"):
 ids = []
 for f, v in (("natural_history.js", "NATURAL_HISTORY_HTML"),
              ("aboriginal_culture.js", "ABORIGINAL_CULTURE_HTML"),
-             ("catchment.js", "CATCHMENT_HTML"), ("stories.js", "STORIES_HTML")):
+             ("catchment.js", "CATCHMENT_HTML"), ("stories.js", "STORIES_HTML"),
+             ("fauna_flora.js", "FAUNA_FLORA_HTML")):
     ids += re.findall(r'id="([^"]+)"', load(f, v))
 dups = {i for i in ids if ids.count(i) > 1}
 assert not dups, dups

@@ -1,0 +1,230 @@
+/* ════════════════════════════════════════════════════════════
+   Version B : la feuille de carte.
+
+   L'accueil est une carte : image satellite pleine largeur, carroyage,
+   lieux et points SWOT posés à leurs coordonnées, échelle graphique.
+   Le texte vient dessous, dans un cartouche comme le bloc-titre d'une
+   carte topographique. Convention cartographique pour la typographie :
+   noms d'eau en sérif italique bleu (Spectral), le reste en grotesque
+   droite (Hanken Grotesk). Blanc du papier, bleu hydrographique pour les
+   données, brun des courbes de niveau pour le carroyage.
+
+   Toutes les règles sont cantonnées à html[data-design="b"] : la version
+   A reste intacte, et l'on passe de l'une à l'autre par ?design=a|b.
+   ════════════════════════════════════════════════════════════ */
+
+html[data-design="b"] {
+  --salt: #FFFFFF;
+  --panel: #FFFFFF;
+  --panel-edge: #D5DADC;
+  --basin: #20262B;
+  --dune: #5E676B;
+  --grid: #EEF1F2;
+  --flood: #1D5C8A;
+  --flood-deep: #164A70;
+  --halite: #1D5C8A;
+  --contour: #8A5B3A;
+  --hydro-pale: #E4EDF3;
+  --font-display: "Spectral", "Charter", "Bitstream Charter", Georgia, serif;
+  --font-body: "Hanken Grotesk", system-ui, sans-serif;
+  --font-read: "Hanken Grotesk", system-ui, sans-serif;
+  --font-mono: "Hanken Grotesk", system-ui, sans-serif;
+  --radius: 0;
+}
+
+/* ── En-tête : le nom du lac est un nom d'eau ─────────────── */
+
+html[data-design="b"] .wordmark {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 600;
+  font-size: 1.3rem;
+  color: var(--flood-deep);
+}
+html[data-design="b"] .wordmark span {
+  font-family: var(--font-body);
+  font-style: normal;
+  font-weight: 500;
+  font-size: 0.95rem;
+  color: var(--dune);
+}
+html[data-design="b"] .section-btn {
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+html[data-design="b"] .section-btn.active { border-bottom-color: var(--basin); }
+html[data-design="b"] .tab { font-family: var(--font-body); }
+html[data-design="b"] .tab.active { border-bottom-color: var(--basin); }
+
+/* ── Accueil : la carte d'abord, le cartouche ensuite ─────── */
+
+html[data-design="b"] .home { padding-top: 12px; }
+/* minmax(0, 1fr) : une colonne 1fr grandirait jusqu'à la largeur de la
+   carte sur téléphone, et c'est la page entière qui déborderait */
+html[data-design="b"] .hero { grid-template-columns: minmax(0, 1fr); gap: 0; padding-top: 8px; }
+html[data-design="b"] .hero-plate { min-width: 0; }
+html[data-design="b"] .hero-plate { order: -1; }
+html[data-design="b"] .plate-frame { display: block; }
+html[data-design="b"] .hero-gauge { display: none; }
+html[data-design="b"] .plate-image {
+  aspect-ratio: 1600 / 995;
+  max-height: none;
+  background: #2B3A40;
+  outline: 1.5px solid var(--basin);
+  outline-offset: 5px;
+}
+html[data-design="b"] .hero-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+html[data-design="b"] .hero-overlay[hidden] { display: none; }
+html[data-design="b"] .hero-plate figcaption {
+  font-family: var(--font-body);
+  font-style: normal;
+  font-size: 0.85rem;
+  margin-top: 14px;
+}
+
+/* Surcouche : chaque texte porte un liseré clair, comme sur une carte */
+html[data-design="b"] .hero-overlay text {
+  paint-order: stroke;
+  stroke: rgba(255, 255, 255, 0.92);
+  stroke-width: 4px;
+  stroke-linejoin: round;
+}
+html[data-design="b"] .o-tick { stroke: #FFFFFF; stroke-width: 2; }
+html[data-design="b"] .o-grid { font-family: var(--font-body); font-size: 17px; fill: var(--contour); }
+html[data-design="b"] .o-water {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 30px;
+  fill: var(--flood-deep);
+  letter-spacing: 0.02em;
+}
+html[data-design="b"] .o-place { font-family: var(--font-body); font-size: 19px; fill: var(--basin); }
+html[data-design="b"] .o-town { fill: var(--basin); stroke: #FFFFFF; stroke-width: 2; }
+html[data-design="b"] .o-site { fill: none; stroke: #FFFFFF; stroke-width: 4; }
+html[data-design="b"] .o-leader { stroke: #FFFFFF; stroke-width: 2; }
+html[data-design="b"] .o-site + .o-site-label,
+html[data-design="b"] .o-site-label { font-family: var(--font-body); font-weight: 700; font-size: 22px; fill: var(--basin); }
+html[data-design="b"] .o-site-date { font-family: var(--font-body); font-size: 17px; fill: var(--dune); }
+html[data-design="b"] .o-scale { stroke: var(--basin); stroke-width: 3; }
+html[data-design="b"] .o-scale-bg { fill: rgba(255, 255, 255, 0.88); }
+html[data-design="b"] .o-scale-label { font-family: var(--font-body); font-size: 16px; fill: var(--basin); stroke: none; }
+
+/* Cartouche : titre et présentation à gauche, état du lac à droite */
+html[data-design="b"] .hero-text {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  grid-template-areas:
+    "title now"
+    "lede  now"
+    "lede  act";
+  column-gap: 40px;
+  margin-top: 34px;
+  padding: 26px 30px 24px;
+  border: 1.5px solid var(--basin);
+}
+html[data-design="b"] .hero-title {
+  grid-area: title;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 600;
+  font-size: clamp(2.2rem, 4.2vw, 3.6rem);
+  line-height: 1.02;
+  letter-spacing: 0;
+  color: var(--flood-deep);
+  margin: 0 0 16px;
+}
+html[data-design="b"] .hero-title br { display: none; }
+html[data-design="b"] .hero-lede { grid-area: lede; font-size: 1.02rem; line-height: 1.6; margin: 0; }
+html[data-design="b"] .lake-now {
+  grid-area: now;
+  margin: 0;
+  padding: 0 0 0 28px;
+  border-left: 1px solid var(--panel-edge);
+}
+html[data-design="b"] .lake-now p { font-size: 0.98rem; line-height: 1.55; }
+html[data-design="b"] .hero-actions { grid-area: act; padding-left: 28px; border-left: 1px solid var(--panel-edge); align-self: end; }
+html[data-design="b"] .text-link { font-family: var(--font-body); }
+
+/* Les quatre parties, comme la légende d'une carte */
+html[data-design="b"] .explore {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0 28px;
+  margin-top: 44px;
+  border-top: none;
+}
+html[data-design="b"] .explore-row {
+  display: block;
+  padding: 16px 0 0;
+  border-bottom: none;
+  border-top: 3px solid var(--basin);
+}
+html[data-design="b"] .explore-name {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.3rem;
+  margin-bottom: 6px;
+}
+html[data-design="b"] .explore-text { font-family: var(--font-body); font-size: 0.95rem; }
+
+/* ── Pages de lecture ─────────────────────────────────────── */
+
+html[data-design="b"] .nh-body,
+html[data-design="b"] .prose-body { font-size: 1.02rem; line-height: 1.66; }
+html[data-design="b"] .nh-article .panel-head h2 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(2rem, 3.4vw, 2.8rem);
+}
+html[data-design="b"] .nh-body h3 { font-family: var(--font-display); font-weight: 600; font-size: 1.4rem; }
+html[data-design="b"] .nh-acknowledgement { font-family: var(--font-display); font-style: italic; font-size: 1.05rem; }
+html[data-design="b"] .catchment-map { border: 1.5px solid var(--basin); }
+
+/* ── Observatory : cadres nets, sans arrondi ──────────────── */
+
+html[data-design="b"] .panel { border-color: var(--panel-edge); }
+html[data-design="b"] .panel-head h2,
+html[data-design="b"] .panel h2 { font-family: var(--font-display); font-weight: 600; }
+html[data-design="b"] .chart-note { font-family: var(--font-body); font-style: normal; }
+html[data-design="b"] .demo-banner { background: var(--flood-deep); }
+
+.design-switch a { font-weight: 600; }
+
+@media (max-width: 900px) {
+  html[data-design="b"] .hero-text {
+    grid-template-columns: 1fr;
+    grid-template-areas: "title" "lede" "now" "act";
+    padding: 20px;
+  }
+  html[data-design="b"] .lake-now,
+  html[data-design="b"] .hero-actions { padding-left: 0; border-left: none; margin-top: 18px; }
+  html[data-design="b"] .explore { grid-template-columns: 1fr 1fr; gap: 20px; }
+  html[data-design="b"] .o-water { font-size: 40px; }
+}
+
+/* Sur téléphone, la feuille garde une taille lisible et se déplace
+   latéralement, comme une carte qu'on fait glisser ; elle s'ouvre centrée
+   sur le lac. */
+@media (max-width: 700px) {
+  html[data-design="b"] .plate-frame {
+    overflow-x: auto;
+    padding: 6px;
+    margin: 0 -6px;
+    -webkit-overflow-scrolling: touch;
+  }
+  html[data-design="b"] .plate-image { width: 980px; max-width: none; }
+  html[data-design="b"] .explore { grid-template-columns: 1fr; }
+}
+
+/* Sommaire et bandeau relèvent de l'interface : grotesque, pas sérif */
+html[data-design="b"] .nh-toc,
+html[data-design="b"] .demo-banner,
+html[data-design="b"] .site-footer { font-family: var(--font-body); }

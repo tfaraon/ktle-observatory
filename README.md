@@ -14,14 +14,19 @@ The data processing is handled in Python. The frontend only reads the files
 generated in `data/`, so observations can be updated without changing the
 interface itself.
 
-The site opens on a **home page** that shows the lake as it is now: the latest
-MODIS image from NASA GIBS, a gauge placing the SWOT water surface at Belt Bay
-within its own record, and a few sentences written from the data (level and its
-change over a month, area covered, waterbirds reported). Four parts follow.
-**The lake** is a continuous, referenced natural history. **Catchment** follows
-the rivers of the Lake Eyre Basin, their wetlands and their protection, with a
-map of the places it names. **Aboriginal culture** has two pages, *Peoples* and
-*Stories*. **Observatory** holds the live **Dashboard**, the **Methods** and the
+The site opens on a **home page** that shows the lake as it is now, as a map
+sheet: the latest MODIS image from NASA GIBS with a graticule, place names, a
+scale bar and the SWOT sites drawn at their coordinates, a gauge placing the
+SWOT water surface at Belt Bay within its own record, and a few sentences
+written from the data. Five parts follow. **The lake** is a continuous,
+referenced natural history. **Catchment** follows the rivers of the Lake Eyre
+Basin, their wetlands and their protection. **Fauna and flora** has three pages:
+*Plants and animals*, referenced prose arranged by group (plants and algae,
+invertebrates, fish, frogs, reptiles, birds, mammals), each group followed by the
+species observed around the lake on iNaturalist and, for birds, on eBird; *Bird sightings*, the eBird
+observations with their own map and a button to submit a checklist; and *iNaturalist*, which invites visitors to
+share their own observations and shows what the community has already shared. **Aboriginal culture** has two pages, *Peoples*
+and *Stories*. **Observatory** holds the live **Dashboard**, the **Methods** and the
 **Publications**. Any section can be linked directly, for example `#ct-rivers`,
 `#st-arabana` or `#nh-geology`.
 
@@ -54,6 +59,7 @@ cited, stops the build:
 python tools/build_natural_history.py
 python tools/build_aboriginal_culture.py
 python tools/build_catchment.py
+python tools/build_fauna_flora.py
 python tools/build_stories.py
 python tests/test_natural_history.py
 python tests/test_aboriginal_culture.py
@@ -173,6 +179,32 @@ should never be added to this repository.
 The default collection is `SWOT_L2_HR_Raster_D`. Version C granules may still
 be kept as an archive, but a single processing version should be used for data
 intended for publication.
+
+### Community observations (iNaturalist)
+
+```bash
+python pipeline/fetch_inaturalist.py
+python pipeline/fetch_inaturalist.py --demo
+```
+
+The *iNaturalist* page serves outreach and collaborative data collection. It
+explains how to take part and how to observe with care on Arabana country, and
+shows the observations already shared: totals, a live map drawn by iNaturalist,
+recent observations and the most observed species. The iNaturalist API is open
+for reading, without a key; the script makes three spaced requests once a day
+(`inaturalist.yml`), well within the 60 per minute and 10,000 per day that
+iNaturalist asks for.
+
+Until a project exists, observations are taken within the lake's bounding box.
+Once a collection project is created on inaturalist.org (any user can create
+one; the place *Kati Thanda-Lake Eyre National Park* already exists), set its
+identifier in `config.yaml` under `inaturalist.project`: it then replaces the
+bounding box for the page, its links and its map, and a "join the project" step
+appears.
+
+Photos are shown only when their observers have licensed them, always with the
+attribution iNaturalist provides; observations with blurred locations are never
+placed on the map as precise points; only observers' public usernames are kept.
 
 ### Bird sightings (eBird)
 
@@ -562,6 +594,8 @@ python tests/test_natural_history.py     # references, contents and style
 python tests/test_aboriginal_culture.py  # nations, sources and protocol
 python tests/test_navigation.py          # headless browser, skipped without Playwright
 python tests/test_ebird.py               # eBird fetch, privacy and key hygiene
+python tests/test_inaturalist.py         # iNaturalist fetch, licences and blurred locations
+python tests/test_fauna_flora.py         # Plants and animals: groups and live observation slots
 python tests/test_catchment_stories.py   # Catchment sources, Stories custodianship rule
 node tests/test_ebird.js                 # bird panel display logic
 node tests/test_windrose.js              # solar elevation and wind roses

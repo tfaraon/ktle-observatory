@@ -153,7 +153,7 @@ for text in re.findall(r">([^<>{}]{4,})<", html):
 
 # Les chaînes de app.js, hors commentaires
 js = "\n".join((ROOT / "frontend" / n).read_text(encoding="utf-8")
-                for n in ("app.js", "ebird.js"))
+                for n in ("app.js", "ebird.js", "inaturalist.js"))
 js_code = re.sub(r"//.*", "", js)
 js_code = re.sub(r"/\*(.|\n)*?\*/", "", js_code)
 for quoted in re.findall(r'"([^"\n]{6,})"|`([^`\n]{6,})`', js_code):
@@ -178,6 +178,7 @@ for m in set(ACCENTS.findall(methods_text)):
 for fname, var in (("natural_history.js", "NATURAL_HISTORY_HTML"),
                    ("aboriginal_culture.js", "ABORIGINAL_CULTURE_HTML"),
                    ("catchment.js", "CATCHMENT_HTML"),
+                   ("fauna_flora.js", "FAUNA_FLORA_HTML"),
                    ("stories.js", "STORIES_HTML")):
     page = (ROOT / "frontend" / fname).read_text(encoding="utf-8")
     text = re.sub(r"<[^>]+>", " ", page)

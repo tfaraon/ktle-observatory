@@ -1476,3 +1476,232 @@ nav.tabs, .subbar { max-width: calc(var(--page) - 56px); padding-left: 0; paddin
 }
 
 .level-value { white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+/* ════════════════════════════════════════════════════════════
+   Accueil : la feuille de carte, dans le style A.
+
+   L'image satellite pleine largeur porte un carroyage, les lieux, une
+   échelle et les points SWOT, tous placés à leurs coordonnées. Les noms
+   d'eau suivent la convention des cartes (sérif italique), les autres
+   lieux sont en Archivo ; le niveau SWOT garde le rose des saumures,
+   seul accent du design. La jauge du relevé reste à droite de la carte.
+   ════════════════════════════════════════════════════════════ */
+
+.hero { grid-template-columns: minmax(0, 1fr); gap: 0; padding-top: 10px; }
+.hero-plate { order: -1; min-width: 0; }
+.plate-frame { grid-template-columns: minmax(0, 1fr) 96px; gap: 18px; }
+.plate-image {
+  aspect-ratio: 1600 / 995;
+  max-height: none;
+  background: #2B3A40;
+  outline: 1px solid var(--basin);
+  outline-offset: 5px;
+}
+.hero-gauge { height: 100%; max-height: none; }
+.hero-overlay { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.hero-overlay[hidden] { display: none; }
+.hero-plate figcaption { margin-top: 16px; }
+
+.hero-overlay text { paint-order: stroke; stroke: rgba(255, 255, 255, 0.92); stroke-width: 4px; stroke-linejoin: round; }
+.o-tick { stroke: #FFFFFF; stroke-width: 2; }
+.o-grid { font-family: var(--font-display); font-size: 17px; fill: var(--dune); font-variant-numeric: tabular-nums; }
+.o-water { font-family: var(--font-read); font-style: italic; font-size: 30px; fill: var(--flood-deep); }
+.o-place { font-family: var(--font-display); font-size: 19px; fill: var(--basin); }
+.o-town { fill: var(--basin); stroke: #FFFFFF; stroke-width: 2; }
+.o-site { fill: none; stroke: #FFFFFF; stroke-width: 4; }
+.o-leader { stroke: #FFFFFF; stroke-width: 2; }
+.o-site-label { font-family: var(--font-display); font-weight: 700; font-size: 23px; fill: var(--halite); }
+.o-site-date { font-family: var(--font-display); font-size: 17px; fill: var(--basin); }
+.o-scale { stroke: var(--basin); stroke-width: 3; }
+.o-scale-bg { fill: rgba(255, 255, 255, 0.88); }
+.o-scale-label { font-family: var(--font-display); font-size: 16px; fill: var(--basin); stroke: none; }
+
+/* Titre à gauche ; présentation, état du lac et accès à droite */
+.hero-text {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  grid-template-areas: "title lede" "title now" "title act";
+  column-gap: 56px;
+  margin-top: 44px;
+}
+.hero-title { grid-area: title; margin: 0; }
+.hero-lede { grid-area: lede; margin: 0 0 6px; }
+.lake-now { grid-area: now; margin: 22px 0 20px; }
+.hero-actions { grid-area: act; }
+
+/* ── Bird sightings ───────────────────────────────────────── */
+
+.birds-page { padding: 12px 0 56px; }
+.birds-intro h2 {
+  font-family: var(--font-display);
+  font-stretch: 116%;
+  font-weight: 600;
+  font-size: clamp(2rem, 3.6vw, 3rem);
+  line-height: 1.05;
+  margin: 18px 0 12px;
+}
+.birds-intro p { font-family: var(--font-read); font-size: 1.06rem; line-height: 1.65; max-width: var(--measure); }
+.birds-plate { margin: 26px 0 30px; }
+.birds-map { height: 440px; border: 1px solid var(--panel-edge); background: var(--grid); }
+.birds-plate figcaption { font-family: var(--font-read); font-style: italic; font-size: 0.9rem; color: var(--dune); margin-top: 8px; max-width: var(--measure); }
+.birds-empty { font-family: var(--font-read); color: var(--dune); }
+
+/* Sur téléphone : la carte reste lisible et glisse latéralement, centrée
+   sur le lac ; la jauge laisse la place, le niveau figure sur la carte. */
+@media (max-width: 900px) {
+  .hero-text { grid-template-columns: minmax(0, 1fr); grid-template-areas: "title" "lede" "now" "act"; }
+  .hero-title { margin-bottom: 22px; }
+}
+@media (max-width: 700px) {
+  .plate-frame { display: block; overflow-x: auto; padding: 6px; margin: 0 -6px; -webkit-overflow-scrolling: touch; }
+  .plate-image { width: 980px; max-width: none; }
+  .hero-gauge { display: none; }
+  .birds-map { height: 340px; }
+}
+
+/* Le titre de l'accueil tient sur deux lignes dans sa colonne */
+.hero-text { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+.hero-title { font-size: clamp(2.4rem, 4.1vw, 3.8rem); }
+
+/* ── iNaturalist : observer et partager ───────────────────── */
+
+.inat-page { padding: 12px 0 56px; }
+.inat-intro h2 {
+  font-family: var(--font-display);
+  font-stretch: 116%;
+  font-weight: 600;
+  font-size: clamp(2rem, 3.6vw, 3rem);
+  line-height: 1.05;
+  margin: 18px 0 12px;
+}
+.inat-lede, .inat-now, .inat-guide p, .inat-steps {
+  font-family: var(--font-read);
+  font-size: 1.05rem;
+  line-height: 1.65;
+  max-width: var(--measure);
+}
+.inat-now { padding-left: 18px; border-left: 3px solid var(--flood); margin: 20px 0; }
+.inat-actions { margin: 0 0 8px; }
+
+.inat-guide {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px 48px;
+  margin: 40px 0 10px;
+  padding-top: 26px;
+  border-top: 1px solid var(--panel-edge);
+}
+.inat-guide h3, .inat-block h3 {
+  font-family: var(--font-display);
+  font-stretch: 110%;
+  font-weight: 600;
+  font-size: 1.3rem;
+  margin: 0 0 12px;
+}
+.inat-steps { padding-left: 1.3em; margin: 0; }
+.inat-steps li { margin-bottom: 8px; padding-left: 4px; }
+.inat-steps li::marker { font-family: var(--font-display); font-weight: 600; color: var(--flood); }
+.inat-guide p { margin: 0 0 12px; font-size: 1rem; }
+
+.inat-plate { margin: 34px 0 40px; }
+.inat-map { height: 440px; border: 1px solid var(--panel-edge); background: var(--grid); }
+.inat-plate figcaption {
+  font-family: var(--font-read); font-style: italic; font-size: 0.9rem;
+  color: var(--dune); margin-top: 8px; max-width: var(--measure);
+}
+
+.inat-block { margin: 0 0 40px; }
+.inat-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 26px 20px;
+}
+.inat-obs { margin: 0; font-family: var(--font-display); font-size: 0.88rem; line-height: 1.35; }
+.inat-obs img, .inat-nophoto {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  background: var(--grid);
+}
+.inat-nophoto {
+  display: flex; align-items: center; justify-content: center;
+  color: var(--dune); font-size: 0.85rem;
+}
+.inat-obs figcaption { margin-top: 8px; }
+.inat-name { display: block; font-weight: 600; color: var(--basin); text-decoration: none; }
+.inat-name:hover { color: var(--flood); }
+.inat-sci { display: block; font-family: var(--font-read); color: var(--dune); }
+.inat-meta { display: block; color: var(--dune); font-size: 0.82rem; margin-top: 3px; font-variant-numeric: tabular-nums; }
+.inat-credit { display: block; color: var(--dune); font-size: 0.74rem; margin-top: 3px; opacity: 0.85; }
+
+.inat-species {
+  list-style: none; padding: 0; margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px 28px;
+  font-family: var(--font-display);
+  font-size: 0.92rem;
+}
+.inat-species li { display: flex; gap: 12px; align-items: center; }
+.inat-species img, .inat-thumb-empty { width: 48px; height: 48px; object-fit: cover; flex: none; background: var(--grid); }
+.inat-sp a { font-weight: 600; color: var(--basin); text-decoration: none; }
+.inat-sp .inat-sci { display: inline; }
+
+@media (max-width: 900px) {
+  .inat-guide { grid-template-columns: minmax(0, 1fr); }
+  .inat-map { height: 340px; }
+}
+.inat-obs > a { text-decoration: none; }
+.inat-sp-name { display: block; font-weight: 600; color: var(--basin); text-decoration: none; }
+.inat-sp .inat-sci { display: block; }
+.inat-page .birds-attribution { padding-left: 0; padding-right: 0; }
+
+/* ── Observations par groupe (Plants and animals) ─────────── */
+
+.obs-block {
+  margin: 14px 0 8px;
+  padding: 16px 0 4px;
+  border-top: 1px solid var(--grid);
+  font-family: var(--font-display);
+  max-width: 60rem;
+}
+.obs-head { font-family: var(--font-read); font-style: italic; color: var(--dune); margin: 0 0 12px; }
+.obs-head a { font-style: normal; }
+.obs-list {
+  list-style: none; padding: 0; margin: 0 0 10px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 12px 26px;
+  font-size: 0.9rem;
+  line-height: 1.3;
+}
+.obs-list li { display: flex; gap: 11px; align-items: center; }
+.obs-list img, .obs-thumb-empty { width: 44px; height: 44px; object-fit: cover; flex: none; background: var(--grid); }
+.obs-name { display: block; font-weight: 600; }
+.obs-name a { color: var(--basin); text-decoration: none; }
+.obs-name a:hover { color: var(--flood); }
+.obs-sci { display: block; font-family: var(--font-read); font-style: italic; color: var(--dune); }
+.obs-meta { display: block; color: var(--dune); font-size: 0.8rem; font-variant-numeric: tabular-nums; }
+.obs-more { font-size: 0.88rem; margin: 6px 0 4px; }
+.obs-more a { margin-right: 14px; }
+.obs-credit { font-size: 0.76rem; color: var(--dune); margin: 4px 0 0; }
+
+/* ── Bouton de soumission (Bird sightings) ─────────────────── */
+
+.submit-row { display: flex; gap: 22px; align-items: flex-start; margin: 22px 0 6px; max-width: 52rem; }
+.submit-btn {
+  flex: none;
+  display: inline-block;
+  padding: 11px 20px;
+  background: var(--flood);
+  color: #FFFFFF;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.98rem;
+  text-decoration: none;
+  border-radius: var(--radius);
+}
+.submit-btn:hover { background: var(--flood-deep); }
+.submit-row p { margin: 0; font-family: var(--font-read); font-size: 0.98rem; line-height: 1.55; color: var(--basin); }
+@media (max-width: 700px) { .submit-row { flex-direction: column; gap: 12px; } }

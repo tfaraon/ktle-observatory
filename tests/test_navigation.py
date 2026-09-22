@@ -77,7 +77,9 @@ with sync_playwright() as p:
                     ("#culture", "tab-culture"), ("#publications", "tab-publications"),
                     ("#catchment", "tab-catchment"), ("#ct-rivers", "tab-catchment"),
                     ("#stories", "tab-stories"), ("#st-arabana", "tab-stories"),
-                    ("#home", "tab-home")):
+                    ("#home", "tab-home"), ("#fauna-flora", "tab-fauna-flora"),
+                    ("#ff-animals", "tab-fauna-flora"), ("#birds", "tab-birds"),
+                    ("#inaturalist", "tab-inaturalist")):
         pg.goto(BASE + h); pg.wait_for_timeout(500)
         s = state(pg)
         check(f"lien direct {h}", s["panel"] == [want] and s["hash"] == h, s)
@@ -94,6 +96,21 @@ with sync_playwright() as p:
     pg.click('.wordmark'); pg.wait_for_timeout(400)
     s = state(pg)
     check("nom du site : retour à l'accueil", s["panel"] == ["tab-home"], s)
+
+    pg.goto(BASE + "#fauna-flora"); pg.wait_for_timeout(400)
+    pg.click('.tab[data-tab="birds"]'); pg.wait_for_timeout(300)
+    s = state(pg)
+    check("onglet Bird sightings", s["panel"] == ["tab-birds"] and s["navs"] == ["fauna-flora"], s)
+    href = pg.evaluate("() => document.querySelector('#tab-birds .submit-btn').href")
+    check("bouton Submit an observation vers eBird", href == "https://ebird.org/submit", href)
+    pg.click('.tab[data-tab="fauna-flora"]'); pg.wait_for_timeout(300)
+    n = pg.evaluate("() => document.querySelectorAll('#tab-fauna-flora .obs-block').length")
+    check("sept groupes avec observations", n == 7, n)
+    pg.click('.tab[data-tab="inaturalist"]'); pg.wait_for_timeout(300)
+    s = state(pg)
+    check("onglet iNaturalist", s["panel"] == ["tab-inaturalist"] and s["navs"] == ["fauna-flora"], s)
+    check("plus de couche Birds sur la carte de l'Observatory",
+          pg.evaluate("() => !document.getElementById('birds-seg')"))
 
     real = [e for e in errors if "fetch" not in e.lower() and "json" not in e.lower()]
     check("aucune erreur JavaScript de navigation", not real, real[:3])

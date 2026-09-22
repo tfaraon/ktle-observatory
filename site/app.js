@@ -31,8 +31,11 @@
     methodsLoaded: false,
     loadedPages: {},
     ebird: null,
-    birdLayer: null,
-    lastTab: { observatory: "observatory", culture: "culture" },
+    birdsLayer: null,
+    lastTab: { observatory: "observatory", culture: "culture", "fauna-flora": "fauna-flora" },
+    birdsMap: null,
+    inat: null,
+    inatMap: null,
     catchmentMap: null,
     weather: null, area: null, extent: null,
     rosePeriod: "h24",
@@ -1802,6 +1805,9 @@
     home: "home",
     "natural-history": "natural-history",
     catchment: "catchment",
+    "fauna-flora": "fauna-flora",
+    birds: "fauna-flora",
+    inaturalist: "fauna-flora",
     culture: "culture",
     stories: "culture",
     observatory: "observatory",
@@ -1821,6 +1827,10 @@
     culture: {
       html: () => (typeof ABORIGINAL_CULTURE_HTML === "string" ? ABORIGINAL_CULTURE_HTML : null),
       anchors: /^(ac|acref)-/,
+    },
+    "fauna-flora": {
+      html: () => (typeof FAUNA_FLORA_HTML === "string" ? FAUNA_FLORA_HTML : null),
+      anchors: /^(ff|ffref)-/,
     },
     catchment: {
       html: () => (typeof CATCHMENT_HTML === "string" ? CATCHMENT_HTML : null),
@@ -1854,6 +1864,7 @@
     });
     state.loadedPages[name] = true;
     if (name === "catchment") initCatchmentMap();
+    if (name === "fauna-flora") renderGroupBlocks();
   }
 
   function showTab(name, anchor) {
@@ -1915,6 +1926,18 @@
     if (name === "catchment" && state.catchmentMap) {
       requestAnimationFrame(() => state.catchmentMap.invalidateSize());
     }
+    if (name === "inaturalist") {
+      requestAnimationFrame(() => {
+        initInatMap();
+        if (state.inatMap) state.inatMap.invalidateSize();
+      });
+    }
+    if (name === "birds") {
+      requestAnimationFrame(() => {
+        initBirdsMap();
+        if (state.birdsMap) state.birdsMap.invalidateSize();
+      });
+    }
   }
 
   // Adresses reconnues : le nom d'un onglet (#natural-history, #culture,
@@ -1973,7 +1996,9 @@
 
   function renderBirds(data) {
     const card = $("birds-card");
-    if (!card || !data || !Array.isArray(data.species) || typeof EBird === "undefined") {
+    const ok = card && data && Array.isArray(data.species) && typeof EBird !== "undefined";
+    if ($("birds-empty")) $("birds-empty").hidden = Boolean(ok);
+    if (!ok) {
       if (card) card.hidden = true;
       return;
     }
@@ -2023,45 +2048,42 @@
     $("birds-body").innerHTML = rows.join("")
       || '<tr><td colspan="4">No sightings reported in this period.</td></tr>';
 
-    $("birds-seg").hidden = !EBird.locationGroups(data.species).length;
+    initBirdsMap();
   }
 
-  const BIRD_ATTRIBUTION = 'Bird records &copy; <a href="https://ebird.org">eBird.org</a>';
-
-  function toggleBirdLayer(on) {
-    const btn = $("birds-toggle");
-    if (state.birdLayer) {
-      state.map.removeLayer(state.birdLayer);
-      state.map.attributionControl.removeAttribution(BIRD_ATTRIBUTION);
-      state.birdLayer = null;
+  // Bird sightings have their own map on the Bird sightings tab. Positions
+  // are those eBird publishes; private locations carry none and are not
+  // mapped.
+  function initBirdsMap() {
+    const el = $("birds-map");
+    if (!el || typeof L === "undefined" || el.offsetParent === null) return;
+    if (!state.birdsMap) {
+      state.birdsMap = L.map(el, { scrollWheelZoom: false }).setView([-28.6, 137.3], 7);
+      L.tileLayer("https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png", {
+        maxZoom: 13,
+        attribution: "&copy; OpenTopoMap (CC-BY-SA), &copy; OpenStreetMap contributors, "
+          + 'bird records &copy; <a href="https://ebird.org">eBird.org</a>',
+      }).addTo(state.birdsMap);
     }
-    if (btn) {
-      btn.classList.toggle("active", Boolean(on));
-      btn.setAttribute("aria-pressed", on ? "true" : "false");
-    }
-    if (!on || !state.ebird || !state.map) return;
-
+    if (state.birdsLayer) state.birdsMap.removeLayer(state.birdsLayer);
+    state.birdsLayer = null;
+    if (!state.ebird || typeof EBird === "undefined") return;
     const layer = L.layerGroup();
     EBird.locationGroups(state.ebird.species).forEach((g) => {
       const list = g.species.slice(0, 8).map((sp) => esc(sp.comName)).join(", ")
         + (g.species.length > 8 ? `, and ${g.species.length - 8} more` : "");
       L.circleMarker([g.lat, g.lng], {
         radius: Math.min(5 + g.species.length, 14),
-        color: "#134450", weight: 1.5, fillColor: "#1E5F6B", fillOpacity: 0.55,
+        color: "#134450", weight: 1.5, fillColor: "#1F6470", fillOpacity: 0.55,
       }).bindPopup(`<b>${esc(g.name)}</b><br>${g.species.length} species, `
         + `latest ${esc(EBird.formatDate(g.last))}<br><small>${list}</small>`
         + '<br><small>Source: <a href="https://ebird.org" target="_blank" '
         + 'rel="noopener">eBird.org</a></small>').addTo(layer);
     });
-    layer.addTo(state.map);
-    state.map.attributionControl.addAttribution(BIRD_ATTRIBUTION);
-    state.birdLayer = layer;
+    layer.addTo(state.birdsMap);
+    state.birdsLayer = layer;
   }
 
-  function wireBirds() {
-    const btn = $("birds-toggle");
-    if (btn) btn.addEventListener("click", () => toggleBirdLayer(!state.birdLayer));
-  }
 
   // ── Home: the lake now ───────────────────────────────────
   //
@@ -2069,9 +2091,11 @@
   // observatory. Sentences appear only for what the data support.
 
   const GIBS_WMS = "https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi";
-  // Plate carrée: at 28.7° S, a degree of longitude is 0.877 of a degree of
-  // latitude, so 1.7° by 2.3° is drawn at 760 by 1170 pixels to keep shapes true.
-  const HERO_BBOX = "136.55,-29.85,138.25,-27.55";
+  // The home page shows the lake as a map sheet, wide enough to take in
+  // the rivers' lower reaches. Plate carrée: at 28.7° S a degree of
+  // longitude is 0.877 of a degree of latitude, and 1600 by 995 pixels
+  // keeps that ratio over 4.4° by 2.4° so shapes stay true.
+  const HERO = { bbox: [135.1, -29.9, 139.5, -27.5], w: 1600, h: 995 };
 
   function isoDaysAgo(n) {
     const d = new Date(Date.now() - n * 86400000);
@@ -2082,7 +2106,7 @@
     const q = new URLSearchParams({
       SERVICE: "WMS", REQUEST: "GetMap", VERSION: "1.1.1",
       LAYERS: "MODIS_Terra_CorrectedReflectance_Bands721", STYLES: "",
-      SRS: "EPSG:4326", BBOX: HERO_BBOX, WIDTH: "760", HEIGHT: "1170",
+      SRS: "EPSG:4326", BBOX: HERO.bbox.join(","), WIDTH: String(HERO.w), HEIGHT: String(HERO.h),
       FORMAT: "image/jpeg", TIME: day,
     });
     return `${GIBS_WMS}?${q}`;
@@ -2103,7 +2127,9 @@
         fallback.hidden = true;
         caption.textContent = `MODIS Terra, ${fmtLongDate(day)}, shortwave infrared composite `
           + "(bands 7, 2, 1): water appears dark and the salt crust pale. "
+          + "Graticule, places and SWOT sites are drawn at their coordinates. "
           + "Image from NASA EOSDIS GIBS.";
+        drawHeroOverlay();
       };
       img.onerror = () => {
         back += 1;
@@ -2181,6 +2207,91 @@
       ? lines.map((l) => `<p>${l}</p>`).join("")
       : "<p>No observations are available yet. The observatory explains how to add them.</p>";
     drawHeroGauge(site);
+    drawHeroOverlay();
+  }
+
+  // The map sheet: everything is placed from coordinates, so labels,
+  // graticule and scale stay true to the image.
+  const MAP_LABELS = [
+    { text: "Lake Eyre North", lon: 137.30, lat: -28.32, kind: "water" },
+    { text: "Lake Eyre South", lon: 137.33, lat: -29.36, kind: "water" },
+    { text: "Marree", lon: 138.064, lat: -29.648, kind: "town" },
+    { text: "William Creek", lon: 136.340, lat: -28.909, kind: "town" },
+  ];
+
+  function drawHeroOverlay() {
+    const svg = $("hero-overlay");
+    if (!svg || $("hero-image").hidden) return;
+    const [x0, y0, x1, y1] = HERO.bbox;
+    const W = HERO.w, H = HERO.h;
+    const px = (lon) => (lon - x0) / (x1 - x0) * W;
+    const py = (lat) => (y1 - lat) / (y1 - y0) * H;
+    const deg = (v, pos, neg) => {
+      const a = Math.abs(v), d = Math.floor(a + 1e-9), m = Math.round((a - d) * 60);
+      return `${d}\u00b0${m ? String(m).padStart(2, "0") + "\u2032" : ""}${v < 0 ? neg : pos}`;
+    };
+    let g = "";
+    // Graticule: ticks every half degree on the neatline, labels every degree
+    for (let lon = Math.ceil(x0 * 2) / 2; lon <= x1; lon += 0.5) {
+      const x = px(lon);
+      g += `<line class="o-tick" x1="${x}" x2="${x}" y1="0" y2="12"/>`
+        + `<line class="o-tick" x1="${x}" x2="${x}" y1="${H - 12}" y2="${H}"/>`;
+      if (Math.abs(lon - Math.round(lon)) < 1e-9) {
+        g += `<text class="o-grid" x="${x}" y="30" text-anchor="middle">${deg(lon, "E", "W")}</text>`;
+      }
+    }
+    for (let lat = Math.ceil(y0 * 2) / 2; lat <= y1; lat += 0.5) {
+      const y = py(lat);
+      g += `<line class="o-tick" x1="0" x2="12" y1="${y}" y2="${y}"/>`
+        + `<line class="o-tick" x1="${W - 12}" x2="${W}" y1="${y}" y2="${y}"/>`;
+      if (Math.abs(lat - Math.round(lat)) < 1e-9) {
+        g += `<text class="o-grid" x="18" y="${y + 5}">${deg(lat, "N", "S")}</text>`;
+      }
+    }
+    MAP_LABELS.forEach((l) => {
+      const x = px(l.lon), y = py(l.lat);
+      g += l.kind === "water"
+        ? `<text class="o-water" x="${x}" y="${y}" text-anchor="middle">${esc(l.text)}</text>`
+        : `<circle class="o-town" cx="${x}" cy="${y}" r="4"/>`
+          + `<text class="o-place" x="${x + 9}" y="${y + 5}">${esc(l.text)}</text>`;
+    });
+    // SWOT sites, with the reference site's latest level
+    const ref = referenceSite();
+    ((state.data && state.data.sites) || []).forEach((site) => {
+      if (typeof site.lon !== "number") return;
+      const x = px(site.lon), y = py(site.lat);
+      g += `<circle class="o-site" cx="${x}" cy="${y}" r="7"/>`;
+      if (ref && site.name === ref.name && site.latest) {
+        // Above the marker, starting from it: William Creek sits at almost
+        // the same latitude to the west, Madigan Gulf to the east.
+        g += `<line class="o-leader" x1="${x}" x2="${x}" y1="${y - 9}" y2="${y - 22}"/>`
+          + `<text class="o-site-label" x="${x - 6}" y="${y - 50}">`
+          + `${esc(site.name)} ${minus(site.latest.wse, 2)}\u00a0m</text>`
+          + `<text class="o-site-date" x="${x - 6}" y="${y - 28}">`
+          + `SWOT, ${esc(fmtLongDate(site.latest.date))}</text>`;
+      } else {
+        g += `<text class="o-place" x="${x + 12}" y="${y + 5}">${esc(site.name)}</text>`;
+      }
+    });
+    // Scale bar: 50 km at the latitude of the sheet's centre
+    const kmPerPx = (x1 - x0) * 111.32 * Math.cos(((y0 + y1) / 2) * Math.PI / 180) / W;
+    const bar = 50 / kmPerPx, bx = 36, by = H - 40;
+    g += `<rect class="o-scale-bg" x="${bx - 12}" y="${by - 30}" width="${bar + 60}" height="46"/>`
+      + `<line class="o-scale" x1="${bx}" x2="${bx + bar}" y1="${by}" y2="${by}"/>`
+      + `<line class="o-scale" x1="${bx}" x2="${bx}" y1="${by - 7}" y2="${by + 7}"/>`
+      + `<line class="o-scale" x1="${bx + bar}" x2="${bx + bar}" y1="${by - 7}" y2="${by + 7}"/>`
+      + `<text class="o-scale-label" x="${bx}" y="${by - 12}">0</text>`
+      + `<text class="o-scale-label" x="${bx + bar}" y="${by - 12}" text-anchor="middle">50 km</text>`;
+    svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+    svg.innerHTML = g;
+    svg.toggleAttribute("hidden", false);
+    // When the sheet is wider than the screen, open it centred on the lake
+    const frame = svg.closest(".plate-frame");
+    if (frame && frame.scrollWidth > frame.clientWidth + 4 && !frame.dataset.centred) {
+      const shown = frame.scrollWidth * px(137.3) / W;
+      frame.scrollLeft = Math.max(0, shown - frame.clientWidth / 2);
+      frame.dataset.centred = "1";
+    }
   }
 
   // Vertical gauge: the SWOT record at the reference site, from its lowest
@@ -2189,7 +2300,12 @@
   function drawHeroGauge(site) {
     const svg = $("hero-gauge");
     if (!svg) return;
-    if (!site || !site.stats || !(site.stats.max > site.stats.min)) { svg.hidden = true; return; }
+    if (!site || !site.stats || !(site.stats.max > site.stats.min)) { svg.toggleAttribute("hidden", true); return; }
+    // Redraw only when the measurement changes: the home page re-renders as
+    // each dataset arrives, and redrawing would replay the rising waterline.
+    const sig = `${site.name}|${site.latest.date}|${site.latest.wse}|${site.stats.min}|${site.stats.max}`;
+    if (svg.dataset.sig === sig) return;
+    svg.dataset.sig = sig;
     const W = 96, H = 520, top = 34, bottom = H - 34, x = 30;
     const { min, max } = site.stats;
     const y = (v) => bottom - (v - min) / (max - min) * (bottom - top);
@@ -2210,7 +2326,7 @@
       + `<g class="g-line" style="--rise:${bottom - y(now)}px">`
       + `<line x1="${x - 18}" x2="${W - 4}" y1="${y(now)}" y2="${y(now)}"/>`
       + `<text x="${W - 4}" y="${y(now) - 7}" text-anchor="end">${minus(now, 2)}</text></g>`;
-    svg.hidden = false;
+    svg.toggleAttribute("hidden", false);
   }
 
   // ── Catchment map ─────────────────────────────────────────
@@ -2248,6 +2364,186 @@
       }).bindTooltip(`<b>${esc(p.name)}</b><br>${esc(p.note)}`).addTo(map);
     });
     state.catchmentMap = map;
+  }
+
+
+  // ── iNaturalist ──────────────────────────────────────────
+  //
+  // data/inaturalist.json is fetched daily by pipeline/fetch_inaturalist.py.
+  // Photos in it are already limited to those their observers licensed;
+  // each is shown with the attribution iNaturalist provides.
+
+  async function loadInat() {
+    const sources = state.staticMode ? ["data/inaturalist.json"]
+      : ["/api/inaturalist", "data/inaturalist.json"];
+    for (const url of sources) {
+      try {
+        const res = await fetch(url, { cache: "no-store" });
+        if (res.ok) return await res.json();
+      } catch (_) { /* next source */ }
+    }
+    return null;
+  }
+
+  function inatName(o) {
+    const n = INat.names(o);
+    const first = n.primaryIsScientific ? `<i>${esc(n.primary)}</i>` : esc(n.primary);
+    return { first, sci: n.scientific ? `<i>${esc(n.scientific)}</i>` : "" };
+  }
+
+  function renderInat(data) {
+    const ok = data && Array.isArray(data.recent) && typeof INat !== "undefined";
+    $("inat-empty").hidden = Boolean(ok);
+    if (!ok) return;
+    const sum = INat.summary(data);
+    const where = data.project ? "in the Kati Thanda\u2013Lake Eyre project" : "around the lake";
+    $("inat-now").innerHTML = sum.observations
+      ? `So far, ${sum.observations.toLocaleString("en-AU")} observation${sum.observations === 1 ? "" : "s"} `
+        + `of ${sum.species.toLocaleString("en-AU")} species have been shared by `
+        + `${sum.observers.toLocaleString("en-AU")} observer${sum.observers === 1 ? "" : "s"} ${where}.`
+        + (data.demo ? " These are demonstration data." : "")
+      : "No observation has been shared here yet. Yours could be the first.";
+    const links = data.links || {};
+    if (links.explore) $("inat-explore").href = links.explore;
+    if (links.project) {
+      $("inat-project").href = links.project;
+      $("inat-join").hidden = false;
+    }
+
+    $("inat-gallery").innerHTML = data.recent.map((o) => {
+      const nm = inatName(o);
+      const pic = o.photo
+        ? `<img src="${esc(o.photo.medium)}" alt="${esc(INat.names(o).primary)}" loading="lazy">`
+        : `<span class="inat-nophoto">${esc(INat.groupLabel(o.taxon && o.taxon.group))}</span>`;
+      const meta = [INat.formatDate(o.observed_on), o.observer ? esc(o.observer) : "",
+                    INat.qualityLabel(o.quality), o.obscured ? "location blurred" : ""]
+        .filter(Boolean).join(", ");
+      return `<figure class="inat-obs"><a href="${esc(o.url)}" target="_blank" rel="noopener">${pic}</a>`
+        + `<figcaption><a class="inat-name" href="${esc(o.url)}" target="_blank" rel="noopener">`
+        + `${nm.first}</a>${nm.sci ? `<span class="inat-sci">${nm.sci}</span>` : ""}`
+        + `<span class="inat-meta">${meta}</span>`
+        + (o.photo ? `<span class="inat-credit">${esc(o.photo.attribution)}</span>` : "")
+        + "</figcaption></figure>";
+    }).join("") || "<p>No recent observations.</p>";
+
+    $("inat-species").innerHTML = (data.species || []).slice(0, data.top_species || 12).map((sp) => {
+      const nm = inatName(sp);
+      const pic = sp.photo
+        ? `<img src="${esc(sp.photo.square)}" alt="" loading="lazy" title="${esc(sp.photo.attribution)}">`
+        : '<span class="inat-thumb-empty"></span>';
+      const name = sp.url
+        ? `<a class="inat-sp-name" href="${esc(sp.url)}" target="_blank" rel="noopener">${nm.first}</a>`
+        : `<span class="inat-sp-name">${nm.first}</span>`;
+      return `<li>${pic}<span class="inat-sp">${name}${nm.sci ? `<span class="inat-sci">${nm.sci}</span>` : ""}`
+        + `<span class="inat-meta">${sp.count} observation${sp.count === 1 ? "" : "s"}</span></span></li>`;
+    }).join("");
+    initInatMap();
+  }
+
+  function initInatMap() {
+    const el = $("inat-map");
+    if (!el || typeof L === "undefined" || el.offsetParent === null) return;
+    if (!state.inatMap) {
+      state.inatMap = L.map(el, { scrollWheelZoom: false }).setView([-28.7, 137.4], 8);
+      L.tileLayer("https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png", {
+        maxZoom: 15,
+        attribution: "&copy; OpenTopoMap (CC-BY-SA), &copy; OpenStreetMap contributors",
+      }).addTo(state.inatMap);
+    }
+    if (!state.inat) return;
+    if (!state.inatTiles && state.inat.filter) {
+      state.inatTiles = L.tileLayer(
+        `https://api.inaturalist.org/v1/points/{z}/{x}/{y}.png?${state.inat.filter}`, {
+          maxZoom: 15, opacity: 0.9,
+          attribution: 'observations &copy; <a href="https://www.inaturalist.org">iNaturalist</a> contributors',
+        }).addTo(state.inatMap);
+    }
+    if (state.inatLayer) state.inatMap.removeLayer(state.inatLayer);
+    const layer = L.layerGroup();
+    INat.mappable(state.inat.recent).forEach((o) => {
+      const nm = inatName(o);
+      L.circleMarker(o.coords, {
+        radius: 7, color: "#134450", weight: 2, fillColor: "#FFFFFF", fillOpacity: 0.6,
+      }).bindPopup(`<b>${nm.first}</b>${nm.sci ? `<br>${nm.sci}` : ""}<br>`
+        + `${esc(INat.formatDate(o.observed_on))}<br>`
+        + `<a href="${esc(o.url)}" target="_blank" rel="noopener">Open on iNaturalist</a>`).addTo(layer);
+    });
+    layer.addTo(state.inatMap);
+    state.inatLayer = layer;
+  }
+
+  // ── Plants and animals: live observations by group ───────
+  //
+  // Each group section of the page carries an empty .obs-block, filled here
+  // from iNaturalist (every group) and eBird (birds). Called when the page
+  // is first opened and again as each dataset arrives, in any order.
+
+  const OBS_SHOWN = 12;
+
+  function renderGroupBlocks() {
+    const blocks = document.querySelectorAll("#tab-fauna-flora .obs-block");
+    if (!blocks.length || typeof INat === "undefined") return;
+    const inat = state.inat || {};
+    const ebird = state.ebird || {};
+    blocks.forEach((el) => {
+      const groups = (el.dataset.groups || "").split(",").filter(Boolean);
+      const useEbird = el.dataset.ebird === "true";
+      const list = INat.groupSpecies(inat.species, ebird.species, groups, useEbird);
+      const nInat = list.filter((x) => x.inat > 0).length;
+      const nEbird = list.filter((x) => x.ebird).length;
+      const explore = inat.links && inat.links.explore
+        ? `${inat.links.explore}&iconic_taxa=${encodeURIComponent(groups.join(","))}` : null;
+
+      let head;
+      if (!state.inat && !(useEbird && state.ebird)) {
+        head = "Observations shared around the lake will appear here.";
+      } else if (!list.length) {
+        head = `None has been shared on iNaturalist around the lake yet. `
+          + `<a href="#inaturalist">Share the first observation</a>.`;
+      } else {
+        const days = esc(ebird.back_days || 30);
+        const sp = (n) => `${n === 1 ? "species" : "species"}`;
+        if (nInat && useEbird && nEbird) {
+          head = `${spell(nInat)} ${sp(nInat)} ${nInat === 1 ? "has" : "have"} been observed around the lake `
+            + `on iNaturalist, and ${spell(nEbird, true)} ${nEbird === 1 ? "was" : "were"} reported on eBird `
+            + `in the last ${days} days.`;
+        } else if (nInat) {
+          head = `${spell(nInat)} ${sp(nInat)} ${nInat === 1 ? "has" : "have"} been observed around the lake `
+            + "on iNaturalist.";
+        } else {
+          head = `${spell(nEbird)} ${sp(nEbird)} ${nEbird === 1 ? "was" : "were"} reported around the lake `
+            + `on eBird in the last ${days} days; none has yet been shared on iNaturalist.`;
+        }
+      }
+
+      const items = list.slice(0, OBS_SHOWN).map((x) => {
+        const pic = x.photo
+          ? `<img src="${esc(x.photo.square)}" alt="" loading="lazy" title="${esc(x.photo.attribution)}">`
+          : '<span class="obs-thumb-empty"></span>';
+        const nm = x.nameIsScientific ? `<i>${esc(x.name)}</i>` : esc(x.name);
+        const name = x.url ? `<a href="${esc(x.url)}" target="_blank" rel="noopener">${nm}</a>` : nm;
+        const meta = [];
+        if (x.inat) meta.push(`${x.inat} iNaturalist observation${x.inat === 1 ? "" : "s"}`);
+        if (x.ebird) meta.push(`on eBird ${esc(EBird.formatDate(x.ebird.date))}`);
+        return `<li>${pic}<span><span class="obs-name">${name}</span>`
+          + (x.scientific ? `<span class="obs-sci">${esc(x.scientific)}</span>` : "")
+          + `<span class="obs-meta">${meta.join(", ")}</span></span></li>`;
+      }).join("");
+
+      const more = [];
+      if (list.length > OBS_SHOWN) more.push(`${list.length - OBS_SHOWN} more species not shown.`);
+      if (explore && nInat) {
+        more.push(`<a href="${esc(explore)}" target="_blank" rel="noopener">All these observations on iNaturalist</a>`);
+      }
+      if (useEbird) more.push('<a href="#birds">Recent sightings and how to submit yours</a>');
+
+      el.innerHTML = `<p class="obs-head">${head}</p>`
+        + (items ? `<ul class="obs-list">${items}</ul>` : "")
+        + (more.length ? `<p class="obs-more">${more.join(" ")}</p>` : "")
+        + (list.some((x) => x.photo)
+          ? '<p class="obs-credit">Thumbnails from iNaturalist under their observers&rsquo; licences; '
+            + "hover a photo for its credit.</p>" : "");
+    });
   }
 
   async function init() {
@@ -2337,14 +2633,14 @@
     state.areaIdx = Math.max(0, areaDates().length - 1);
     drawAreaChart();
     loadWeather().then(() => loadScenario(null));
-    loadEbird().then((d) => { state.ebird = d; renderBirds(d); renderHome(); });
+    loadEbird().then((d) => { state.ebird = d; renderBirds(d); renderHome(); renderGroupBlocks(); });
+    loadInat().then((d) => { state.inat = d; renderInat(d); renderGroupBlocks(); });
   }
 
   document.addEventListener("DOMContentLoaded", () => {
     // Les onglets fonctionnent même si les données manquent
     wireTabs();
     wireDownloads();
-    wireBirds();
     init();
   });
 })();

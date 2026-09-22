@@ -1,0 +1,36 @@
+# Rafraichit data/inaturalist.json une fois par jour et le publie.
+#
+# L'API d'iNaturalist est ouverte en lecture : aucun secret n'est
+# necessaire. Trois requetes espacees par execution, bien en deca des
+# 60 requetes par minute et 10 000 par jour qu'iNaturalist demande de
+# respecter.
+name: Refresh iNaturalist observations
+
+on:
+  schedule:
+    - cron: "41 20 * * *"      # 20:41 UTC, le petit matin en Australie
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - run: pip install PyYAML
+      - name: Fetch iNaturalist observations
+        run: |
+          python pipeline/fetch_inaturalist.py
+          if [ -d site/data ]; then cp data/inaturalist.json site/data/; fi
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          [ -f site/data/inaturalist.json ] && git add -f site/data/inaturalist.json
+          git diff --staged --quiet || git commit -m "iNaturalist refresh"
+          git push

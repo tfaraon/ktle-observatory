@@ -47,7 +47,8 @@ REFS = {
         "https://www.landscape.sa.gov.au/saal/water/managing-water-resources/surface-water"),
 }
 REFS.update(shared_refs(["habeck2014", "kotwicki1986", "costelloe2003",
-                         "knighton1994", "rai2026b", "kingsford1999"]))
+                         "knighton1994", "rai2026b"]))
+REFS.update(shared_refs(["kingsford1999"], source="build_fauna_flora.py"))
 
 MAP = """<figure class="plate catchment-plate">
 <div id="ct-map" class="catchment-map" role="img"

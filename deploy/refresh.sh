@@ -2,7 +2,7 @@
 #
 # Rafraichit les donnees puis publie.
 #
-#   ./deploy/refresh.sh                  # tout : SWOT, meteo, surface, etendue, oiseaux, puis publie
+#   ./deploy/refresh.sh                  # tout : SWOT, meteo, surface, etendue, eBird, iNaturalist, puis publie
 #   ./deploy/refresh.sh --no-swot        # sans telechargement SWOT (rapide)
 #   ./deploy/refresh.sh --only-area      # surface seule, puis publie
 #   ./deploy/refresh.sh --no-birds       # sans eBird
@@ -78,6 +78,7 @@ if [ "$DO_BIRDS" -eq 1 ]; then
   else
     echo "── $(stamp)  Oiseaux (eBird) : EBIRD_API_KEY absente, étape sautée"
   fi
+  run_step "Observations iNaturalist" "$PY" pipeline/fetch_inaturalist.py
 fi
 
 echo

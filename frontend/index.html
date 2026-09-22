@@ -14,7 +14,6 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
           integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
-
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -28,10 +27,21 @@
     <nav class="sections" aria-label="Site">
       <button type="button" class="section-btn" data-section="natural-history">The lake</button>
       <button type="button" class="section-btn" data-section="catchment">Catchment</button>
+      <button type="button" class="section-btn" data-section="fauna-flora">Fauna and flora</button>
       <button type="button" class="section-btn" data-section="culture">Aboriginal culture</button>
       <button type="button" class="section-btn" data-section="observatory">Observatory</button>
     </nav>
   </header>
+
+  <nav class="tabs" id="fauna-tabs" data-for="fauna-flora" role="tablist"
+       aria-label="Fauna and flora" hidden>
+    <button class="tab" role="tab" data-tab="fauna-flora"
+            aria-selected="false">Plants and animals</button>
+    <button class="tab" role="tab" data-tab="birds"
+            aria-selected="false">Bird sightings</button>
+    <button class="tab" role="tab" data-tab="inaturalist"
+            aria-selected="false">iNaturalist</button>
+  </nav>
 
   <nav class="tabs" id="culture-tabs" data-for="culture" role="tablist"
        aria-label="Aboriginal culture" hidden>
@@ -75,10 +85,6 @@
           <div class="map-bar">
             <div class="seg" id="base-seg" role="group" aria-label="Base map">
               <button type="button" class="seg-btn active" data-base="topo">Map</button>
-            </div>
-            <div class="seg" id="birds-seg" role="group" aria-label="Bird sightings" hidden>
-              <button type="button" class="seg-btn" id="birds-toggle" aria-pressed="false"
-                      title="Locations of recent eBird sightings">Birds</button>
             </div>
             <div class="seg" id="model-seg" role="group" aria-label="Model layer">
               <button type="button" class="seg-btn active" data-model="none">No model</button>
@@ -195,28 +201,6 @@
         </div>
       </article>
 
-
-      <!-- Panel: bird sightings (eBird) -->
-      <article class="panel birds-card" id="birds-card" hidden>
-        <div class="panel-head head-row">
-          <div>
-            <h2>Recent sightings around the lake</h2>
-          </div>
-          <p id="birds-updated" class="weather-updated mono"></p>
-        </div>
-        <p id="birds-note" class="chart-note"></p>
-        <div id="birds-indicators" class="birds-indicators"></div>
-        <div class="table-wrap birds-table-wrap">
-          <table class="birds-table">
-            <thead><tr><th>Species</th><th>Last seen</th><th>Count</th><th>Location</th></tr></thead>
-            <tbody id="birds-body"></tbody>
-          </table>
-        </div>
-        <p class="birds-attribution mono">Bird observations from
-          <a href="https://ebird.org" target="_blank" rel="noopener">eBird.org</a>,
-          Cornell Lab of Ornithology, submitted by volunteer observers.</p>
-      </article>
-
       <!-- Panel 3b: surface water area -->
       <article class="panel chart-card" id="area-card" hidden>
         <div class="panel-head head-row">
@@ -253,11 +237,11 @@
     <section id="tab-home" class="tab-panel home" role="tabpanel">
       <div class="hero">
         <div class="hero-text">
-          <h1 class="hero-title">Kati Thanda&ndash;<br>Lake Eyre</h1>
+          <h1 class="hero-title">Kati&nbsp;Thanda&ndash;<br>Lake&nbsp;Eyre</h1>
           <p class="hero-lede">Australia&rsquo;s lowest point and largest salt lake, dry for most
             of its history and, when the rivers of its basin reach it, an inland sea for a while.
             This observatory follows its water from space, alongside its natural history, its
-            catchment and the Aboriginal peoples whose country it is.</p>
+            catchment, its plants and animals, and the Aboriginal peoples whose country it is.</p>
           <div id="lake-now" class="lake-now" aria-live="polite">
             <p>Reading the latest observations.</p>
           </div>
@@ -268,6 +252,7 @@
             <div class="plate-image">
               <img id="hero-image" alt="Satellite image of Kati Thanda&ndash;Lake Eyre" hidden>
               <p id="hero-fallback" class="plate-fallback">Loading the latest satellite image.</p>
+              <svg id="hero-overlay" class="hero-overlay" aria-hidden="true" hidden></svg>
             </div>
             <svg id="hero-gauge" class="hero-gauge" role="img" aria-labelledby="hero-gauge-title" hidden>
               <title id="hero-gauge-title">Water surface at Belt Bay within its SWOT record</title>
@@ -278,19 +263,136 @@
       </div>
       <nav class="explore" aria-label="Parts of this site">
         <a class="explore-row" href="#natural-history"><span class="explore-name">The lake</span>
-          <span class="explore-text">Geology, deep history, water and climate, plants and animals of Kati Thanda.</span></a>
+          <span class="explore-text">The country, geology, deep history, water and climate of Kati Thanda.</span></a>
         <a class="explore-row" href="#catchment"><span class="explore-name">Catchment</span>
           <span class="explore-text">The rivers of the Lake Eyre Basin, from the Channel Country to the lake, and how they are protected.</span></a>
+        <a class="explore-row" href="#fauna-flora"><span class="explore-name">Fauna and flora</span>
+          <span class="explore-text">The plants and animals that live with the lake&rsquo;s cycles of flood and drought, the birds reported this month, and how to share your own observations on iNaturalist.</span></a>
         <a class="explore-row" href="#culture"><span class="explore-name">Aboriginal culture</span>
           <span class="explore-text">The peoples of the lake and its basin, and the stories they have chosen to share.</span></a>
         <a class="explore-row" href="#observatory"><span class="explore-name">Observatory</span>
-          <span class="explore-text">Water level, extent and area from SWOT, weather, birds and hydrodynamic scenarios.</span></a>
+          <span class="explore-text">Water level, extent and area from SWOT, weather and hydrodynamic scenarios.</span></a>
       </nav>
     </section>
 
     <section id="tab-natural-history" class="tab-panel prose" role="tabpanel" hidden></section>
 
     <section id="tab-catchment" class="tab-panel prose" role="tabpanel" hidden></section>
+
+    <section id="tab-fauna-flora" class="tab-panel prose" role="tabpanel" hidden></section>
+
+    <section id="tab-inaturalist" class="tab-panel inat-page" role="tabpanel" hidden>
+      <div class="inat-intro">
+        <h2>Observe and share</h2>
+        <p class="inat-lede">Every photograph of a plant or an animal taken around Kati Thanda can become
+          a record for science. On iNaturalist, observers share what they see, a community of naturalists
+          helps to identify it, and observations that the community confirms become research grade and
+          are shared with the biodiversity databases used by researchers and land managers.</p>
+        <p id="inat-now" class="inat-now"></p>
+        <p class="inat-actions">
+          <a id="inat-explore" class="text-link" href="https://www.inaturalist.org/places/kati-thanda-lake-eyre-national-park"
+             target="_blank" rel="noopener">See every observation on iNaturalist</a>
+        </p>
+      </div>
+
+      <div class="inat-guide">
+        <section>
+          <h3>How to take part</h3>
+          <ol class="inat-steps">
+            <li>Install the iNaturalist app, or open
+              <a href="https://www.inaturalist.org" target="_blank" rel="noopener">inaturalist.org</a>,
+              and create a free account.</li>
+            <li>Photograph a plant or an animal, from more than one angle if you can. The app records
+              where and when.</li>
+            <li>Upload the observation with your best guess of what it is, or with none at all.</li>
+            <li>Other naturalists help to identify it. When enough of them agree, the observation
+              becomes research grade.</li>
+            <li id="inat-join" hidden>Join the <a id="inat-project" href="#" target="_blank"
+              rel="noopener">Kati Thanda&ndash;Lake Eyre project</a> to follow what others find.</li>
+          </ol>
+        </section>
+        <section>
+          <h3>Observe with care</h3>
+          <p>Kati Thanda is Arabana country and a national park. Observe from the shore and the public
+            tracks: the Arabana ask visitors not to walk or boat on the lake, where a footprint stays until
+            the next big flood (<a href="https://www.abc.net.au/news/2025-06-22/kati-thanda-lake-eyre-first-fill-since-recreational-access-ban/105371816"
+            target="_blank" rel="noopener">ABC News, 2025</a>), and park rules do not allow boating
+            (<a href="https://www.parks.sa.gov.au/parks/kati-thanda-lake-eyre-national-park"
+            target="_blank" rel="noopener">National Parks and Wildlife Service SA</a>).</p>
+          <p>The tracks to the lake cross pastoral stations, whose owners ask visitors to stay on the main
+            tracks, close any gate they find closed, take their rubbish with them and leave the trees standing
+            (Mitchell, 1991, in <i>A Natural History of the Lake Eyre Region</i>).</p>
+          <p>Keep well back from nesting birds. iNaturalist blurs the location of threatened species
+            on its own, and you can choose to blur the location of any of your observations.</p>
+        </section>
+      </div>
+
+      <figure class="plate inat-plate">
+        <div id="inat-map" class="inat-map" role="img"
+             aria-label="Map of iNaturalist observations around the lake"></div>
+        <figcaption>Dots are drawn live by iNaturalist from every observation shared in this area, with the
+          locations of threatened species blurred. Circles mark the recent observations below whose
+          location is public.</figcaption>
+      </figure>
+
+      <section class="inat-block">
+        <h3>Recent observations</h3>
+        <div id="inat-gallery" class="inat-gallery"></div>
+      </section>
+
+      <section class="inat-block">
+        <h3>Most observed</h3>
+        <ol id="inat-species" class="inat-species"></ol>
+      </section>
+
+      <p id="inat-empty" class="birds-empty" hidden>No iNaturalist observations have been fetched yet.
+        Run <code>python pipeline/fetch_inaturalist.py</code> to add them.</p>
+      <p class="birds-attribution">Observations and photos from
+        <a href="https://www.inaturalist.org" target="_blank" rel="noopener">iNaturalist</a>.
+        Each photo is shown under the licence chosen by its observer, who is credited beneath it.</p>
+    </section>
+
+    <section id="tab-birds" class="tab-panel birds-page" role="tabpanel" hidden>
+      <div class="birds-intro">
+        <h2>Bird sightings</h2>
+        <p>Birds reported by volunteer observers around Kati Thanda over the last month, from eBird.
+          Waterbirds that gather when the lake holds water are listed first: their presence is a sign
+          that the lake has filled.</p>
+        <div class="submit-row">
+          <a class="submit-btn" href="https://ebird.org/submit" target="_blank" rel="noopener">Submit an observation</a>
+          <p>Every checklist records where and when you watched, how you watched, and which birds you
+            saw and how many. You can also use the free eBird Mobile app for iOS and Android. Please
+            observe from the shore: see <a href="#inaturalist">Observe with care</a>.</p>
+        </div>
+      </div>
+      <figure class="plate birds-plate">
+        <div id="birds-map" class="birds-map" role="img"
+             aria-label="Map of the locations where birds were reported around the lake"></div>
+        <figcaption>Locations of recent sightings. Circles grow with the number of species reported;
+          sightings from private locations are listed below but not mapped.</figcaption>
+      </figure>
+      <p id="birds-empty" class="birds-empty" hidden>No bird observations are available yet.
+        Run <code>python pipeline/fetch_ebird.py</code> with an eBird key to add them.</p>
+      <article class="panel birds-card" id="birds-card" hidden>
+        <div class="panel-head head-row">
+          <div>
+            <h2>Species reported</h2>
+          </div>
+          <p id="birds-updated" class="weather-updated mono"></p>
+        </div>
+        <p id="birds-note" class="chart-note"></p>
+        <div id="birds-indicators" class="birds-indicators"></div>
+        <div class="table-wrap birds-table-wrap">
+          <table class="birds-table">
+            <thead><tr><th>Species</th><th>Last seen</th><th>Count</th><th>Location</th></tr></thead>
+            <tbody id="birds-body"></tbody>
+          </table>
+        </div>
+        <p class="birds-attribution mono">Bird observations from
+          <a href="https://ebird.org" target="_blank" rel="noopener">eBird.org</a>,
+          Cornell Lab of Ornithology, submitted by volunteer observers.</p>
+      </article>
+    </section>
 
     <section id="tab-culture" class="tab-panel prose" role="tabpanel" hidden></section>
 
@@ -316,15 +418,18 @@
     <span>Data: SWOT L2 HR Raster (NASA / CNES), Weather © Bureau of Meteorology, Imagery NASA EOSDIS GIBS / Worldview</span>
     <span>Base map: © OpenTopoMap (CC-BY-SA), © OpenStreetMap</span>
     <span>Bird observations: <a href="https://ebird.org" target="_blank" rel="noopener">eBird.org</a>, Cornell Lab of Ornithology</span>
+    <span>Community observations: <a href="https://www.inaturalist.org" target="_blank" rel="noopener">iNaturalist</a>, photos under their observers&rsquo; licences</span>
   </footer>
 
   <script src="windrose.js"></script>
   <script src="download.js"></script>
   <script src="ebird.js"></script>
+  <script src="inaturalist.js"></script>
   <script src="methods.js"></script>
   <script src="natural_history.js"></script>
   <script src="aboriginal_culture.js"></script>
   <script src="catchment.js"></script>
+  <script src="fauna_flora.js"></script>
   <script src="stories.js"></script>
   <script src="app.js"></script>
 </body>

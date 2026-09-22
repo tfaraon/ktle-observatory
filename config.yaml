@@ -340,3 +340,19 @@ ebird:
     - "Recurvirostra novaehollandiae"    # red-necked avocet
     - "Chroicocephalus novaehollandiae"  # silver gull
     - "Gelochelidon macrotarsa"          # Australian tern
+
+# ============================================================
+# Observations participatives (iNaturalist)
+# ============================================================
+# API ouverte en lecture, sans cle. Tant qu'aucun projet n'existe, les
+# observations sont prises dans l'emprise du lac ; une fois le projet cree
+# sur inaturalist.org (projet de collecte, lieu « Kati Thanda-Lake Eyre
+# National Park »), indiquer son identifiant ci-dessous : il remplace
+# l'emprise partout, pour le site, les liens et la carte.
+inaturalist:
+  project: null          # ex. "kati-thanda-lake-eyre"
+  place_slug: "kati-thanda-lake-eyre-national-park"
+  bbox: [136.6, -29.8, 138.3, -27.6]   # ouest, sud, est, nord
+  recent: 24             # observations recentes affichees (60 au plus)
+  top_species: 12        # especes les plus observees (50 au plus)
+  max_species: 300       # toutes les especes, rangees par groupe (500 au plus)
