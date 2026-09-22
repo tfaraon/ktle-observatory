@@ -29,8 +29,8 @@
     manifest: null, staticIndex: null, paramGrid: null,
     staticArrows: null, staticArrowsKey: null,
     methodsLoaded: false,
-    naturalLoaded: false,
-    lastObsTab: "observatory",
+    loadedPages: {},
+    lastTab: { observatory: "observatory" },
     weather: null, area: null, extent: null,
     rosePeriod: "h24",
     canvasRenderer: null,
@@ -1788,23 +1788,68 @@
 
   // ── Tabs ─────────────────────────────────────────────────
 
-  // Deux parties : Natural History, une lecture continue, et Observatory,
-  // qui regroupe le tableau de bord, les méthodes et les publications.
-  const OBS_TABS = ["observatory", "methods", "publications"];
+  // Trois parties : Natural History et Aboriginal Culture, des lectures
+  // référencées, et Observatory, qui regroupe le tableau de bord, les
+  // méthodes et les publications. Chaque onglet appartient à une partie.
+  const SECTION_OF = {
+    "natural-history": "natural-history",
+    culture: "culture",
+    observatory: "observatory",
+    methods: "observatory",
+    publications: "observatory",
+  };
+  // Contenus injectés à la première ouverture, et préfixes des ancres
+  // qu'ils portent : sections et références de chaque page.
+  // Un « const » global n'est pas une propriété de window : window[nom]
+  // renverrait undefined. On lit donc chaque contenu par son nom, typeof
+  // restant sûr si le fichier n'a pas été chargé.
+  const LAZY_PAGES = {
+    "natural-history": {
+      html: () => (typeof NATURAL_HISTORY_HTML === "string" ? NATURAL_HISTORY_HTML : null),
+      anchors: /^(nh|ref)-/,
+    },
+    culture: {
+      html: () => (typeof ABORIGINAL_CULTURE_HTML === "string" ? ABORIGINAL_CULTURE_HTML : null),
+      anchors: /^(ac|acref)-/,
+    },
+  };
+
+  function lazyPage(name) {
+    const spec = LAZY_PAGES[name];
+    if (!spec || state.loadedPages[name]) return;
+    const box = $("tab-" + name);
+    const html = spec.html();
+    box.innerHTML = html !== null ? html
+      : '<article class="panel"><div class="prose-body">'
+        + "<p>This content is unavailable.</p></div></article>";
+    // Sommaire et renvois : défilement doux dans la page, et adresse mise
+    // à jour pour qu'un lien reste partageable. Un lien vers une autre
+    // partie du site suit son cours et passe par le routage.
+    box.addEventListener("click", (e) => {
+      const a = e.target.closest('a[href^="#"]');
+      if (!a) return;
+      const target = document.getElementById(a.getAttribute("href").slice(1));
+      if (!target) return;
+      e.preventDefault();
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+      try { history.replaceState(null, "", a.getAttribute("href")); } catch (_) { /* ignore */ }
+    });
+    state.loadedPages[name] = true;
+  }
 
   function showTab(name, anchor) {
-    const natural = name === "natural-history";
-    if (!natural && !OBS_TABS.includes(name)) name = "observatory";
-    if (!natural) state.lastObsTab = name;
+    if (!SECTION_OF[name]) name = "observatory";
+    const section = SECTION_OF[name];
+    state.lastTab[section] = name;
 
     document.querySelectorAll(".section-btn").forEach((b) => {
-      const on = b.dataset.section === (natural ? "natural-history" : "observatory");
+      const on = b.dataset.section === section;
       b.classList.toggle("active", on);
       b.setAttribute("aria-current", on ? "page" : "false");
     });
-    const obsNav = $("observatory-tabs");
-    if (obsNav) obsNav.hidden = natural;
-
+    document.querySelectorAll("nav.tabs[data-for]").forEach((n) => {
+      n.hidden = n.dataset.for !== section;
+    });
     document.querySelectorAll(".tab").forEach((b) => {
       const on = b.dataset.tab === name;
       b.classList.toggle("active", on);
@@ -1822,26 +1867,7 @@
           + "<p>Methods documentation unavailable.</p></div></article>";
       state.methodsLoaded = true;
     }
-
-    if (natural && !state.naturalLoaded) {
-      const box = $("tab-natural-history");
-      box.innerHTML = typeof NATURAL_HISTORY_HTML === "string"
-        ? NATURAL_HISTORY_HTML
-        : '<article class="panel"><div class="prose-body">'
-          + "<p>Natural history content unavailable.</p></div></article>";
-      // Sommaire et renvois bibliographiques : défilement doux dans la
-      // page, et adresse mise à jour pour qu'un lien reste partageable.
-      box.addEventListener("click", (e) => {
-        const a = e.target.closest('a[href^="#"]');
-        if (!a) return;
-        const target = document.getElementById(a.getAttribute("href").slice(1));
-        if (!target) return;
-        e.preventDefault();
-        target.scrollIntoView({ behavior: "smooth", block: "start" });
-        try { history.replaceState(null, "", a.getAttribute("href")); } catch (_) { /* ignore */ }
-      });
-      state.naturalLoaded = true;
-    }
+    lazyPage(name);
 
     // Leaflet et Plotly calculent leurs dimensions au moment du rendu :
     // masqués, ils mesurent zéro et restent figés au retour.
@@ -1858,16 +1884,28 @@
       });
     }
 
-    const hash = anchor || name;
-    try { history.replaceState(null, "", "#" + hash); } catch (_) { /* ignore */ }
+    try { history.replaceState(null, "", "#" + (anchor || name)); } catch (_) { /* ignore */ }
     if (anchor) {
       requestAnimationFrame(() => {
         const el = document.getElementById(anchor);
         if (el) el.scrollIntoView({ block: "start" });
       });
-    } else if (natural) {
+    } else if (LAZY_PAGES[name]) {
       window.scrollTo({ top: 0 });
     }
+  }
+
+  // Adresses reconnues : le nom d'un onglet (#natural-history, #culture,
+  // #methods...) ou une ancre d'une page référencée (#nh-geology,
+  // #acref-dodd2012...), qui ouvre la bonne partie puis y défile.
+  function route(hash) {
+    const h = (hash || "").replace("#", "");
+    if (!h) return false;
+    if (SECTION_OF[h]) { showTab(h); return true; }
+    for (const [name, spec] of Object.entries(LAZY_PAGES)) {
+      if (spec.anchors.test(h)) { showTab(name, h); return true; }
+    }
+    return false;
   }
 
   function wireTabs() {
@@ -1875,18 +1913,13 @@
       b.addEventListener("click", () => showTab(b.dataset.tab)));
     document.querySelectorAll(".section-btn").forEach((b) =>
       b.addEventListener("click", () => {
-        showTab(b.dataset.section === "natural-history"
-          ? "natural-history" : (state.lastObsTab || "observatory"));
+        const section = b.dataset.section;
+        showTab(state.lastTab[section] || section);
       }));
-
-    // Adresses reconnues : #natural-history, une section (#nh-geology) ou
-    // une référence (#ref-kotwicki1986) de cette partie, et les onglets
-    // de l'observatoire.
-    const initial = (location.hash || "").replace("#", "");
-    if (initial === "natural-history") showTab("natural-history");
-    else if (/^(nh|ref)-/.test(initial)) showTab("natural-history", initial);
-    else if (["methods", "publications"].includes(initial)) showTab(initial);
+    window.addEventListener("hashchange", () => route(location.hash));
+    if (location.hash !== "#observatory") route(location.hash);
   }
+
 
 
   // ── Initialisation ───────────────────────────────────────

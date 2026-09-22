@@ -357,7 +357,8 @@ def build(cfg, out_dir=SITE, colors=64, limit=None, sample=40):
             shutil.copytree(maps_src, data_dir / folder, dirs_exist_ok=True)
 
     for name in ("index.html", "style.css", "app.js", "methods.js",
-                 "windrose.js", "download.js", "natural_history.js"):
+                 "windrose.js", "download.js", "natural_history.js",
+                 "aboriginal_culture.js"):
         shutil.copy(ROOT / "frontend" / name, out_dir / name)
     (out_dir / ".nojekyll").write_text("", encoding="utf-8")
 

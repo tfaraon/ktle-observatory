@@ -14,11 +14,20 @@ The data processing is handled in Python. The frontend only reads the files
 generated in `data/`, so observations can be updated without changing the
 interface itself.
 
-The site has two parts. **Natural History** is a continuous, referenced account
-of the lake: its country and people, geology and landscape, deep history, water
-and climate, plants and animals. **Observatory** holds the live **Dashboard**,
-the **Methods** and the **Publications**. Sections of Natural History can be
-linked directly, for example `#nh-geology` or `#ref-kotwicki1986`.
+The site has three parts. **Natural History** is a continuous, referenced
+account of the lake: geology and landscape, deep history, water and climate,
+plants and animals. **Aboriginal Culture** names the nations around the lake
+and across its basin. **Observatory** holds the live **Dashboard**, the
+**Methods** and the **Publications**. Aboriginal culture is deliberately a part
+of its own rather than a chapter of natural history. Any section can be linked
+directly, for example `#nh-geology`, `#ac-basin` or `#acref-dodd2012`.
+
+The Aboriginal Culture page draws only on public records: native title
+determinations, the registers of the bodies that hold native title, and
+material published by governments with Traditional Owners. It does not describe
+ceremony, sacred places or stories, whose custodians decide what is shared. The
+basin's 71 language groups are set out in full in the *Lake Eyre Basin
+Aboriginal Way* map held by AIATSIS, to which the page defers.
 
 The Natural History text is generated from `tools/build_natural_history.py`,
 where the prose and the reference list live side by side. Each citation is a
@@ -27,7 +36,9 @@ cited, stops the build:
 
 ```bash
 python tools/build_natural_history.py
+python tools/build_aboriginal_culture.py
 python tests/test_natural_history.py
+python tests/test_aboriginal_culture.py
 ```
 
 The Country and people section concerns Arabana country and knowledge. It
@@ -501,6 +512,8 @@ python tests/test_sync_manifest.py       # matching settings on the static site
 python tests/test_bathymetry_cache.py    # bathymetry cached off the external disk
 python tests/test_language.py            # interface strings stay in English
 python tests/test_natural_history.py     # references, contents and style
+python tests/test_aboriginal_culture.py  # nations, sources and protocol
+python tests/test_navigation.py          # headless browser, skipped without Playwright
 node tests/test_windrose.js              # solar elevation and wind roses
 node tests/test_download.js              # CSV export
 ```

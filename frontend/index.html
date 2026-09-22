@@ -41,11 +41,19 @@
   <nav class="sections" aria-label="Site">
     <button type="button" class="section-btn" data-section="natural-history">
       <span class="section-kicker">The lake</span>Natural History</button>
+    <button type="button" class="section-btn" data-section="culture">
+      <span class="section-kicker">Country</span>Aboriginal Culture</button>
     <button type="button" class="section-btn active" data-section="observatory">
       <span class="section-kicker">Now</span>Observatory</button>
   </nav>
 
-  <nav class="tabs" id="observatory-tabs" role="tablist" aria-label="Observatory">
+  <nav class="tabs" id="culture-tabs" data-for="culture" role="tablist"
+       aria-label="Aboriginal culture" hidden>
+    <button class="tab" role="tab" data-tab="culture"
+            aria-selected="false">Peoples</button>
+  </nav>
+
+  <nav class="tabs" id="observatory-tabs" data-for="observatory" role="tablist" aria-label="Observatory">
     <button class="tab active" role="tab" data-tab="observatory"
             aria-selected="true">Dashboard</button>
     <button class="tab" role="tab" data-tab="methods"
@@ -230,6 +238,8 @@
 
     <section id="tab-natural-history" class="tab-panel prose" role="tabpanel" hidden></section>
 
+    <section id="tab-culture" class="tab-panel prose" role="tabpanel" hidden></section>
+
     <section id="tab-methods" class="tab-panel prose" role="tabpanel" hidden></section>
 
     <section id="tab-publications" class="tab-panel prose" role="tabpanel" hidden>
@@ -256,6 +266,7 @@
   <script src="download.js"></script>
   <script src="methods.js"></script>
   <script src="natural_history.js"></script>
+  <script src="aboriginal_culture.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

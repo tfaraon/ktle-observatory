@@ -1036,3 +1036,47 @@ main {
   .sections { padding: 12px 16px 0; }
   .section-btn { padding: 8px 14px 9px; font-size: 1rem; }
 }
+
+/* ── Aboriginal Culture : tableau des nations ──────────────── */
+
+.table-wrap {
+  overflow-x: auto;
+  margin: 6px 0 18px;
+  border: 1px solid var(--panel-edge);
+  border-radius: var(--radius);
+}
+.people-table {
+  width: 100%;
+  min-width: 620px;
+  border-collapse: collapse;
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+.people-table th {
+  text-align: left;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--dune);
+  background: var(--salt);
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--panel-edge);
+}
+.people-table td {
+  padding: 10px 12px;
+  vertical-align: top;
+  border-bottom: 1px solid var(--grid);
+}
+.people-table tr:last-child td { border-bottom: none; }
+.people-table td:first-child { width: 17%; }
+.people-table .alt { font-size: 12px; color: var(--dune); }
+
+.nation-list {
+  columns: 3 11em;
+  column-gap: 24px;
+  margin: 4px 0 18px;
+  padding-left: 1.1em;
+}
+.nation-list li { break-inside: avoid; margin-bottom: 3px; }
