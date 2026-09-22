@@ -43,6 +43,29 @@ import scenario_field as sfield  # noqa: E402
 OUT_FILE = ROOT / "data" / "hypsometry.json"
 
 
+def fill_gaps(a):
+    """Comble les trous d'un tableau de coordonnees, par interpolation.
+
+    Delft3D ecrit des sentinelles dans les mailles inactives, que la
+    lecture convertit en NaN. Or np.gradient PROPAGE ces NaN a leurs
+    voisines : une seule maille inactive suffit alors a priver de son
+    aire toute la bordure du lac, et la somme devient NaN. La grille
+    etant continue par construction, on reconstitue les valeurs
+    manquantes le long de chaque ligne puis de chaque colonne.
+    """
+    out = np.array(a, dtype="float64", copy=True)
+    for axis in (1, 0):
+        moved = np.moveaxis(out, axis, -1)
+        for row in moved.reshape(-1, moved.shape[-1]):
+            bad = ~np.isfinite(row)
+            if not bad.any() or bad.all():
+                continue
+            idx = np.arange(row.size)
+            row[bad] = np.interp(idx[bad], idx[~bad], row[~bad])
+        out = np.moveaxis(moved, -1, axis)
+    return out
+
+
 def cell_areas(xv, yv):
     """Aire de chaque maille d'une grille curviligne, en m2.
 
@@ -50,11 +73,15 @@ def cell_areas(xv, yv):
     grille : |dP/di x dP/dj|. Sur une grille reguliere cela redonne le
     produit des pas, et le calcul reste juste sur une grille tournee ou
     etiree.
+
+    Les coordonnees sont completees au prealable : sans cela, les
+    mailles bordant une zone inactive n'auraient pas d'aire.
     """
-    dxi = np.gradient(xv, axis=1)
-    dyi = np.gradient(yv, axis=1)
-    dxj = np.gradient(xv, axis=0)
-    dyj = np.gradient(yv, axis=0)
+    fx, fy = fill_gaps(xv), fill_gaps(yv)
+    dxi = np.gradient(fx, axis=1)
+    dyi = np.gradient(fy, axis=1)
+    dxj = np.gradient(fx, axis=0)
+    dyj = np.gradient(fy, axis=0)
     return np.abs(dxi * dyj - dyi * dxj)
 
 

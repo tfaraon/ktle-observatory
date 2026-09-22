@@ -216,13 +216,22 @@ def build(cfg, level=None, connected=True, out_path=OUT_FILE):
           + (f" · décalage {offset:+.2f} m" if offset else
              " · AUCUN décalage de datum appliqué"))
 
-    series = []
+    by_day = {}
     for obs in site["series"]:
-        h = obs["wse"] + offset
+        by_day.setdefault(obs["date"][:10], []).append(obs["wse"])
+
+    series = []
+    for day in sorted(by_day):
+        values = by_day[day]
+        h = float(np.mean(values)) + offset
         wet, area, vol = extent_stats(bed, areas, h, connected)
-        row = {"date": obs["date"][:10], "level_m": round(h, 3),
+        if not np.isfinite(area) or not np.isfinite(vol):
+            print(f"  {day} : surface indéterminée — bathymétrie incomplète")
+            continue
+        row = {"date": day, "level_m": round(h, 3),
                "area_km2": round(area / 1e6, 1),
                "volume_km3": round(vol / 1e9, 4),
+               "n_obs": len(values),
                "n_cells": int(wet.sum())}
         if wet.any():
             depth_map = np.where(wet, h - bed, np.nan)

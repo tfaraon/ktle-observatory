@@ -194,8 +194,25 @@ def mask_date(path):
 
 # ------------------------------------------------------------------
 
+def nearest_level(date, levels_by_date, max_gap_days):
+    """Niveau SWOT le plus proche d'une date d'image, dans la tolerance.
+
+    Sentinel-2 et SWOT passent rarement le meme jour. Rai et al. (2026)
+    acceptent jusqu'a 3 jours d'ecart entre l'image optique et la passe
+    SWOT ; au-dela, le niveau a pu changer et le rivage ne lui
+    correspondrait plus.
+    """
+    target = datetime.strptime(date, "%Y-%m-%d")
+    best = None
+    for day, wse in levels_by_date.items():
+        gap = abs((datetime.strptime(day, "%Y-%m-%d") - target).days)
+        if gap <= max_gap_days and (best is None or gap < best[2]):
+            best = (day, wse, gap)
+    return best
+
+
 def build(cfg, masks_dir, span=1.5, step_m=0.05, apply_offset=False,
-          sample=5, out_path=OUT_FILE):
+          sample=5, max_gap_days=3, out_path=OUT_FILE):
     masks = sorted(Path(masks_dir).expanduser().glob("*_water_class.tif"))
     if not masks:
         raise SystemExit(f"Aucun masque *_water_class.tif dans {masks_dir}")
@@ -225,15 +242,24 @@ def build(cfg, masks_dir, span=1.5, step_m=0.05, apply_offset=False,
     model_lon, model_lat = geo.utm_to_lonlat_array(xv, yv, zone, south)
 
     site, current_offset, _ = wex.load_levels(cfg)
-    levels_by_date = {o["date"][:10]: o["wse"] for o in site["series"]}
-    print(f"Niveaux : {site['name']} · {len(levels_by_date)} dates")
+    grouped = {}
+    for o in site["series"]:
+        grouped.setdefault(o["date"][:10], []).append(o["wse"])
+    levels_by_date = {d: float(np.mean(v)) for d, v in grouped.items()}
+    print(f"Niveaux : {site['name']} · {len(levels_by_date)} dates · "
+          f"tolérance {max_gap_days} j")
 
     rows = []
+    skipped_gap = 0
     for path in masks:
         date = mask_date(path)
-        if date is None or date not in levels_by_date:
+        if date is None:
             continue
-        wse = levels_by_date[date]
+        match = nearest_level(date, levels_by_date, max_gap_days)
+        if match is None:
+            skipped_gap += 1
+            continue
+        swot_day, wse, gap = match
 
         water, valid, transform, crs = read_mask(path)
         lon, lat, (rr, cc) = mask_lonlat(water.shape, transform, crs, sample)
@@ -248,13 +274,21 @@ def build(cfg, masks_dir, span=1.5, step_m=0.05, apply_offset=False,
         obs_area = float(obs[ok].sum()) * pixel_m2
 
         levels = np.arange(wse - span, wse + span + step_m / 2, step_m)
-        h_star, score, curve = best_level(bed_s, obs, ok, levels)
+        # Sans connexite : une scene SWIR peut ne couvrir qu'une fenetre
+        # du lac, ou la connexite ne se juge pas — de l'eau reliee au lac
+        # hors du cadre y paraitrait isolee et serait ecartee a tort. Le
+        # calage porte sur la POSITION du rivage, que le seul seuil
+        # bathymetrique suffit a decrire.
+        h_star, score, curve = best_level(bed_s, obs, ok, levels,
+                                          connected=False)
         if h_star is None:
             continue
 
-        at_swot = wex.flooded(bed_s, wse + current_offset)
+        at_swot = wex.flooded(bed_s, wse + current_offset, connected=False)
         rows.append({
             "date": date,
+            "swot_date": swot_day,
+            "gap_days": gap,
             "swot_level_m": round(wse, 3),
             "swir_area_km2": round(obs_area / 1e6, 1),
             "model_area_km2": round(float(at_swot[ok].sum()) * pixel_m2 / 1e6,
@@ -266,14 +300,18 @@ def build(cfg, masks_dir, span=1.5, step_m=0.05, apply_offset=False,
             "n_samples": int(ok.sum()),
         })
         r = rows[-1]
-        print(f"  {date}  SWIR {r['swir_area_km2']:7,.0f} km² · "
+        print(f"  {date} (SWOT {swot_day}, {gap} j)  "
+              f"SWIR {r['swir_area_km2']:7,.0f} km² · "
               f"modèle {r['model_area_km2']:7,.0f} km² · "
               f"décalage {r['implied_offset_m']:+.2f} m · "
               f"Jaccard {r['jaccard']:.2f}")
 
     if not rows:
-        raise SystemExit("Aucune date commune entre masques SWIR et série "
-                         "SWOT.")
+        raise SystemExit(
+            f"Aucune image SWIR à moins de {max_gap_days} jour(s) d'une "
+            f"passe SWOT ({skipped_gap} écartée(s) pour l'écart de date). "
+            "Élargissez avec --max-gap-days, en gardant à l'esprit que le "
+            "niveau a pu changer entre les deux acquisitions.")
 
     offsets = [r["implied_offset_m"] for r in rows]
     median = float(np.median(offsets))
@@ -331,6 +369,9 @@ def main():
                         help="Pas de recherche, en m")
     parser.add_argument("--sample", type=int, default=5,
                         help="Sous-échantillonnage des pixels SWIR")
+    parser.add_argument("--max-gap-days", type=int, default=3,
+                        help="Écart maximal image/passe SWOT (défaut : 3 j, "
+                             "comme Rai et al. 2026)")
     parser.add_argument("--apply", action="store_true",
                         help="Écrire le décalage médian dans config.yaml")
     args = parser.parse_args()
@@ -338,7 +379,8 @@ def main():
     with open(args.config, "r", encoding="utf-8") as f:
         cfg = yaml.safe_load(f)
     build(cfg, args.masks, span=args.span, step_m=args.step,
-          apply_offset=args.apply, sample=args.sample)
+          apply_offset=args.apply, sample=args.sample,
+          max_gap_days=args.max_gap_days)
 
 
 if __name__ == "__main__":

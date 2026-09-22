@@ -91,3 +91,41 @@ assert sw.mask_date("sans_date_water_class.tif") is None
 
 print("OK — indice de Jaccard, calage d'un décalage connu, robustesse au "
       "bruit et détection d'un optimum mal contraint validés.")
+
+# ══════════════════════════════════════════════════════════════
+# Appariement temporel et fenetre locale.
+# ══════════════════════════════════════════════════════════════
+
+# Sentinel-2 et SWOT passent rarement le même jour : une tolérance est
+# indispensable, faute de quoi aucune image ne serait jamais appariée.
+lv = {"2026-08-14": -13.04, "2026-08-15": -12.85, "2026-09-04": -12.95}
+same = sw.nearest_level("2026-08-15", lv, 3)
+assert same[0] == "2026-08-15" and same[2] == 0
+near = sw.nearest_level("2026-08-17", lv, 3)
+assert near[0] == "2026-08-15" and near[2] == 2
+assert sw.nearest_level("2026-08-19", lv, 3) is None, "au-delà de 3 jours"
+# À 5 jours de tolérance, le 15 (4 j) l'emporte sur le 14 (5 j)
+assert sw.nearest_level("2026-08-19", lv, 5)[0] == "2026-08-15"
+# À égalité d'écart, la passe retenue doit rester déterministe
+assert sw.nearest_level("2026-08-16", {"2026-08-14": 1.0, "2026-08-18": 2.0},
+                        3) is not None
+
+# Fenêtre locale : la connexité ne s'y juge pas. Deux plans d'eau reliés
+# HORS du cadre y paraissent disjoints ; avec la connexité, le calage
+# écarterait l'un des deux et se tromperait de niveau.
+m = 200
+wx, wy = np.meshgrid(np.linspace(0, 20000, m), np.linspace(0, 20000, m))
+# Deux sillons au même niveau, séparés par une flèche émergée au centre
+bed_w = -13.0 + 0.6 * np.cos(wx / 20000 * 2 * np.pi) ** 2
+obs_w = bed_w <= -12.7
+ok_w = np.ones_like(obs_w, dtype=bool)
+lv_w = np.arange(-13.5, -12.0, 0.05)
+
+h_free, s_free, _ = sw.best_level(bed_w, obs_w, ok_w, lv_w, connected=False)
+h_conn, s_conn, _ = sw.best_level(bed_w, obs_w, ok_w, lv_w, connected=True)
+assert abs(h_free - (-12.7)) <= 0.06, h_free
+assert s_free > s_conn, (
+    "dans une fenêtre locale, la connexité dégrade le calage")
+
+print("OK — appariement image/passe dans la tolérance, et calage sans "
+      "connexité sur une fenêtre locale.")

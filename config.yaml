@@ -142,7 +142,7 @@ scenarios:
   # uniforme de 0,50 m. Cette valeur concerne leur bathymetrie SDPB, pas
   # directement EGM2008 -> AHD : elle donne un ORDRE DE GRANDEUR, a
   # verifier sur vos propres donnees avant publication.
-  wlvl_offset: 0.0
+  wlvl_offset: -0.47
 
   # Site SWOT fournissant le niveau d'eau pour l'appariement.
   # null = premier site de la liste disposant d'une observation.

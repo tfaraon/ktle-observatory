@@ -37,6 +37,30 @@ assert abs(hy.cell_areas(rx, ry).mean() / areas.mean() - 1) < 0.01
 # Grille étirée d'un facteur 2 en x : l'aire doit doubler
 assert abs(hy.cell_areas(2 * xv, yv).mean() / areas.mean() - 2) < 0.01
 
+# ── Coordonnées trouées, comme les sorties Delft3D ───────────
+# Les mailles inactives portent des sentinelles, converties en NaN a la
+# lecture. np.gradient les propage a leurs voisines : sans comblement
+# prealable, toute la bordure du lac perdrait son aire et la somme
+# deviendrait NaN.
+
+hole = np.hypot(xv - 20000, yv - 20000) < 12000
+xh = np.where(hole, xv, np.nan)
+yh = np.where(hole, yv, np.nan)
+areas_holed = hy.cell_areas(xh, yh)
+
+assert np.isfinite(areas_holed[hole]).all(), (
+    f"{int((~np.isfinite(areas_holed[hole])).sum())} maille(s) sans aire")
+assert np.isfinite(areas_holed[hole].sum())
+# La surface doit approcher celle du disque
+exact_disc = np.pi * 12000 ** 2
+assert abs(areas_holed[hole].sum() / exact_disc - 1) < 0.05
+
+# fill_gaps ne doit pas altérer un tableau déjà complet
+assert np.allclose(hy.fill_gaps(xv), xv)
+# ... ni inventer quoi que ce soit sur un tableau entièrement vide
+allnan = np.full((5, 5), np.nan)
+assert not np.isfinite(hy.fill_gaps(allnan)).any()
+
 # ── Cuvette conique : surface et volume analytiques ──────────
 # Fond : z = -15 + r/2000, donc le contour z = h est un cercle de
 # rayon r = 2000 (h + 15).

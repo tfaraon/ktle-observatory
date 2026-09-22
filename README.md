@@ -220,9 +220,17 @@ make KaRIn's own classification unreliable over a salt crust — the role
 Sentinel-3 plays in the published method.
 
 ```bash
+python pipeline/export_levels.py --out levels_for_swir.csv
 python pipeline/swir_extent.py --masks results_spit/masks
 python pipeline/swir_extent.py --masks results_spit/masks --apply
 ```
+
+The CSV downloaded from the site is a documented archive: metadata lines
+starting with `#`, both sites, and a `date_utc` column. The toolbox reads with
+pandas defaults and expects `date` and `water_level_m`, one level per date, so it
+cannot use that file. `export_levels.py` writes the reference site in the
+toolbox's format, averaging same-day passes; `--apply-offset` adds
+`scenarios.wlvl_offset` once the datum offset is established.
 
 Beyond validation, this settles a question nothing else could: **the vertical
 datum offset**. The observed shoreline sits, by definition, at the true water
@@ -462,6 +470,7 @@ python tests/test_lake_area.py           # water area from SWOT
 python tests/test_hypsometry.py          # area-level curve from bathymetry
 python tests/test_water_extent.py        # extent derived from the level
 python tests/test_swir_extent.py         # SWIR calibration of the datum
+python tests/test_export_levels.py       # level export for the SWIR toolbox
 python tests/test_language.py            # interface strings stay in English
 node tests/test_windrose.js              # solar elevation and wind roses
 node tests/test_download.js              # CSV export

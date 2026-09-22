@@ -43,3 +43,7 @@ __MACOSX/
 Thumbs.db
 .idea/
 .vscode/
+data/*.npz
+data/extent_maps/
+data/area_maps/
+data/diagnose/

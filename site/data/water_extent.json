@@ -1,10 +1,10 @@
 {
- "generated_at": "2026-09-10T00:19:43Z",
+ "generated_at": "2026-09-22T04:35:36Z",
  "method": "SWOT water level intersected with the Delft3D bathymetry; only the pool hydraulically connected to the low point is retained",
  "note": "SWOT measures elevation reliably; its per-pixel water classification is not robust over a salt playa, so the extent is derived from the level rather than read from the radar",
- "datum_note": "Bathymetry is AHD, SWOT levels are EGM2008 — scenarios.wlvl_offset applied: +0.00 m",
+ "datum_note": "Bathymetry is AHD, SWOT levels are EGM2008 — scenarios.wlvl_offset applied: -0.47 m",
  "site": "Belt Bay",
- "wlvl_offset": 0.0,
+ "wlvl_offset": -0.47,
  "connected": true,
  "demo": false,
  "bathymetry": "wind-sp1.0_wind-dir0.0_wlvl-10.0_sal200.0",
@@ -21,730 +21,351 @@
  "series": [
   {
    "date": "2025-05-12",
-   "level_m": -14.971,
-   "area_km2": 180.0,
-   "volume_km3": 0.0143,
-   "n_cells": 720,
-   "map": "extent_maps/2025-05-12.png"
+   "level_m": -15.441,
+   "area_km2": 0.0,
+   "volume_km3": 0.0,
+   "n_obs": 1,
+   "n_cells": 0
   },
   {
    "date": "2025-05-13",
-   "level_m": -14.823,
-   "area_km2": 245.0,
-   "volume_km3": 0.0461,
-   "n_cells": 980,
-   "map": "extent_maps/2025-05-13.png"
-  },
-  {
-   "date": "2025-05-13",
-   "level_m": -14.824,
-   "area_km2": 245.0,
-   "volume_km3": 0.0459,
-   "n_cells": 980,
-   "map": "extent_maps/2025-05-13.png"
+   "level_m": -15.293,
+   "area_km2": 0.0,
+   "volume_km3": 0.0,
+   "n_obs": 2,
+   "n_cells": 0
   },
   {
    "date": "2025-06-22",
-   "level_m": -13.113,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 13589,
-   "map": "extent_maps/2025-06-22.png"
-  },
-  {
-   "date": "2025-06-22",
-   "level_m": -13.249,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 12728,
+   "level_m": -13.651,
+   "area_km2": 2529.5,
+   "volume_km3": 1.711,
+   "n_obs": 2,
+   "n_cells": 10118,
    "map": "extent_maps/2025-06-22.png"
   },
   {
    "date": "2025-06-24",
-   "level_m": -13.307,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 12303,
-   "map": "extent_maps/2025-06-24.png"
-  },
-  {
-   "date": "2025-06-24",
-   "level_m": -13.301,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 12365,
+   "level_m": -13.774,
+   "area_km2": 2316.8,
+   "volume_km3": 1.4117,
+   "n_obs": 2,
+   "n_cells": 9267,
    "map": "extent_maps/2025-06-24.png"
   },
   {
    "date": "2025-07-13",
-   "level_m": -13.223,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 12876,
-   "map": "extent_maps/2025-07-13.png"
-  },
-  {
-   "date": "2025-07-13",
-   "level_m": -13.223,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 12876,
+   "level_m": -13.693,
+   "area_km2": 2465.2,
+   "volume_km3": 1.606,
+   "n_obs": 2,
+   "n_cells": 9861,
    "map": "extent_maps/2025-07-13.png"
   },
   {
    "date": "2025-07-15",
-   "level_m": -13.318,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 12259,
-   "map": "extent_maps/2025-07-15.png"
-  },
-  {
-   "date": "2025-07-15",
-   "level_m": -13.322,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 12233,
+   "level_m": -13.79,
+   "area_km2": 2277.2,
+   "volume_km3": 1.3748,
+   "n_obs": 2,
+   "n_cells": 9109,
    "map": "extent_maps/2025-07-15.png"
   },
   {
    "date": "2025-08-24",
-   "level_m": -13.273,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 12550,
-   "map": "extent_maps/2025-08-24.png"
-  },
-  {
-   "date": "2025-08-24",
-   "level_m": -13.316,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 12262,
+   "level_m": -13.764,
+   "area_km2": 2338.8,
+   "volume_km3": 1.4338,
+   "n_obs": 2,
+   "n_cells": 9355,
    "map": "extent_maps/2025-08-24.png"
   },
   {
    "date": "2025-08-25",
-   "level_m": -13.314,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 12267,
-   "map": "extent_maps/2025-08-25.png"
-  },
-  {
-   "date": "2025-08-25",
-   "level_m": -13.321,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 12240,
+   "level_m": -13.787,
+   "area_km2": 2283.2,
+   "volume_km3": 1.3805,
+   "n_obs": 2,
+   "n_cells": 9133,
    "map": "extent_maps/2025-08-25.png"
   },
   {
    "date": "2025-09-14",
-   "level_m": -13.417,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 11657,
-   "map": "extent_maps/2025-09-14.png"
-  },
-  {
-   "date": "2025-09-14",
-   "level_m": -13.417,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 11657,
-   "map": "extent_maps/2025-09-14.png"
-  },
-  {
-   "date": "2025-09-14",
-   "level_m": -13.437,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 11554,
-   "map": "extent_maps/2025-09-14.png"
-  },
-  {
-   "date": "2025-09-14",
-   "level_m": -13.437,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 11554,
+   "level_m": -13.897,
+   "area_km2": 860.2,
+   "volume_km3": 0.5873,
+   "n_obs": 4,
+   "n_cells": 3441,
    "map": "extent_maps/2025-09-14.png"
   },
   {
    "date": "2025-09-15",
-   "level_m": -13.492,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 11226,
-   "map": "extent_maps/2025-09-15.png"
-  },
-  {
-   "date": "2025-09-15",
-   "level_m": -13.497,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 11191,
+   "level_m": -13.965,
+   "area_km2": 822.2,
+   "volume_km3": 0.5306,
+   "n_obs": 2,
+   "n_cells": 3289,
    "map": "extent_maps/2025-09-15.png"
   },
   {
    "date": "2025-10-05",
-   "level_m": -13.492,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 11226,
-   "map": "extent_maps/2025-10-05.png"
-  },
-  {
-   "date": "2025-10-05",
-   "level_m": -13.492,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 11226,
-   "map": "extent_maps/2025-10-05.png"
-  },
-  {
-   "date": "2025-10-05",
-   "level_m": -13.496,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 11200,
-   "map": "extent_maps/2025-10-05.png"
-  },
-  {
-   "date": "2025-10-05",
-   "level_m": -13.496,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 11200,
+   "level_m": -13.964,
+   "area_km2": 822.2,
+   "volume_km3": 0.531,
+   "n_obs": 4,
+   "n_cells": 3289,
    "map": "extent_maps/2025-10-05.png"
   },
   {
    "date": "2025-10-06",
-   "level_m": -13.736,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 9604,
-   "map": "extent_maps/2025-10-06.png"
-  },
-  {
-   "date": "2025-10-06",
-   "level_m": -13.738,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 9579,
+   "level_m": -14.207,
+   "area_km2": 692.8,
+   "volume_km3": 0.3457,
+   "n_obs": 2,
+   "n_cells": 2771,
    "map": "extent_maps/2025-10-06.png"
   },
   {
    "date": "2025-10-26",
-   "level_m": -13.684,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 9919,
-   "map": "extent_maps/2025-10-26.png"
-  },
-  {
-   "date": "2025-10-26",
-   "level_m": -13.68,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 9947,
-   "map": "extent_maps/2025-10-26.png"
-  },
-  {
-   "date": "2025-10-26",
-   "level_m": -13.684,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 9919,
+   "level_m": -14.153,
+   "area_km2": 725.8,
+   "volume_km3": 0.3841,
+   "n_obs": 3,
+   "n_cells": 2903,
    "map": "extent_maps/2025-10-26.png"
   },
   {
    "date": "2025-11-15",
-   "level_m": -13.972,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 3266,
-   "map": "extent_maps/2025-11-15.png"
-  },
-  {
-   "date": "2025-11-15",
-   "level_m": -13.967,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 3280,
+   "level_m": -14.44,
+   "area_km2": 427.5,
+   "volume_km3": 0.1725,
+   "n_obs": 2,
+   "n_cells": 1710,
    "map": "extent_maps/2025-11-15.png"
   },
   {
    "date": "2025-11-17",
-   "level_m": -13.921,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 3388,
-   "map": "extent_maps/2025-11-17.png"
-  },
-  {
-   "date": "2025-11-17",
-   "level_m": -13.929,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 3358,
+   "level_m": -14.395,
+   "area_km2": 454.8,
+   "volume_km3": 0.1923,
+   "n_obs": 2,
+   "n_cells": 1819,
    "map": "extent_maps/2025-11-17.png"
   },
   {
    "date": "2025-12-06",
-   "level_m": -14.372,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 2417,
-   "map": "extent_maps/2025-12-06.png"
-  },
-  {
-   "date": "2025-12-06",
-   "level_m": -14.37,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 2419,
+   "level_m": -14.841,
+   "area_km2": 240.2,
+   "volume_km3": 0.0417,
+   "n_obs": 2,
+   "n_cells": 961,
    "map": "extent_maps/2025-12-06.png"
   },
   {
    "date": "2025-12-08",
-   "level_m": -14.022,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 3169,
-   "map": "extent_maps/2025-12-08.png"
-  },
-  {
-   "date": "2025-12-08",
-   "level_m": -14.015,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 3184,
+   "level_m": -14.489,
+   "area_km2": 397.2,
+   "volume_km3": 0.1523,
+   "n_obs": 2,
+   "n_cells": 1589,
    "map": "extent_maps/2025-12-08.png"
   },
   {
    "date": "2025-12-29",
-   "level_m": -14.235,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 2706,
+   "level_m": -14.705,
+   "area_km2": 291.8,
+   "volume_km3": 0.078,
+   "n_obs": 1,
+   "n_cells": 1167,
    "map": "extent_maps/2025-12-29.png"
   },
   {
    "date": "2026-01-17",
-   "level_m": -14.362,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 2447,
-   "map": "extent_maps/2026-01-17.png"
-  },
-  {
-   "date": "2026-01-17",
-   "level_m": -14.362,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 2447,
+   "level_m": -14.832,
+   "area_km2": 242.8,
+   "volume_km3": 0.0439,
+   "n_obs": 2,
+   "n_cells": 971,
    "map": "extent_maps/2026-01-17.png"
   },
   {
    "date": "2026-02-07",
-   "level_m": -14.29,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 2574,
-   "map": "extent_maps/2026-02-07.png"
-  },
-  {
-   "date": "2026-02-07",
-   "level_m": -14.312,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 2536,
-   "map": "extent_maps/2026-02-07.png"
-  },
-  {
-   "date": "2026-02-07",
-   "level_m": -14.312,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 2536,
-   "map": "extent_maps/2026-02-07.png"
-  },
-  {
-   "date": "2026-02-07",
-   "level_m": -14.29,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 2574,
+   "level_m": -14.771,
+   "area_km2": 267.8,
+   "volume_km3": 0.0595,
+   "n_obs": 4,
+   "n_cells": 1071,
    "map": "extent_maps/2026-02-07.png"
   },
   {
    "date": "2026-02-08",
-   "level_m": -14.096,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 3034,
-   "map": "extent_maps/2026-02-08.png"
-  },
-  {
-   "date": "2026-02-08",
-   "level_m": -14.1,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 3025,
-   "map": "extent_maps/2026-02-08.png"
-  },
-  {
-   "date": "2026-02-08",
-   "level_m": -14.096,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 3034,
-   "map": "extent_maps/2026-02-08.png"
-  },
-  {
-   "date": "2026-02-08",
-   "level_m": -14.1,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 3025,
+   "level_m": -14.568,
+   "area_km2": 354.5,
+   "volume_km3": 0.1224,
+   "n_obs": 4,
+   "n_cells": 1418,
    "map": "extent_maps/2026-02-08.png"
   },
   {
    "date": "2026-02-28",
-   "level_m": -13.688,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 9886,
-   "map": "extent_maps/2026-02-28.png"
-  },
-  {
-   "date": "2026-02-28",
-   "level_m": -13.685,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 9908,
-   "map": "extent_maps/2026-02-28.png"
-  },
-  {
-   "date": "2026-02-28",
-   "level_m": -13.685,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 9908,
-   "map": "extent_maps/2026-02-28.png"
-  },
-  {
-   "date": "2026-02-28",
-   "level_m": -13.688,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 9886,
+   "level_m": -14.157,
+   "area_km2": 723.8,
+   "volume_km3": 0.3814,
+   "n_obs": 4,
+   "n_cells": 2895,
    "map": "extent_maps/2026-02-28.png"
   },
   {
    "date": "2026-03-01",
-   "level_m": -13.711,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 9740,
-   "map": "extent_maps/2026-03-01.png"
-  },
-  {
-   "date": "2026-03-01",
-   "level_m": -13.712,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 9735,
-   "map": "extent_maps/2026-03-01.png"
-  },
-  {
-   "date": "2026-03-01",
-   "level_m": -13.711,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 9740,
-   "map": "extent_maps/2026-03-01.png"
-  },
-  {
-   "date": "2026-03-01",
-   "level_m": -13.712,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 9735,
+   "level_m": -14.182,
+   "area_km2": 705.8,
+   "volume_km3": 0.3635,
+   "n_obs": 4,
+   "n_cells": 2823,
    "map": "extent_maps/2026-03-01.png"
   },
   {
    "date": "2026-03-21",
-   "level_m": -13.172,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 13223,
-   "map": "extent_maps/2026-03-21.png"
-  },
-  {
-   "date": "2026-03-21",
-   "level_m": -13.169,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 13239,
+   "level_m": -13.641,
+   "area_km2": 2540.2,
+   "volume_km3": 1.7376,
+   "n_obs": 2,
+   "n_cells": 10161,
    "map": "extent_maps/2026-03-21.png"
   },
   {
    "date": "2026-03-22",
-   "level_m": -12.887,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 15430,
-   "map": "extent_maps/2026-03-22.png"
-  },
-  {
-   "date": "2026-03-22",
-   "level_m": -12.891,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 15380,
+   "level_m": -13.359,
+   "area_km2": 2997.2,
+   "volume_km3": 2.5203,
+   "n_obs": 2,
+   "n_cells": 11989,
    "map": "extent_maps/2026-03-22.png"
   },
   {
    "date": "2026-04-10",
-   "level_m": -13.236,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 12806,
-   "map": "extent_maps/2026-04-10.png"
-  },
-  {
-   "date": "2026-04-10",
-   "level_m": -13.234,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 12810,
-   "map": "extent_maps/2026-04-10.png"
-  },
-  {
-   "date": "2026-04-10",
-   "level_m": -13.234,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 12810,
-   "map": "extent_maps/2026-04-10.png"
-  },
-  {
-   "date": "2026-04-10",
-   "level_m": -13.236,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 12806,
+   "level_m": -13.705,
+   "area_km2": 2444.8,
+   "volume_km3": 1.5766,
+   "n_obs": 4,
+   "n_cells": 9779,
    "map": "extent_maps/2026-04-10.png"
   },
   {
    "date": "2026-04-12",
-   "level_m": -13.044,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 13979,
-   "map": "extent_maps/2026-04-12.png"
-  },
-  {
-   "date": "2026-04-12",
-   "level_m": -13.053,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 13943,
+   "level_m": -13.519,
+   "area_km2": 2758.2,
+   "volume_km3": 2.0605,
+   "n_obs": 2,
+   "n_cells": 11033,
    "map": "extent_maps/2026-04-12.png"
   },
   {
    "date": "2026-05-01",
-   "level_m": -12.775,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 16859,
-   "map": "extent_maps/2026-05-01.png"
-  },
-  {
-   "date": "2026-05-01",
-   "level_m": -12.767,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 16959,
+   "level_m": -13.241,
+   "area_km2": 3189.8,
+   "volume_km3": 2.8855,
+   "n_obs": 2,
+   "n_cells": 12759,
    "map": "extent_maps/2026-05-01.png"
   },
   {
    "date": "2026-05-03",
-   "level_m": -12.946,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 14662,
-   "map": "extent_maps/2026-05-03.png"
-  },
-  {
-   "date": "2026-05-03",
-   "level_m": -12.942,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 14690,
+   "level_m": -13.414,
+   "area_km2": 2917.2,
+   "volume_km3": 2.3577,
+   "n_obs": 2,
+   "n_cells": 11669,
    "map": "extent_maps/2026-05-03.png"
   },
   {
    "date": "2026-05-22",
-   "level_m": -12.829,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 16168,
-   "map": "extent_maps/2026-05-22.png"
-  },
-  {
-   "date": "2026-05-22",
-   "level_m": -12.829,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 16168,
+   "level_m": -13.299,
+   "area_km2": 3096.0,
+   "volume_km3": 2.7031,
+   "n_obs": 2,
+   "n_cells": 12384,
    "map": "extent_maps/2026-05-22.png"
   },
   {
    "date": "2026-05-24",
-   "level_m": -12.91,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 14981,
-   "map": "extent_maps/2026-05-24.png"
-  },
-  {
-   "date": "2026-05-24",
-   "level_m": -12.909,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 14981,
+   "level_m": -13.38,
+   "area_km2": 2964.8,
+   "volume_km3": 2.4592,
+   "n_obs": 2,
+   "n_cells": 11859,
    "map": "extent_maps/2026-05-24.png"
   },
   {
    "date": "2026-06-12",
-   "level_m": -12.972,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 14433,
-   "map": "extent_maps/2026-06-12.png"
-  },
-  {
-   "date": "2026-06-12",
-   "level_m": -12.973,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 14433,
+   "level_m": -13.443,
+   "area_km2": 2879.5,
+   "volume_km3": 2.2751,
+   "n_obs": 2,
+   "n_cells": 11518,
    "map": "extent_maps/2026-06-12.png"
   },
   {
    "date": "2026-06-13",
-   "level_m": -12.946,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 14662,
-   "map": "extent_maps/2026-06-13.png"
-  },
-  {
-   "date": "2026-06-13",
-   "level_m": -12.941,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 14700,
+   "level_m": -13.414,
+   "area_km2": 2917.2,
+   "volume_km3": 2.3592,
+   "n_obs": 2,
+   "n_cells": 11669,
    "map": "extent_maps/2026-06-13.png"
   },
   {
    "date": "2026-07-03",
-   "level_m": -12.827,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 16198,
-   "map": "extent_maps/2026-07-03.png"
-  },
-  {
-   "date": "2026-07-03",
-   "level_m": -12.834,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 16132,
+   "level_m": -13.301,
+   "area_km2": 3091.2,
+   "volume_km3": 2.6984,
+   "n_obs": 2,
+   "n_cells": 12365,
    "map": "extent_maps/2026-07-03.png"
   },
   {
    "date": "2026-07-04",
-   "level_m": -12.829,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 16168,
-   "map": "extent_maps/2026-07-04.png"
-  },
-  {
-   "date": "2026-07-04",
-   "level_m": -12.841,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 16046,
+   "level_m": -13.305,
+   "area_km2": 3081.2,
+   "volume_km3": 2.6845,
+   "n_obs": 2,
+   "n_cells": 12325,
    "map": "extent_maps/2026-07-04.png"
   },
   {
    "date": "2026-07-24",
-   "level_m": -12.86,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 15814,
-   "map": "extent_maps/2026-07-24.png"
-  },
-  {
-   "date": "2026-07-24",
-   "level_m": -12.841,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 16046,
+   "level_m": -13.321,
+   "area_km2": 3060.0,
+   "volume_km3": 2.6369,
+   "n_obs": 2,
+   "n_cells": 12240,
    "map": "extent_maps/2026-07-24.png"
   },
   {
    "date": "2026-07-25",
-   "level_m": -12.909,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 14981,
-   "map": "extent_maps/2026-07-25.png"
-  },
-  {
-   "date": "2026-07-25",
-   "level_m": -12.909,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 14981,
+   "level_m": -13.379,
+   "area_km2": 2964.8,
+   "volume_km3": 2.4606,
+   "n_obs": 2,
+   "n_cells": 11859,
    "map": "extent_maps/2026-07-25.png"
   },
   {
    "date": "2026-08-14",
-   "level_m": -13.043,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 13982,
-   "map": "extent_maps/2026-08-14.png"
-  },
-  {
-   "date": "2026-08-14",
-   "level_m": -13.038,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 14010,
+   "level_m": -13.511,
+   "area_km2": 2776.2,
+   "volume_km3": 2.0827,
+   "n_obs": 2,
+   "n_cells": 11105,
    "map": "extent_maps/2026-08-14.png"
   },
   {
    "date": "2026-08-15",
-   "level_m": -12.85,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 15918,
-   "map": "extent_maps/2026-08-15.png"
-  },
-  {
-   "date": "2026-08-15",
-   "level_m": -12.852,
-   "area_km2": NaN,
-   "volume_km3": NaN,
-   "n_cells": 15896,
+   "level_m": -13.321,
+   "area_km2": 3060.0,
+   "volume_km3": 2.6354,
+   "n_obs": 2,
+   "n_cells": 12240,
    "map": "extent_maps/2026-08-15.png"
   }
  ]
