@@ -156,6 +156,34 @@ The default collection is `SWOT_L2_HR_Raster_D`. Version C granules may still
 be kept as an archive, but a single processing version should be used for data
 intended for publication.
 
+### Bird sightings (eBird)
+
+```bash
+export EBIRD_API_KEY=your_key          # free key: https://ebird.org/api/keygen
+python pipeline/fetch_ebird.py
+python pipeline/fetch_ebird.py --demo  # synthetic data, no key needed
+```
+
+Recent bird sightings around the lake come from the eBird API 2.0. The key is
+read only from the `EBIRD_API_KEY` environment variable: never from
+`config.yaml`, never written to the output, and never used in the browser,
+where anyone could read it. On GitHub, add it as a repository secret
+(Settings > Secrets and variables > Actions > `EBIRD_API_KEY`); the
+`ebird.yml` workflow then refreshes `site/data/ebird.json` once a day and does
+nothing if the secret is absent.
+
+The API returns only the **most recent sighting of each species** within 50 km
+of a point over at most 30 days, so the dashboard shows a list of species
+reported, not a count of birds. Four points cover both lakes. Waterbirds that
+gather when the lake holds water are flagged, and their presence is a sign of a
+filled lake. Private locations keep their species but lose their name and
+coordinates, and no observer names are stored.
+
+eBird's terms allow free non-commercial use and require eBird.org to be
+credited, with a link, wherever its data are shown; the panel, the map layer
+and the footer all do so. Bulk download of the observations is deliberately not
+offered, since eBird distributes its data itself on request.
+
 ### Surface water area
 
 ```bash
@@ -471,6 +499,7 @@ The main routes are:
 | `/api/weather` | BOM observations |
 | `/api/area` | water area from SWOT detection |
 | `/api/extent` | water extent derived from the level |
+| `/api/ebird` | recent bird sightings (file written by the pipeline) |
 | `/api/config` | imagery layers used by the frontend |
 | `/api/scenarios` | simulation index |
 | `/api/scenario/match` | closest scenario |
@@ -514,6 +543,8 @@ python tests/test_language.py            # interface strings stay in English
 python tests/test_natural_history.py     # references, contents and style
 python tests/test_aboriginal_culture.py  # nations, sources and protocol
 python tests/test_navigation.py          # headless browser, skipped without Playwright
+python tests/test_ebird.py               # eBird fetch, privacy and key hygiene
+node tests/test_ebird.js                 # bird panel display logic
 node tests/test_windrose.js              # solar elevation and wind roses
 node tests/test_download.js              # CSV export
 ```

@@ -1,0 +1,46 @@
+# Rafraichit data/ebird.json une fois par jour et le publie.
+#
+# La cle eBird est un SECRET du depot, jamais ecrite dans un fichier :
+#   Settings > Secrets and variables > Actions > New repository secret
+#   Nom : EBIRD_API_KEY    Valeur : votre cle (https://ebird.org/api/keygen)
+#
+# Une execution par jour suffit : l'API ne renvoie que la derniere
+# observation de chaque espece sur 30 jours, et les observateurs sont
+# rares au bord du lac. Rester courtois envers les serveurs d'eBird fait
+# partie de ses conditions d'utilisation.
+name: Refresh eBird observations
+
+on:
+  schedule:
+    - cron: "23 20 * * *"      # 20:23 UTC, soit le petit matin en Australie
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - run: pip install PyYAML
+      - name: Fetch eBird observations
+        env:
+          EBIRD_API_KEY: ${{ secrets.EBIRD_API_KEY }}
+        run: |
+          if [ -z "$EBIRD_API_KEY" ]; then
+            echo "Secret EBIRD_API_KEY absent : rien a faire."
+            exit 0
+          fi
+          python pipeline/fetch_ebird.py
+          if [ -d site/data ]; then cp data/ebird.json site/data/; fi
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          [ -f site/data/ebird.json ] && git add -f site/data/ebird.json
+          git diff --staged --quiet || git commit -m "eBird refresh"
+          git push

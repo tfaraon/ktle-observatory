@@ -7,3 +7,5 @@
 site/data/weather.json    merge=ours
 site/data/swot_wse.json   merge=ours
 site/data/lake_area.json  merge=ours
+site/data/water_extent.json  merge=ours
+site/data/ebird.json      merge=ours

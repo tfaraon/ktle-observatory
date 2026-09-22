@@ -196,6 +196,25 @@ def _read_weather_file():
         return json.load(f)
 
 
+EBIRD_FILE = ROOT / "data" / "ebird.json"
+
+
+@app.get("/api/ebird")
+def api_ebird():
+    """Observations eBird deja recuperees par pipeline/fetch_ebird.py.
+
+    Le serveur ne detient pas la cle et n'interroge pas eBird a la
+    demande : le fichier est rafraichi par le pipeline ou le workflow.
+    """
+    if not EBIRD_FILE.exists():
+        return jsonify({
+            "error": "no_data",
+            "message": "No bird observations yet: run pipeline/fetch_ebird.py",
+        }), 404
+    with open(EBIRD_FILE, "r", encoding="utf-8") as f:
+        return jsonify(json.load(f))
+
+
 @app.get("/api/weather")
 def api_weather():
     """Observations BOM, avec cache TTL cote serveur : le fichier

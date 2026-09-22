@@ -81,6 +81,10 @@
             <div class="seg" id="base-seg" role="group" aria-label="Base map">
               <button type="button" class="seg-btn active" data-base="topo">Map</button>
             </div>
+            <div class="seg" id="birds-seg" role="group" aria-label="Bird sightings" hidden>
+              <button type="button" class="seg-btn" id="birds-toggle" aria-pressed="false"
+                      title="Locations of recent eBird sightings">Birds</button>
+            </div>
             <div class="seg" id="model-seg" role="group" aria-label="Model layer">
               <button type="button" class="seg-btn active" data-model="none">No model</button>
             </div>
@@ -201,6 +205,28 @@
       </article>
 
 
+      <!-- Panel: bird sightings (eBird) -->
+      <article class="panel birds-card" id="birds-card" hidden>
+        <div class="panel-head head-row">
+          <div>
+            <p class="eyebrow">Birds</p>
+            <h2>Recent sightings around the lake</h2>
+          </div>
+          <p id="birds-updated" class="weather-updated mono"></p>
+        </div>
+        <p id="birds-note" class="chart-note"></p>
+        <div id="birds-indicators" class="birds-indicators"></div>
+        <div class="table-wrap birds-table-wrap">
+          <table class="birds-table">
+            <thead><tr><th>Species</th><th>Last seen</th><th>Count</th><th>Location</th></tr></thead>
+            <tbody id="birds-body"></tbody>
+          </table>
+        </div>
+        <p class="birds-attribution mono">Bird observations from
+          <a href="https://ebird.org" target="_blank" rel="noopener">eBird.org</a>,
+          Cornell Lab of Ornithology, submitted by volunteer observers.</p>
+      </article>
+
       <!-- Panel 3b: surface water area -->
       <article class="panel chart-card" id="area-card" hidden>
         <div class="panel-head head-row">
@@ -260,10 +286,12 @@
     <span>Kati Thanda&ndash;Lake Eyre lies on Arabana country. We acknowledge the Arabana as Traditional Owners and pay our respects to their Elders past and present.</span>
     <span>Data: SWOT L2 HR Raster (NASA / CNES) · Weather © Bureau of Meteorology · Imagery NASA EOSDIS GIBS / Worldview</span>
     <span>Base map: © OpenTopoMap (CC-BY-SA) · © OpenStreetMap</span>
+    <span>Bird observations: <a href="https://ebird.org" target="_blank" rel="noopener">eBird.org</a>, Cornell Lab of Ornithology</span>
   </footer>
 
   <script src="windrose.js"></script>
   <script src="download.js"></script>
+  <script src="ebird.js"></script>
   <script src="methods.js"></script>
   <script src="natural_history.js"></script>
   <script src="aboriginal_culture.js"></script>

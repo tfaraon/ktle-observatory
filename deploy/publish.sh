@@ -53,7 +53,7 @@ echo "Frontend : $copied fichier(s) mis à jour"
 # ── Donnees ─────────────────────────────────────────────────
 mkdir -p site/data
 data_copied=0
-for name in swot_wse.json weather.json lake_area.json water_extent.json; do
+for name in swot_wse.json weather.json lake_area.json water_extent.json ebird.json; do
   if [ -f "data/$name" ]; then
     if ! cmp -s "data/$name" "site/data/$name"; then
       cp "data/$name" "site/data/"

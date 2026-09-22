@@ -312,3 +312,31 @@ weather:
     - { name: "Marree Airport",  product: "IDS60801", wmo: "95480", lat: -29.660, lon: 138.065 }
     - { name: "Oodnadatta",      product: "IDS60801", wmo: "94476", lat: -27.556, lon: 135.447 }
     - { name: "Moomba Airport",  product: "IDS60801", wmo: "95481", lat: -28.099, lon: 140.197 }
+
+# ============================================================
+# Observations d'oiseaux (API eBird 2.0)
+# ============================================================
+# La CLE N'EST PAS ICI : elle est lue dans la variable d'environnement
+# EBIRD_API_KEY (cle gratuite sur https://ebird.org/api/keygen). Sur
+# GitHub, declarez-la comme secret du depot (Settings > Secrets and
+# variables > Actions > EBIRD_API_KEY) : le workflow ebird.yml l'injecte.
+#
+# Usage non commercial libre ; eBird.org doit etre cite partout ou ses
+# donnees s'affichent. L'API ne renvoie que la DERNIERE observation de
+# chaque espece : le site montre une liste d'especes, pas un recensement.
+ebird:
+  back_days: 30          # 1 a 30, plafond de l'API
+  dist_km: 50            # 1 a 50, plafond de l'API
+  points:
+    - { name: "Lake Eyre North", lat: -28.20, lon: 137.30 }
+    - { name: "Belt Bay",        lat: -28.89, lon: 137.03 }
+    - { name: "Madigan Gulf",    lat: -28.89, lon: 137.56 }
+    - { name: "Lake Eyre South", lat: -29.25, lon: 137.30 }
+  # Oiseaux d'eau cites par le Departement de l'environnement pour le lac
+  # en eau : leur presence signale un lac rempli.
+  indicator_species:
+    - "Cladorhynchus leucocephalus"      # banded stilt
+    - "Pelecanus conspicillatus"         # Australian pelican
+    - "Recurvirostra novaehollandiae"    # red-necked avocet
+    - "Chroicocephalus novaehollandiae"  # silver gull
+    - "Gelochelidon macrotarsa"          # Australian tern

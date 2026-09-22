@@ -345,7 +345,7 @@ def build(cfg, out_dir=SITE, colors=64, limit=None, sample=40):
         json.dump(slim, f, separators=(",", ":"))
 
     for name in ("swot_wse.json", "weather.json", "lake_area.json",
-                 "water_extent.json"):
+                 "water_extent.json", "ebird.json"):
         src_file = ROOT / "data" / name
         if src_file.exists():
             shutil.copy(src_file, data_dir / name)
@@ -358,7 +358,7 @@ def build(cfg, out_dir=SITE, colors=64, limit=None, sample=40):
 
     for name in ("index.html", "style.css", "app.js", "methods.js",
                  "windrose.js", "download.js", "natural_history.js",
-                 "aboriginal_culture.js"):
+                 "aboriginal_culture.js", "ebird.js"):
         shutil.copy(ROOT / "frontend" / name, out_dir / name)
     (out_dir / ".nojekyll").write_text("", encoding="utf-8")
 

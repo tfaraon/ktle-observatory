@@ -30,6 +30,8 @@
     staticArrows: null, staticArrowsKey: null,
     methodsLoaded: false,
     loadedPages: {},
+    ebird: null,
+    birdLayer: null,
     lastTab: { observatory: "observatory" },
     weather: null, area: null, extent: null,
     rosePeriod: "h24",
@@ -992,7 +994,7 @@
   function staticConditions(at) {
     // Mêmes conversions que le serveur : km/h -> m/s, convention de
     // direction, décalage de datum.
-    const cfg = state.manifest.matching || {};
+    const cfg = (state.manifest && state.manifest.matching) || {};
     const target = {}, origin = {};
 
     const wx = state.weather;
@@ -1717,7 +1719,11 @@
       return;
     }
     const idx = state.staticIndex;
-    const cfgm = state.manifest.matching || {};
+    if (!idx || !Array.isArray(idx.scenarios)) {
+      body.innerHTML = '<p class="scenario-error">Scenario library unavailable.</p>';
+      return;
+    }
+    const cfgm = (state.manifest && state.manifest.matching) || {};
     const match = matchStatic(idx.scenarios, state.paramGrid, target,
                               cfgm.weights, cfgm.wlvl_rounding);
     renderScenario(body, {
@@ -1924,6 +1930,123 @@
 
   // ── Initialisation ───────────────────────────────────────
 
+  // ── Bird sightings (eBird) ───────────────────────────────
+  //
+  // data/ebird.json is fetched server-side by pipeline/fetch_ebird.py:
+  // the API key never reaches the browser. Location names are free text
+  // typed by observers, so everything taken from the file is escaped
+  // before it goes into the page.
+
+  function esc(v) {
+    return String(v === null || v === undefined ? "" : v)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+  }
+
+  async function loadEbird() {
+    const sources = state.staticMode ? ["data/ebird.json"]
+      : ["/api/ebird", "data/ebird.json"];
+    for (const url of sources) {
+      try {
+        const res = await fetch(url, { cache: "no-store" });
+        if (res.ok) return await res.json();
+      } catch (_) { /* next source */ }
+    }
+    return null;
+  }
+
+  function renderBirds(data) {
+    const card = $("birds-card");
+    if (!card || !data || !Array.isArray(data.species) || typeof EBird === "undefined") {
+      if (card) card.hidden = true;
+      return;
+    }
+    card.hidden = false;
+    const sum = EBird.summary(data);
+
+    $("birds-updated").textContent = data.fetched_at
+      ? "fetched " + data.fetched_at.replace("T", " ").replace("Z", " UTC") : "";
+
+    const notes = [
+      `The most recent sighting of each species within ${esc(data.dist_km)} km of `
+      + `${(data.points || []).length} points on the lake over the last `
+      + `${esc(data.back_days)} days: a list of species reported, not a count of birds.`,
+    ];
+    if (sum.nPrivate) {
+      notes.push(sum.nPrivate === 1
+        ? "One sighting from a private location is listed without its location."
+        : `${sum.nPrivate} sightings from private locations are listed without `
+          + "their location.");
+    }
+    if (data.demo) notes.push("Demonstration data, not real observations.");
+    if (data.stale) notes.push("eBird could not be reached: showing the last valid set.");
+    else if (data.partial) notes.push("Some points could not be queried.");
+    $("birds-note").innerHTML = notes.join(" ");
+
+    $("birds-indicators").innerHTML = (data.indicators || []).map((i) => {
+      const name = esc(i.comName || i.sciName);
+      return i.present
+        ? `<div class="bird-chip present"><b>${name}</b>`
+          + `<span class="mono">last seen ${esc(EBird.formatDate(i.lastSeen))}</span></div>`
+        : `<div class="bird-chip absent"><b><i>${esc(i.sciName)}</i></b>`
+          + `<span class="mono">not reported</span></div>`;
+    }).join("");
+
+    const rows = EBird.sortSpecies(data.species).map((sp) => {
+      const tags = (sp.indicator ? '<span class="bird-tag indicator">waterbird</span>' : "")
+        + (sp.notable ? '<span class="bird-tag notable">notable</span>' : "");
+      const age = EBird.daysAgo(sp.obsDt);
+      const ageText = age === null ? "" : age === 0 ? "today" : `${age} d ago`;
+      const where = sp.locationPrivate ? "<i>private location</i>" : esc(sp.locName);
+      return `<tr><td><a href="${esc(EBird.speciesUrl(sp.speciesCode))}" target="_blank"`
+        + ` rel="noopener">${esc(sp.comName)}</a>${tags}`
+        + `<span class="sci">${esc(sp.sciName)}</span></td>`
+        + `<td>${esc(EBird.formatDate(sp.obsDt))}<span class="sci">${ageText}</span></td>`
+        + `<td>${esc(EBird.formatCount(sp.howMany))}</td><td>${where}</td></tr>`;
+    });
+    $("birds-body").innerHTML = rows.join("")
+      || '<tr><td colspan="4">No sightings reported in this period.</td></tr>';
+
+    $("birds-seg").hidden = !EBird.locationGroups(data.species).length;
+  }
+
+  const BIRD_ATTRIBUTION = 'Bird records &copy; <a href="https://ebird.org">eBird.org</a>';
+
+  function toggleBirdLayer(on) {
+    const btn = $("birds-toggle");
+    if (state.birdLayer) {
+      state.map.removeLayer(state.birdLayer);
+      state.map.attributionControl.removeAttribution(BIRD_ATTRIBUTION);
+      state.birdLayer = null;
+    }
+    if (btn) {
+      btn.classList.toggle("active", Boolean(on));
+      btn.setAttribute("aria-pressed", on ? "true" : "false");
+    }
+    if (!on || !state.ebird || !state.map) return;
+
+    const layer = L.layerGroup();
+    EBird.locationGroups(state.ebird.species).forEach((g) => {
+      const list = g.species.slice(0, 8).map((sp) => esc(sp.comName)).join(", ")
+        + (g.species.length > 8 ? `, and ${g.species.length - 8} more` : "");
+      L.circleMarker([g.lat, g.lng], {
+        radius: Math.min(5 + g.species.length, 14),
+        color: "#134450", weight: 1.5, fillColor: "#1E5F6B", fillOpacity: 0.55,
+      }).bindPopup(`<b>${esc(g.name)}</b><br>${g.species.length} species, `
+        + `latest ${esc(EBird.formatDate(g.last))}<br><small>${list}</small>`
+        + '<br><small>Source: <a href="https://ebird.org" target="_blank" '
+        + 'rel="noopener">eBird.org</a></small>').addTo(layer);
+    });
+    layer.addTo(state.map);
+    state.map.attributionControl.addAttribution(BIRD_ATTRIBUTION);
+    state.birdLayer = layer;
+  }
+
+  function wireBirds() {
+    const btn = $("birds-toggle");
+    if (btn) btn.addEventListener("click", () => toggleBirdLayer(!state.birdLayer));
+  }
+
   async function init() {
     const { data, viaApi } = await loadData();
 
@@ -2007,12 +2130,14 @@
     state.areaIdx = Math.max(0, areaDates().length - 1);
     drawAreaChart();
     loadWeather().then(() => loadScenario(null));
+    loadEbird().then((d) => { state.ebird = d; renderBirds(d); });
   }
 
   document.addEventListener("DOMContentLoaded", () => {
     // Les onglets fonctionnent même si les données manquent
     wireTabs();
     wireDownloads();
+    wireBirds();
     init();
   });
 })();
