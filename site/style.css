@@ -88,8 +88,6 @@ code {
   font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 500;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
   color: var(--dune);
 }
 
@@ -113,8 +111,6 @@ code {
 }
 .header-label {
   font-size: 10.5px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
 }
 #generated-at { color: var(--basin); }
 
@@ -366,8 +362,6 @@ main {
 .level-meta dt {
   color: var(--dune);
   font-size: 10.5px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
   padding-top: 2px;
 }
 .level-meta dd { margin: 0; text-align: right; }
@@ -416,7 +410,6 @@ main {
   color: var(--basin);
   font-variant-numeric: tabular-nums;
   pointer-events: none;
-  box-shadow: 0 1px 5px rgba(0,0,0,.12);
 }
 .map-readout b { font-weight: 600; }
 .map-readout .dim { color: var(--dune); font-size: 10.5px; }
@@ -435,7 +428,6 @@ main {
   padding: 7px 12px;
   font-size: 11.5px;
   color: var(--basin);
-  box-shadow: 0 1px 6px rgba(0,0,0,.14);
 }
 
 /* Légende du modèle, posée sur la carte */
@@ -454,7 +446,6 @@ main {
   padding: 7px 10px;
   font-size: 10.5px;
   color: var(--basin);
-  box-shadow: 0 1px 6px rgba(0,0,0,.12);
 }
 .map-legend > span:first-child { grid-area: title; font-weight: 600; }
 .legend-bar {
@@ -551,7 +542,6 @@ main {
   border-radius: 50%;
   background: var(--flood);
   border: 2.5px solid #FFF;
-  box-shadow: 0 1px 4px rgba(0,0,0,.35);
 }
 .marker-dot.selected { background: var(--halite); }
 
@@ -560,7 +550,6 @@ main {
   width: 11px; height: 11px;
   background: var(--ochre);
   border: 2px solid #FFF;
-  box-shadow: 0 1px 3px rgba(0,0,0,.35);
   transform: rotate(45deg);
 }
 
@@ -799,8 +788,6 @@ main {
 .match-label {
   font-family: var(--font-mono);
   font-size: 10px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
   color: var(--dune);
   display: block;
   margin-bottom: 5px;
@@ -834,8 +821,6 @@ main {
 .alt-label {
   font-family: var(--font-mono);
   font-size: 10px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
   color: var(--dune);
   margin-right: 4px;
 }
@@ -951,14 +936,11 @@ main {
 .section-btn.active {
   color: var(--basin);
   background: var(--panel);
-  box-shadow: inset 0 3px 0 var(--flood);
 }
 .section-kicker {
   font-family: var(--font-mono);
   font-size: 10.5px;
   font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
   color: var(--dune);
 }
 
@@ -979,8 +961,6 @@ main {
 .nh-toc-title {
   font-family: var(--font-mono);
   font-size: 11px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
   color: var(--dune);
   margin: 0 0 8px;
 }
@@ -1057,8 +1037,6 @@ main {
   font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 500;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
   color: var(--dune);
   background: var(--salt);
   padding: 9px 12px;
@@ -1114,8 +1092,6 @@ main {
   font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 500;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
   color: var(--dune);
   background: var(--salt);
   padding: 8px 10px;
@@ -1132,11 +1108,371 @@ main {
   border-radius: 4px;
   font-family: var(--font-mono);
   font-size: 10px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
   vertical-align: 1px;
 }
 .bird-tag.indicator { background: rgba(30, 95, 107, 0.12); color: var(--flood-deep); }
 .bird-tag.notable { background: rgba(196, 83, 107, 0.12); color: var(--halite); }
 .birds-attribution { padding: 0 22px 16px; font-size: 11.5px; color: var(--dune); }
 .birds-attribution a { color: var(--flood-deep); }
+
+
+/* ════════════════════════════════════════════════════════════
+   Refonte : un observatoire, pas un tableau de bord.
+
+   Palette tirée du lac vu d'orbite : blanc froid de l'halite pour le
+   fond, bleu-noir d'eau profonde pour l'encre, eau de crue pour les
+   données, rose des saumures pour un seul élément, la ligne d'eau.
+   Literata porte la lecture ; Archivo, élargi, les titres et
+   l'interface, avec des chiffres tabulaires.
+   ════════════════════════════════════════════════════════════ */
+
+:root {
+  --salt: #EEF1EF;
+  --panel: #F9FBFA;
+  --panel-edge: #D3DCDA;
+  --basin: #16333B;
+  --dune: #56696C;
+  --grid: #E0E7E5;
+  --flood: #1F6470;
+  --flood-deep: #134450;
+  --halite: #C0476A;
+  --ochre: #946535;
+  --font-display: "Archivo", system-ui, sans-serif;
+  --font-body: "Archivo", system-ui, sans-serif;
+  --font-read: "Literata", Georgia, "Times New Roman", serif;
+  --font-mono: "Archivo", system-ui, sans-serif;
+  --radius: 3px;
+  --measure: 66ch;
+  --page: 1180px;
+}
+
+body { background: var(--salt); color: var(--basin); }
+.mono { font-variant-numeric: tabular-nums; letter-spacing: 0; }
+.eyebrow, .section-kicker { display: none; }
+:focus-visible { outline: 2px solid var(--flood); outline-offset: 2px; }
+a { color: var(--flood-deep); }
+
+/* ── En-tête ──────────────────────────────────────────────── */
+
+.masthead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px 32px;
+  max-width: var(--page);
+  margin: 0 auto;
+  padding: 22px 28px 14px;
+}
+.wordmark {
+  font-family: var(--font-display);
+  font-stretch: 112%;
+  font-weight: 600;
+  font-size: 1.15rem;
+  color: var(--basin);
+  text-decoration: none;
+}
+.wordmark span { font-weight: 400; color: var(--dune); margin-left: 0.45em; }
+nav.sections {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 26px;
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: none;
+}
+.section-btn {
+  appearance: none;
+  background: none;
+  border: none;
+  padding: 4px 0 6px;
+  font-family: var(--font-display);
+  font-size: 0.98rem;
+  font-weight: 500;
+  color: var(--dune);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+}
+.section-btn:hover { color: var(--basin); }
+.section-btn.active { color: var(--basin); border-bottom-color: var(--flood); }
+
+/* Sous-navigation d'une partie : discrète, sous l'en-tête */
+nav.tabs, .subbar {
+  max-width: var(--page);
+  margin: 0 auto;
+  padding: 0 28px;
+  background: none;
+  border: none;
+}
+.subbar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px 24px; }
+.subbar[hidden] { display: none; }
+.subbar nav.tabs { padding: 0; margin: 0; }
+nav.tabs { display: flex; gap: 20px; border-top: 1px solid var(--panel-edge); padding-top: 8px; }
+.subbar { border-top: 1px solid var(--panel-edge); padding-top: 8px; }
+.subbar nav.tabs { border-top: none; padding-top: 0; }
+nav.tabs[hidden] { display: none; }
+.tab {
+  background: none;
+  border: none;
+  border-radius: 0;
+  padding: 4px 0;
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  color: var(--dune);
+  cursor: pointer;
+}
+.tab.active { color: var(--basin); font-weight: 600; }
+.data-status { font-size: 0.85rem; color: var(--dune); display: flex; gap: 14px; align-items: center; font-variant-numeric: tabular-nums; }
+.refresh-btn {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  background: none;
+  border: 1px solid var(--panel-edge);
+  border-radius: var(--radius);
+  padding: 4px 10px;
+  color: var(--flood-deep);
+  cursor: pointer;
+}
+
+/* ── Accueil ──────────────────────────────────────────────── */
+
+.home { padding: 20px 0 56px; }
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.95fr);
+  gap: 48px;
+  align-items: start;
+  padding-top: 24px;
+}
+.hero-title {
+  font-family: var(--font-display);
+  font-stretch: 118%;
+  font-weight: 600;
+  font-size: clamp(2.6rem, 5.4vw, 4.9rem);
+  line-height: 0.98;
+  letter-spacing: -0.015em;
+  margin: 0 0 28px;
+  color: var(--basin);
+}
+.hero-lede, .lake-now p {
+  font-family: var(--font-read);
+  font-size: 1.12rem;
+  line-height: 1.62;
+  max-width: 34em;
+  margin: 0 0 18px;
+}
+.lake-now {
+  margin: 30px 0 22px;
+  padding-left: 18px;
+  border-left: 3px solid var(--halite);
+}
+.lake-now p { font-size: 1.04rem; margin-bottom: 10px; }
+.hero-actions { margin: 0; }
+.text-link {
+  font-family: var(--font-display);
+  font-weight: 600;
+  color: var(--flood-deep);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1px;
+}
+.hero-plate { margin: 0; }
+.plate-frame {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 96px;
+  gap: 14px;
+  align-items: stretch;
+}
+.plate-image {
+  position: relative;
+  aspect-ratio: 760 / 1170;
+  max-height: 78vh;
+  background: #20383E;
+  overflow: hidden;
+}
+.plate-image img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.plate-fallback {
+  position: absolute;
+  inset: auto 16px 16px 16px;
+  margin: 0;
+  color: #CFDCDA;
+  font-size: 0.9rem;
+}
+.hero-gauge { width: 96px; height: 100%; max-height: 78vh; overflow: visible; }
+.hero-gauge text { font-family: var(--font-display); font-size: 12px; fill: var(--dune); font-variant-numeric: tabular-nums; }
+.hero-gauge .g-end { font-size: 11px; }
+.g-axis, .g-tick { stroke: var(--dune); stroke-width: 1; }
+.g-water { fill: var(--flood); opacity: 0.18; }
+.g-line line { stroke: var(--halite); stroke-width: 2.5; }
+.g-line text { fill: var(--halite); font-weight: 600; font-size: 13px; }
+@media (prefers-reduced-motion: no-preference) {
+  .g-line { animation: rise 1.4s cubic-bezier(.2, .7, .2, 1) both; }
+  @keyframes rise { from { transform: translateY(var(--rise)); opacity: 0.2; } }
+}
+.hero-plate figcaption {
+  font-family: var(--font-read);
+  font-style: italic;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--dune);
+  margin-top: 10px;
+  max-width: 44em;
+}
+
+.explore { margin-top: 64px; border-top: 1px solid var(--panel-edge); }
+.explore-row {
+  display: grid;
+  grid-template-columns: 16rem minmax(0, 1fr);
+  gap: 8px 32px;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--panel-edge);
+  text-decoration: none;
+  color: inherit;
+}
+.explore-name {
+  font-family: var(--font-display);
+  font-stretch: 112%;
+  font-weight: 600;
+  font-size: 1.3rem;
+  color: var(--basin);
+}
+.explore-text { font-family: var(--font-read); font-size: 1.02rem; line-height: 1.55; color: var(--dune); max-width: 40em; }
+.explore-row:hover .explore-name { color: var(--flood); }
+
+/* ── Pages de lecture ─────────────────────────────────────── */
+
+.tab-panel.prose { padding: 8px 0 64px; }
+.nh-article.panel, .tab-panel.prose .panel { background: none; border: none; border-radius: 0; }
+.nh-article .panel-head h2 {
+  font-family: var(--font-display);
+  font-stretch: 116%;
+  font-weight: 600;
+  font-size: clamp(2rem, 3.6vw, 3rem);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  margin: 18px 0 8px;
+}
+.nh-body, .prose-body { font-family: var(--font-read); font-size: 1.06rem; line-height: 1.68; }
+.nh-body p, .prose-body p { max-width: var(--measure); }
+.nh-body h3 {
+  font-family: var(--font-display);
+  font-stretch: 110%;
+  font-weight: 600;
+  font-size: 1.35rem;
+  margin: 2.2em 0 0.6em;
+}
+.nh-acknowledgement { font-style: italic; color: var(--dune); max-width: var(--measure); }
+.nh-toc { font-family: var(--font-display); }
+.nh-toc-title { font-weight: 600; color: var(--basin); font-size: 0.9rem; }
+.nh-references { font-size: 0.92rem; line-height: 1.55; }
+a.cite { text-decoration: none; border-bottom: 1px dotted currentColor; }
+
+.people-table th, .birds-table th {
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--basin);
+  background: var(--grid);
+}
+.people-table, .birds-table { font-family: var(--font-display); }
+
+.catchment-plate { margin: 26px 0 32px; }
+.catchment-map { height: 460px; border: 1px solid var(--panel-edge); background: var(--grid); }
+.catchment-plate figcaption, .nh-body figcaption {
+  font-style: italic;
+  font-size: 0.9rem;
+  color: var(--dune);
+  margin-top: 8px;
+  max-width: var(--measure);
+}
+
+.story-list { list-style: none; padding: 0; margin: 10px 0 26px; max-width: var(--measure); }
+.story-list li { padding: 12px 0; border-bottom: 1px solid var(--grid); }
+.story-list li:first-child { border-top: 1px solid var(--grid); }
+.story-title { display: block; font-family: var(--font-display); font-weight: 600; font-size: 1.02rem; color: var(--flood-deep); }
+.story-meta { display: block; font-size: 0.95rem; color: var(--dune); margin-top: 2px; }
+
+/* ── Observatory : des planches, pas des cartes à ombre ───── */
+
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--panel-edge);
+  border-radius: var(--radius);
+}
+.panel-head h2, .panel h2 {
+  font-family: var(--font-display);
+  font-stretch: 108%;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.chart-note { font-family: var(--font-read); font-style: italic; color: var(--dune); }
+.seg-btn { font-family: var(--font-display); border-radius: var(--radius); }
+
+footer { font-family: var(--font-display); color: var(--dune); }
+
+/* ── Petits écrans ────────────────────────────────────────── */
+
+@media (max-width: 900px) {
+  .hero { grid-template-columns: 1fr; gap: 28px; }
+  .plate-image { max-height: 70vh; }
+  .explore-row { grid-template-columns: 1fr; }
+  .masthead { padding: 16px 18px 10px; }
+  .home, .tab-panel.prose { padding-left: 18px; padding-right: 18px; }
+  nav.tabs, .subbar { padding-left: 18px; padding-right: 18px; }
+}
+
+/* Alignement : l'en-tête et les sous-navigations suivent main */
+.masthead, nav.tabs, .subbar { box-sizing: border-box; }
+.plate-image img[hidden] { display: none; }
+
+.demo-banner {
+  background: var(--basin);
+  color: #DDE6E4;
+  font-family: var(--font-display);
+  font-size: 0.88rem;
+  text-align: left;
+  padding: 8px 28px;
+}
+.demo-banner code { background: rgba(255, 255, 255, 0.12); color: #FFFFFF; }
+
+/* ── Retouches après relecture des captures ───────────────── */
+
+.section-btn, .section-btn:hover, .section-btn.active { background: none; box-shadow: none; }
+
+.nh-article .panel-head, .nh-article .nh-layout { padding-left: 0; padding-right: 0; }
+.nh-acknowledgement {
+  background: none;
+  border: none;
+  border-left: 2px solid var(--panel-edge);
+  border-radius: 0;
+  padding: 2px 0 2px 16px;
+}
+
+/* Les filets des sous-navigations couvrent exactement la colonne de texte */
+nav.tabs, .subbar { max-width: calc(var(--page) - 56px); padding-left: 0; padding-right: 0; }
+.tab { font-weight: 500; border-bottom: 2px solid transparent; padding-bottom: 5px; }
+.tab.active { font-weight: 600; border-bottom-color: var(--flood); }
+
+.demo-banner { padding: 8px max(28px, calc((100% - var(--page)) / 2 + 28px)); }
+
+.wordmark { white-space: nowrap; }
+
+@media (max-width: 900px) {
+  main { padding-left: 18px; padding-right: 18px; }
+  nav.tabs, .subbar { max-width: none; margin-left: 18px; margin-right: 18px; }
+  .wordmark span { display: block; margin-left: 0; font-size: 0.95rem; }
+  nav.sections { gap: 2px 18px; }
+  .demo-banner { padding: 8px 18px; }
+}
+
+/* Le rose des saumures est réservé à la ligne d'eau de l'accueil */
+.date-btn-latest.active,
+.marker-dot.selected {
+  background: var(--flood);
+  border-color: var(--flood);
+}
+
+.level-value { white-space: nowrap; font-variant-numeric: tabular-nums; }

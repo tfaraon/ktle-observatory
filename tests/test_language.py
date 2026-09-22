@@ -176,7 +176,9 @@ for m in set(ACCENTS.findall(methods_text)):
 # anglais consacrés : on les retire avant l'analyse, faute de quoi « La »
 # passerait pour un article français.
 for fname, var in (("natural_history.js", "NATURAL_HISTORY_HTML"),
-                   ("aboriginal_culture.js", "ABORIGINAL_CULTURE_HTML")):
+                   ("aboriginal_culture.js", "ABORIGINAL_CULTURE_HTML"),
+                   ("catchment.js", "CATCHMENT_HTML"),
+                   ("stories.js", "STORIES_HTML")):
     page = (ROOT / "frontend" / fname).read_text(encoding="utf-8")
     text = re.sub(r"<[^>]+>", " ", page)
     text = re.sub(r"La Ni(?:ñ|&ntilde;)a|El Ni(?:ñ|&ntilde;)o", " ", text)

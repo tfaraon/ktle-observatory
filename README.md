@@ -14,13 +14,29 @@ The data processing is handled in Python. The frontend only reads the files
 generated in `data/`, so observations can be updated without changing the
 interface itself.
 
-The site has three parts. **Natural History** is a continuous, referenced
-account of the lake: geology and landscape, deep history, water and climate,
-plants and animals. **Aboriginal Culture** names the nations around the lake
-and across its basin. **Observatory** holds the live **Dashboard**, the
-**Methods** and the **Publications**. Aboriginal culture is deliberately a part
-of its own rather than a chapter of natural history. Any section can be linked
-directly, for example `#nh-geology`, `#ac-basin` or `#acref-dodd2012`.
+The site opens on a **home page** that shows the lake as it is now: the latest
+MODIS image from NASA GIBS, a gauge placing the SWOT water surface at Belt Bay
+within its own record, and a few sentences written from the data (level and its
+change over a month, area covered, waterbirds reported). Four parts follow.
+**The lake** is a continuous, referenced natural history. **Catchment** follows
+the rivers of the Lake Eyre Basin, their wetlands and their protection, with a
+map of the places it names. **Aboriginal culture** has two pages, *Peoples* and
+*Stories*. **Observatory** holds the live **Dashboard**, the **Methods** and the
+**Publications**. Any section can be linked directly, for example `#ct-rivers`,
+`#st-arabana` or `#nh-geology`.
+
+The *Stories* page lists only stories that Aboriginal knowledge holders, or
+the organisations that speak for them, have made public, and links to them
+rather than retelling them: the stories remain their custodians' cultural and
+intellectual property. Records made by missionaries or anthropologists are not
+listed. `tests/test_catchment_stories.py` enforces this: every story link must
+lead to a custodian's own publication.
+
+The design takes its palette from the lake seen from orbit (halite white,
+deep-water ink, floodwater blue, and brine pink reserved for the waterline),
+sets reading text in Literata and the interface in Archivo, and avoids
+dashboard conventions: no drop shadows, no capitalised labels, no middle-dot
+separators.
 
 The Aboriginal Culture page draws only on public records: native title
 determinations, the registers of the bodies that hold native title, and
@@ -37,6 +53,8 @@ cited, stops the build:
 ```bash
 python tools/build_natural_history.py
 python tools/build_aboriginal_culture.py
+python tools/build_catchment.py
+python tools/build_stories.py
 python tests/test_natural_history.py
 python tests/test_aboriginal_culture.py
 ```
@@ -544,6 +562,7 @@ python tests/test_natural_history.py     # references, contents and style
 python tests/test_aboriginal_culture.py  # nations, sources and protocol
 python tests/test_navigation.py          # headless browser, skipped without Playwright
 python tests/test_ebird.py               # eBird fetch, privacy and key hygiene
+python tests/test_catchment_stories.py   # Catchment sources, Stories custodianship rule
 node tests/test_ebird.js                 # bird panel display logic
 node tests/test_windrose.js              # solar elevation and wind roses
 node tests/test_download.js              # CSV export

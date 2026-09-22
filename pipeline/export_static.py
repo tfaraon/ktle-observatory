@@ -358,7 +358,8 @@ def build(cfg, out_dir=SITE, colors=64, limit=None, sample=40):
 
     for name in ("index.html", "style.css", "app.js", "methods.js",
                  "windrose.js", "download.js", "natural_history.js",
-                 "aboriginal_culture.js", "ebird.js"):
+                 "aboriginal_culture.js", "ebird.js",
+                 "catchment.js", "stories.js"):
         shutil.copy(ROOT / "frontend" / name, out_dir / name)
     (out_dir / ".nojekyll").write_text("", encoding="utf-8")
 

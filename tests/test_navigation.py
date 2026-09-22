@@ -29,7 +29,7 @@ def state(page):
     return page.evaluate("""() => ({
       panel: [...document.querySelectorAll('.tab-panel')].filter(p => !p.hidden).map(p => p.id),
       section: [...document.querySelectorAll('.section-btn.active')].map(b => b.dataset.section),
-      navs: [...document.querySelectorAll('nav.tabs[data-for]')].filter(n => !n.hidden).map(n => n.dataset.for),
+      navs: [...document.querySelectorAll('[data-for]')].filter(n => !n.hidden).map(n => n.dataset.for),
       hash: location.hash,
     })""")
 
@@ -48,7 +48,7 @@ with sync_playwright() as p:
 
     pg.goto(BASE); pg.wait_for_timeout(400)
     s = state(pg)
-    check("ouverture sur l'Observatory", s["panel"] == ["tab-observatory"] and s["section"] == ["observatory"], s)
+    check("ouverture sur l'accueil", s["panel"] == ["tab-home"] and s["section"] == [], s)
 
     pg.click('.section-btn[data-section="culture"]'); pg.wait_for_timeout(200)
     s = state(pg)
@@ -74,7 +74,10 @@ with sync_playwright() as p:
     check("retour sur le dernier onglet de l'Observatory", s["panel"] == ["tab-methods"], s)
 
     for h, want in (("#nh-geology", "tab-natural-history"), ("#acref-qldparl2023", "tab-culture"),
-                    ("#culture", "tab-culture"), ("#publications", "tab-publications")):
+                    ("#culture", "tab-culture"), ("#publications", "tab-publications"),
+                    ("#catchment", "tab-catchment"), ("#ct-rivers", "tab-catchment"),
+                    ("#stories", "tab-stories"), ("#st-arabana", "tab-stories"),
+                    ("#home", "tab-home")):
         pg.goto(BASE + h); pg.wait_for_timeout(500)
         s = state(pg)
         check(f"lien direct {h}", s["panel"] == [want] and s["hash"] == h, s)
@@ -83,6 +86,14 @@ with sync_playwright() as p:
     pg.evaluate("() => { location.hash = '#ac-basin'; }"); pg.wait_for_timeout(500)
     s = state(pg)
     check("changement d'adresse en cours de visite", s["panel"] == ["tab-culture"], s)
+
+    pg.goto(BASE + "#culture"); pg.wait_for_timeout(400)
+    pg.click('.tab[data-tab="stories"]'); pg.wait_for_timeout(300)
+    s = state(pg)
+    check("sous-onglet Stories", s["panel"] == ["tab-stories"] and s["navs"] == ["culture"], s)
+    pg.click('.wordmark'); pg.wait_for_timeout(400)
+    s = state(pg)
+    check("nom du site : retour à l'accueil", s["panel"] == ["tab-home"], s)
 
     real = [e for e in errors if "fetch" not in e.lower() and "json" not in e.lower()]
     check("aucune erreur JavaScript de navigation", not real, real[:3])

@@ -32,7 +32,8 @@
     loadedPages: {},
     ebird: null,
     birdLayer: null,
-    lastTab: { observatory: "observatory" },
+    lastTab: { observatory: "observatory", culture: "culture" },
+    catchmentMap: null,
     weather: null, area: null, extent: null,
     rosePeriod: "h24",
     canvasRenderer: null,
@@ -58,7 +59,7 @@
       { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
     const time = d.toLocaleTimeString("en-GB",
       { hour: "2-digit", minute: "2-digit", timeZone: "UTC" });
-    return `${date} · ${time} UTC`;
+    return `${date}, ${time} UTC`;
   }
 
   function fmtDateShort(iso) {
@@ -129,7 +130,7 @@
       }
       clearInterval(timer);
       if (st.last && st.last.ok) {
-        setRefreshStatus(st.last.message + " · reloading…", false);
+        setRefreshStatus(st.last.message + ", reloading…", false);
         setTimeout(() => location.reload(), 900);
       } else {
         setRefreshStatus(st.last ? st.last.message : "Update failed.", true);
@@ -176,7 +177,7 @@
   function topoLayer() {
     return L.tileLayer("https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png", {
       maxZoom: 15,
-      attribution: "© OpenTopoMap (CC-BY-SA) · © OpenStreetMap",
+      attribution: "© OpenTopoMap (CC-BY-SA), © OpenStreetMap",
     });
   }
 
@@ -193,7 +194,7 @@
       maxNativeZoom: spec.max_native_zoom || img.max_native_zoom || 9,
       maxZoom: 15,
       bounds: [[-85.0511, -179.9999], [85.0511, 179.9999]],
-      attribution: `${spec.layer} — NASA EOSDIS GIBS / Worldview`,
+      attribution: `${spec.layer}, NASA EOSDIS GIBS / Worldview`,
     });
   }
 
@@ -297,7 +298,7 @@
       });
       const m = L.marker([site.lat, site.lon], { icon }).addTo(map);
       const latest = site.latest
-        ? `${site.latest.wse.toFixed(2)} m · ${fmtDateShort(site.latest.date)}`
+        ? `${site.latest.wse.toFixed(2)} m, ${fmtDateShort(site.latest.date)}`
         : "no data";
       m.bindTooltip(`<strong>${site.name}</strong><br>${latest}`);
       m.on("click", () => selectSite(site.name));
@@ -504,13 +505,13 @@
 
   function setValue(target) {
     const node = $("wse-value");
-    if (reduceMotion) { node.textContent = target.toFixed(2); return; }
-    const from = parseFloat(node.textContent) || target;
+    if (reduceMotion) { node.textContent = minus(target, 2); return; }
+    const from = parseFloat(node.textContent.replace("\u2212", "-")) || target;
     const t0 = performance.now(), dur = 550;
     (function tick(t) {
       const p = Math.min(1, (t - t0) / dur);
       const eased = 1 - Math.pow(1 - p, 3);
-      node.textContent = (from + (target - from) * eased).toFixed(2);
+      node.textContent = minus(from + (target - from) * eased, 2);
       if (p < 1) requestAnimationFrame(tick);
     })(t0);
   }
@@ -529,7 +530,7 @@
       $("latest-date").textContent = fmtDate(site.latest.date);
       $("latest-age").textContent = relativeAge(site.latest.date);
       $("series-span").textContent =
-        `${site.stats.n} obs · ${site.stats.min.toFixed(2)} to ${site.stats.max.toFixed(2)} m`;
+        `${site.stats.n} obs, ${site.stats.min.toFixed(2)} to ${site.stats.max.toFixed(2)} m`;
     } else {
       $("wse-value").textContent = "—";
       $("latest-date").textContent = "no data";
@@ -538,7 +539,7 @@
     }
     $("site-coords").textContent =
       `${site.lat.toFixed(3)}, ${site.lon.toFixed(3)}`;
-    $("chart-title").textContent = `SWOT water surface elevation — ${site.name}`;
+    $("chart-title").textContent = `SWOT water surface elevation at ${site.name}`;
 
     drawGauge(site);
     drawChart(site);
@@ -580,12 +581,12 @@
     if (!st.ok || !st.latest) {
       return `<div class="wx-card"><div class="wx-head">`
            + `<span class="wx-name">${st.name}</span></div>`
-           + `<p class="wx-error">Unavailable${st.error ? " — " + st.error : ""}</p></div>`;
+           + `<p class="wx-error">Unavailable${st.error ? ": " + st.error : ""}</p></div>`;
     }
     const l = st.latest;
     const dir = l.wind_dir || "variable";
     const age = bomAge(l.utc) || "";
-    const ageTxt = st.stale ? `${age} · last known reading` : age;
+    const ageTxt = st.stale ? `${age}, last known reading` : age;
     return `<div class="wx-card">
       <div class="wx-head">
         <span class="wx-name">${st.name}</span>
@@ -619,7 +620,7 @@
       });
       const l = st.latest;
       const txt = st.ok && l
-        ? `${l.wind_dir || "variable"} ${fmtNum(l.wind_spd_kmh, " km/h")} · `
+        ? `${l.wind_dir || "variable"} ${fmtNum(l.wind_spd_kmh, " km/h")}, `
           + `${fmtNum(l.air_temp, " °C", 1)}`
         : "unavailable";
       const m = L.marker([st.lat, st.lon], { icon }).addTo(state.map);
@@ -650,8 +651,8 @@
         line: { color: WX_COLOURS[i % WX_COLOURS.length], width: 1.6 },
         customdata: hist.map((r) => [r.gust_kmh, r.wind_dir || "—"]),
         hovertemplate: "%{x|%a %H:%M}<br>%{y:.0f} km/h"
-          + " · gusts %{customdata[0]:.0f}"
-          + " · %{customdata[1]}<extra>" + st.name + "</extra>",
+          + ", gusts %{customdata[0]:.0f}"
+          + ", %{customdata[1]}<extra>" + st.name + "</extra>",
       });
     });
 
@@ -685,7 +686,7 @@
       type: "barpolar", r: row, theta: rose.sectors,
       name: rose.labels[k] + " km/h",
       marker: { color: ROSE_COLOURS[k], line: { color: "#FFF", width: 0.5 } },
-      hovertemplate: "%{theta} · %{r:.1f} %<extra>"
+      hovertemplate: "%{theta}, %{r:.1f} %<extra>"
         + rose.labels[k] + " km/h</extra>",
     })).filter((t) => t.r.some((v) => v > 0));
   }
@@ -704,8 +705,8 @@
       cell.appendChild(empty);
       return 0;
     }
-    title.textContent = `${station.name} · ${rose.total} obs`
-      + (rose.calm > 0 ? ` · ${rose.calmPercent.toFixed(0)} % calm` : "");
+    title.textContent = `${station.name}, ${rose.total} obs`
+      + (rose.calm > 0 ? `, ${rose.calmPercent.toFixed(0)} % calm` : "");
 
     const plot = document.createElement("div");
     plot.className = "rose-plot";
@@ -784,14 +785,14 @@
     const span = archiveSpanHours(stations);
     const spec = WindRose.PERIODS[state.rosePeriod] || {};
     const note = $("rose-note");
-    const bits = [`direction the wind blows from · ${shown} observations`];
+    const bits = [`direction the wind blows from, ${shown} observations`];
     if (span !== null) bits.push(`archive spans ${span.toFixed(0)} h`);
     const short = spec.hours && span !== null && span < spec.hours * 0.9;
     if (short) {
-      bits.push(`this period needs ${spec.hours} h — it will fill in as `
+      bits.push(`this period needs ${spec.hours} h; it will fill in as `
         + `observations accumulate`);
     }
-    note.textContent = bits.join(" · ");
+    note.textContent = bits.join(", ");
     note.classList.toggle("warn", Boolean(short));
   }
 
@@ -856,9 +857,9 @@
     const note = $("weather-updated");
     const parts = [];
     if (wx.demo) parts.push("demonstration data");
-    if (wx.stale) parts.push("cached — BOM unreachable");
+    if (wx.stale) parts.push("cached, BOM unreachable");
     parts.push("fetched " + fmtDate(wx.fetched_at.replace("Z", "")));
-    note.textContent = parts.join(" · ");
+    note.textContent = parts.join(", ");
     note.classList.toggle("warn", Boolean(wx.demo || wx.stale));
 
     const okStations = wx.stations.filter((s) => s.ok);
@@ -1075,7 +1076,7 @@
         <span class="match-arrow">→</span>
         <span class="match-sim">${fmtParam(key, params[key], units)}</span>
       </span>
-      <span class="match-delta">${out ? "outside simulated range · " : ""}${dTxt}</span>
+      <span class="match-delta">${out ? "outside simulated range, " : ""}${dTxt}</span>
     </div>`;
   }
 
@@ -1098,7 +1099,7 @@
         + `${origin.wlvl.wse.toFixed(2)} m on ${fmtDateShort(origin.wlvl.date)}`);
     }
     if (demo) bits.push("demo index");
-    return bits.join(" · ");
+    return bits.join(", ");
   }
 
   // ── Model layers on the map (Alplakes-style overlay) ─────
@@ -1233,8 +1234,8 @@
     if (v === null) { el.hidden = true; return; }
     const digits = Math.abs(v) < 1 ? 3 : 2;
     el.innerHTML = `<b>${v.toFixed(digits)}</b> ${d.units || ""}`
-      + `<span class="dim"> · ${d.label}</span>`
-      + (state.field.coarse ? '<span class="dim"> · nearest sample</span>' : "");
+      + `<span class="dim">, ${d.label}</span>`
+      + (state.field.coarse ? '<span class="dim">, nearest sample</span>' : "");
     el.hidden = false;
   }
 
@@ -1293,8 +1294,8 @@
       // Le panneau des scénarios est loin sous la carte : le message
       // doit apparaître là où l'utilisateur regarde.
       showMapMessage(`${LAYER_LABELS[state.modelLayer] || "Layer"} `
-        + `unavailable — ${e.message}`);
-      setModelNote("Layer unavailable — " + e.message, true);
+        + `unavailable: ${e.message}`);
+      setModelNote("Layer unavailable: " + e.message, true);
       return;
     }
     hideMapMessage();
@@ -1318,10 +1319,10 @@
     buildModelSelectors(d);
     if (!d.zmax) {
       showMapMessage(`${d.label} is zero everywhere in this scenario `
-        + `(calm conditions) — the lake outline is still shown.`);
+        + `(calm conditions); the lake outline is still shown.`);
     }
-    setModelNote(`${d.label} · ${d.n_arrows} arrows`
-      + (d.warning ? " · " + d.warning : ""), Boolean(d.warning));
+    setModelNote(`${d.label}, ${d.n_arrows} arrows`
+      + (d.warning ? ", " + d.warning : ""), Boolean(d.warning));
   }
 
   // Arrow length is set in screen pixels rather than in degrees:
@@ -1464,7 +1465,7 @@
     const dates = areaDates();
     const a = state.extent;
     if (!dates.length || !a || !a.map_bounds) {
-      showMapMessage("No water extent available — run "
+      showMapMessage("No water extent available. Run "
         + "pipeline/water_extent.py");
       return;
     }
@@ -1491,10 +1492,10 @@
     buildAreaDateControls(dates, idx, entry);
     // L'étendue vient du niveau mesuré, pas de la classification du
     // radar : c'est ce que la note doit dire.
-    setModelNote(`${entry.date} · level ${entry.level_m.toFixed(2)} m · `
-      + `${entry.area_km2.toLocaleString("en-GB")} km² · `
-      + `${entry.volume_km3.toFixed(3)} km³ · derived from the SWOT level`
-      + (a.wlvl_offset ? "" : " · datum offset not yet applied"),
+    setModelNote(`${entry.date}, level ${entry.level_m.toFixed(2)} m, `
+      + `${entry.area_km2.toLocaleString("en-GB")} km², `
+      + `${entry.volume_km3.toFixed(3)} km³, derived from the SWOT level`
+      + (a.wlvl_offset ? "" : ", datum offset not yet applied"),
       !a.wlvl_offset);
   }
 
@@ -1611,13 +1612,13 @@
 
   function roundingNote(m) {
     return m.match && m.match.wlvl_capped
-      ? ' · water level rounded down to the nearest simulated level' : "";
+      ? ', water level rounded down to the nearest simulated level' : "";
   }
 
   function coverageNote(m) {
     const c = m.coverage;
     if (!c || !c.n_missing) return "";
-    return ` · design: ${c.n_done}/${c.n_design_unique} runs present`;
+    return `, design: ${c.n_done}/${c.n_design_unique} runs present`;
   }
 
   function currentKey() {
@@ -1798,8 +1799,11 @@
   // référencées, et Observatory, qui regroupe le tableau de bord, les
   // méthodes et les publications. Chaque onglet appartient à une partie.
   const SECTION_OF = {
+    home: "home",
     "natural-history": "natural-history",
+    catchment: "catchment",
     culture: "culture",
+    stories: "culture",
     observatory: "observatory",
     methods: "observatory",
     publications: "observatory",
@@ -1817,6 +1821,14 @@
     culture: {
       html: () => (typeof ABORIGINAL_CULTURE_HTML === "string" ? ABORIGINAL_CULTURE_HTML : null),
       anchors: /^(ac|acref)-/,
+    },
+    catchment: {
+      html: () => (typeof CATCHMENT_HTML === "string" ? CATCHMENT_HTML : null),
+      anchors: /^(ct|ctref)-/,
+    },
+    stories: {
+      html: () => (typeof STORIES_HTML === "string" ? STORIES_HTML : null),
+      anchors: /^(st|stref)-/,
     },
   };
 
@@ -1841,10 +1853,11 @@
       try { history.replaceState(null, "", a.getAttribute("href")); } catch (_) { /* ignore */ }
     });
     state.loadedPages[name] = true;
+    if (name === "catchment") initCatchmentMap();
   }
 
   function showTab(name, anchor) {
-    if (!SECTION_OF[name]) name = "observatory";
+    if (!SECTION_OF[name]) name = "home";
     const section = SECTION_OF[name];
     state.lastTab[section] = name;
 
@@ -1853,7 +1866,7 @@
       b.classList.toggle("active", on);
       b.setAttribute("aria-current", on ? "page" : "false");
     });
-    document.querySelectorAll("nav.tabs[data-for]").forEach((n) => {
+    document.querySelectorAll("[data-for]").forEach((n) => {
       n.hidden = n.dataset.for !== section;
     });
     document.querySelectorAll(".tab").forEach((b) => {
@@ -1896,8 +1909,11 @@
         const el = document.getElementById(anchor);
         if (el) el.scrollIntoView({ block: "start" });
       });
-    } else if (LAZY_PAGES[name]) {
+    } else if (LAZY_PAGES[name] || name === "home") {
       window.scrollTo({ top: 0 });
+    }
+    if (name === "catchment" && state.catchmentMap) {
+      requestAnimationFrame(() => state.catchmentMap.invalidateSize());
     }
   }
 
@@ -1923,7 +1939,7 @@
         showTab(state.lastTab[section] || section);
       }));
     window.addEventListener("hashchange", () => route(location.hash));
-    if (location.hash !== "#observatory") route(location.hash);
+    if (!route(location.hash)) showTab("home");
   }
 
 
@@ -2047,15 +2063,205 @@
     if (btn) btn.addEventListener("click", () => toggleBirdLayer(!state.birdLayer));
   }
 
+  // ── Home: the lake now ───────────────────────────────────
+  //
+  // Everything on the home page is read from data already loaded for the
+  // observatory. Sentences appear only for what the data support.
+
+  const GIBS_WMS = "https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi";
+  // Plate carrée: at 28.7° S, a degree of longitude is 0.877 of a degree of
+  // latitude, so 1.7° by 2.3° is drawn at 760 by 1170 pixels to keep shapes true.
+  const HERO_BBOX = "136.55,-29.85,138.25,-27.55";
+
+  function isoDaysAgo(n) {
+    const d = new Date(Date.now() - n * 86400000);
+    return d.toISOString().slice(0, 10);
+  }
+
+  function heroImageUrl(day) {
+    const q = new URLSearchParams({
+      SERVICE: "WMS", REQUEST: "GetMap", VERSION: "1.1.1",
+      LAYERS: "MODIS_Terra_CorrectedReflectance_Bands721", STYLES: "",
+      SRS: "EPSG:4326", BBOX: HERO_BBOX, WIDTH: "760", HEIGHT: "1170",
+      FORMAT: "image/jpeg", TIME: day,
+    });
+    return `${GIBS_WMS}?${q}`;
+  }
+
+  // The most recent complete day is usually two days back; if that image
+  // fails, step back a day at a time, up to a week.
+  function loadHeroImage() {
+    const img = $("hero-image");
+    const fallback = $("hero-fallback");
+    const caption = $("hero-caption");
+    if (!img) return;
+    let back = 2;
+    const attempt = () => {
+      const day = isoDaysAgo(back);
+      img.onload = () => {
+        img.hidden = false;
+        fallback.hidden = true;
+        caption.textContent = `MODIS Terra, ${fmtLongDate(day)}, shortwave infrared composite `
+          + "(bands 7, 2, 1): water appears dark and the salt crust pale. "
+          + "Image from NASA EOSDIS GIBS.";
+      };
+      img.onerror = () => {
+        back += 1;
+        if (back <= 7) { attempt(); return; }
+        fallback.textContent = "The satellite image could not be loaded. "
+          + "Recent imagery is available on the observatory map.";
+      };
+      img.src = heroImageUrl(day);
+    };
+    attempt();
+  }
+
+  function fmtLongDate(iso) {
+    const d = new Date(String(iso).slice(0, 10) + "T00:00:00Z");
+    if (Number.isNaN(d.getTime())) return String(iso);
+    return d.toLocaleDateString("en-AU", { day: "numeric", month: "long",
+                                          year: "numeric", timeZone: "UTC" });
+  }
+
+  function referenceSite() {
+    const sites = (state.data && state.data.sites) || [];
+    return sites.find((x) => x.name === "Belt Bay" && x.latest)
+      || sites.find((x) => x.latest) || null;
+  }
+
+  function monthBefore(site) {
+    const t = new Date(site.latest.date).getTime() - 25 * 86400000;
+    const earlier = (site.series || []).filter((r) => new Date(r.date).getTime() <= t);
+    return earlier.length ? earlier[earlier.length - 1] : null;
+  }
+
+  const minus = (v, d) => v.toFixed(d).replace("-", "\u2212");
+  const WORDS = ["No", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten"];
+  const spell = (n, lower) => {
+    const w = n < WORDS.length ? WORDS[n] : String(n);
+    return lower ? w.toLowerCase() : w;
+  };
+
+  function renderHome() {
+    const box = $("lake-now");
+    if (!box) return;
+    const lines = [];
+    const site = referenceSite();
+    if (site) {
+      const wse = site.latest.wse;
+      let s = `SWOT last measured the water surface at ${esc(site.name)} on `
+        + `${fmtLongDate(site.latest.date)}, at ${minus(wse, 2)}&nbsp;m relative to the EGM2008 geoid`;
+      const prev = monthBefore(site);
+      if (prev) {
+        const dz = wse - prev.wse;
+        s += Math.abs(dz) < 0.02 ? ", unchanged from a month earlier"
+          : `, ${Math.abs(dz).toFixed(2)}&nbsp;m ${dz > 0 ? "higher" : "lower"} than a month earlier`;
+      }
+      lines.push(s + ".");
+    }
+    const area = state.area && Array.isArray(state.area.series)
+      ? state.area.series.filter((r) => !r.partial && r.area_km2 > 0) : [];
+    if (area.length) {
+      const a = area[area.length - 1];
+      lines.push(`On ${fmtLongDate(a.date)}, water covered about `
+        + `${Math.round(a.area_km2).toLocaleString("en-AU")}&nbsp;km&sup2; of the lake.`);
+    }
+    const birds = state.ebird && Array.isArray(state.ebird.indicators) ? state.ebird.indicators : [];
+    if (birds.length) {
+      const seen = birds.filter((b) => b.present).length;
+      lines.push(seen
+        ? `${spell(seen)} of the ${spell(birds.length, true)} waterbirds that gather when the lake `
+          + `holds water ${seen === 1 ? "has" : "have"} been reported nearby in the last `
+          + `${esc(state.ebird.back_days)} days.`
+        : `None of the ${spell(birds.length, true)} waterbirds that gather when the lake holds `
+          + `water has been reported nearby in the last ${esc(state.ebird.back_days)} days.`);
+    }
+    if (state.data && state.data.demo) lines.push("These are demonstration data.");
+    box.innerHTML = lines.length
+      ? lines.map((l) => `<p>${l}</p>`).join("")
+      : "<p>No observations are available yet. The observatory explains how to add them.</p>";
+    drawHeroGauge(site);
+  }
+
+  // Vertical gauge: the SWOT record at the reference site, from its lowest
+  // to its highest measurement, with today's water surface drawn across it.
+  // No datum conversion is implied: the scale is the record itself.
+  function drawHeroGauge(site) {
+    const svg = $("hero-gauge");
+    if (!svg) return;
+    if (!site || !site.stats || !(site.stats.max > site.stats.min)) { svg.hidden = true; return; }
+    const W = 96, H = 520, top = 34, bottom = H - 34, x = 30;
+    const { min, max } = site.stats;
+    const y = (v) => bottom - (v - min) / (max - min) * (bottom - top);
+    const now = site.latest.wse;
+    const step = (max - min) > 2.5 ? 1 : 0.5;
+    let ticks = "";
+    for (let v = Math.ceil(min / step) * step; v <= max + 1e-9; v += step) {
+      ticks += `<line class="g-tick" x1="${x}" x2="${x + 8}" y1="${y(v)}" y2="${y(v)}"/>`
+        + `<text class="g-tick-label" x="${x + 12}" y="${y(v) + 4}">${minus(v, step < 1 ? 1 : 0)}</text>`;
+    }
+    svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+    svg.innerHTML = svg.querySelector("title").outerHTML
+      + `<text class="g-end" x="${x}" y="${top - 14}">highest</text>`
+      + `<text class="g-end" x="${x}" y="${bottom + 24}">lowest</text>`
+      + `<line class="g-axis" x1="${x}" x2="${x}" y1="${top}" y2="${bottom}"/>`
+      + ticks
+      + `<rect class="g-water" x="${x - 12}" width="12" y="${y(now)}" height="${bottom - y(now)}"/>`
+      + `<g class="g-line" style="--rise:${bottom - y(now)}px">`
+      + `<line x1="${x - 18}" x2="${W - 4}" y1="${y(now)}" y2="${y(now)}"/>`
+      + `<text x="${W - 4}" y="${y(now) - 7}" text-anchor="end">${minus(now, 2)}</text></g>`;
+    svg.hidden = false;
+  }
+
+  // ── Catchment map ─────────────────────────────────────────
+  //
+  // Places named on the Catchment page. Positions are approximate and the
+  // map says so; the topographic base map carries the rivers.
+  const CATCHMENT_PLACES = [
+    { name: "Kati Thanda\u2013Lake Eyre", lat: -28.40, lng: 137.30, note: "Terminal lake of the basin" },
+    { name: "Birdsville", lat: -25.90, lng: 139.35, note: "Diamantina River" },
+    { name: "Goyder Lagoon", lat: -26.70, lng: 139.30, note: "Diamantina River" },
+    { name: "Boulia", lat: -22.91, lng: 139.91, note: "Burke River, Georgina system" },
+    { name: "Longreach", lat: -23.44, lng: 144.25, note: "Thomson River" },
+    { name: "Windorah", lat: -25.42, lng: 142.66, note: "Cooper Creek" },
+    { name: "Nappa Merrie", lat: -27.60, lng: 141.11, note: "Cooper Creek gauge, station 003103A" },
+    { name: "Innamincka", lat: -27.75, lng: 140.74, note: "Cooper Creek" },
+    { name: "Coongie Lakes", lat: -27.18, lng: 140.16, note: "Ramsar wetland, listed 1987" },
+    { name: "Alice Springs", lat: -23.70, lng: 133.88, note: "Todd River" },
+    { name: "Oodnadatta", lat: -27.55, lng: 135.45, note: "Neales River" },
+    { name: "Marree", lat: -29.65, lng: 138.06, note: "South of the lake" },
+  ];
+
+  function initCatchmentMap() {
+    const el = document.getElementById("ct-map");
+    if (!el || state.catchmentMap || typeof L === "undefined") return;
+    const map = L.map(el, { scrollWheelZoom: false, attributionControl: true })
+      .setView([-26.3, 138.6], 5);
+    L.tileLayer("https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png", {
+      maxZoom: 12,
+      attribution: "&copy; OpenTopoMap (CC-BY-SA), &copy; OpenStreetMap contributors",
+    }).addTo(map);
+    CATCHMENT_PLACES.forEach((p) => {
+      L.circleMarker([p.lat, p.lng], {
+        radius: p.name.startsWith("Kati") ? 8 : 5,
+        color: "#134450", weight: 1.5, fillColor: "#1F6470", fillOpacity: 0.8,
+      }).bindTooltip(`<b>${esc(p.name)}</b><br>${esc(p.note)}`).addTo(map);
+    });
+    state.catchmentMap = map;
+  }
+
   async function init() {
+    loadHeroImage();
     const { data, viaApi } = await loadData();
 
     if (!data || !data.sites) {
       $("empty-state").hidden = false;
+      renderHome();
       return;
     }
 
     state.data = data;
+    renderHome();
     refreshDownloadButtons();
     $("dashboard").hidden = false;
     $("generated-at").textContent = fmtDate(data.generated_at.replace("Z", ""));
@@ -2111,6 +2317,7 @@
     }
 
     state.area = await loadArea();
+    renderHome();
     state.extent = await loadExtent();
     refreshDownloadButtons();
     state.imagery = await loadImageryConfig();
@@ -2130,7 +2337,7 @@
     state.areaIdx = Math.max(0, areaDates().length - 1);
     drawAreaChart();
     loadWeather().then(() => loadScenario(null));
-    loadEbird().then((d) => { state.ebird = d; renderBirds(d); });
+    loadEbird().then((d) => { state.ebird = d; renderBirds(d); renderHome(); });
   }
 
   document.addEventListener("DOMContentLoaded", () => {

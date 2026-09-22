@@ -110,7 +110,7 @@ QLD_LIST = ('<ul class="nation-list">'
 
 SECTIONS = [
 ("About this page", "ac-about", [
-"This page names the Aboriginal nations whose country lies around Kati Thanda and across the Lake Eyre Basin, drawing only on public records: native title determinations of the Federal Court, the registers of the corporations that hold native title, and material published by governments in consultation with Traditional Owners. It does not describe ceremony, sacred places or stories. That knowledge belongs to its custodians, part of it is restricted, and the decision to share it rests with them.",
+"This page names the Aboriginal nations whose country lies around Kati Thanda and across the Lake Eyre Basin, drawing only on public records: native title determinations of the Federal Court, the registers of the corporations that hold native title, and material published by governments in consultation with Traditional Owners. It does not describe ceremony, sacred places or stories. That knowledge belongs to its custodians, part of it is restricted, and the decision to share it rests with them. Stories that custodians have chosen to make public are listed, with links to their own tellings, under <a href=\"#stories\">Stories</a>.",
 "Names follow the spellings used in native title determinations and by the nations&rsquo; own organisations, and other spellings are common in the literature, among them Arabunna for Arabana, Diyari for Dieri, and Thirrari or Tirari for Dhirari. No boundaries are drawn here. Published maps of Aboriginal Australia are an approximate guide only and are not intended for land claims {c:mlt}; the boundaries recognised in law are those of the determinations themselves.",
 ]),
 ("Around the lake", "ac-lake", [

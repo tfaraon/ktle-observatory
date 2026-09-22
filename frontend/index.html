@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kati Thanda – Lake Eyre · Observatory</title>
+  <title>Kati Thanda – Lake Eyre, Observatory</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;600;700&family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..700&family=Literata:ital,opsz,wght@0,7..72,400..600;1,7..72,400&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
@@ -20,57 +20,52 @@
 <body>
 
   <div id="demo-banner" class="demo-banner" hidden>
-    Demonstration data — run <code>python pipeline/update_swot.py</code> to show real SWOT observations.
+    Demonstration data. Run <code>python pipeline/update_swot.py</code> to show real SWOT observations.
   </div>
 
-  <header class="site-header">
-    <div class="header-left">
-      <p class="eyebrow">Natural history and hydrodynamic observatory</p>
-      <h1>Kati Thanda – Lake Eyre</h1>
-    </div>
-    <div class="header-right">
-      <div class="header-update mono">
-        <span class="header-label">Last updated</span>
-        <span id="generated-at">—</span>
-      </div>
-      <button id="refresh-btn" class="refresh-btn" hidden>Check for new data</button>
-      <p id="refresh-status" class="refresh-status mono" hidden></p>
-    </div>
+  <header class="masthead">
+    <a class="wordmark" href="#home">Kati Thanda&ndash;Lake Eyre<span>Observatory</span></a>
+    <nav class="sections" aria-label="Site">
+      <button type="button" class="section-btn" data-section="natural-history">The lake</button>
+      <button type="button" class="section-btn" data-section="catchment">Catchment</button>
+      <button type="button" class="section-btn" data-section="culture">Aboriginal culture</button>
+      <button type="button" class="section-btn" data-section="observatory">Observatory</button>
+    </nav>
   </header>
-
-  <nav class="sections" aria-label="Site">
-    <button type="button" class="section-btn" data-section="natural-history">
-      <span class="section-kicker">The lake</span>Natural History</button>
-    <button type="button" class="section-btn" data-section="culture">
-      <span class="section-kicker">Country</span>Aboriginal Culture</button>
-    <button type="button" class="section-btn active" data-section="observatory">
-      <span class="section-kicker">Now</span>Observatory</button>
-  </nav>
 
   <nav class="tabs" id="culture-tabs" data-for="culture" role="tablist"
        aria-label="Aboriginal culture" hidden>
     <button class="tab" role="tab" data-tab="culture"
             aria-selected="false">Peoples</button>
+    <button class="tab" role="tab" data-tab="stories"
+            aria-selected="false">Stories</button>
   </nav>
 
-  <nav class="tabs" id="observatory-tabs" data-for="observatory" role="tablist" aria-label="Observatory">
-    <button class="tab active" role="tab" data-tab="observatory"
-            aria-selected="true">Dashboard</button>
-    <button class="tab" role="tab" data-tab="methods"
-            aria-selected="false">Methods</button>
-    <button class="tab" role="tab" data-tab="publications"
-            aria-selected="false">Publications</button>
-  </nav>
+  <div class="subbar" data-for="observatory" hidden>
+  <nav class="tabs" id="observatory-tabs" role="tablist" aria-label="Observatory">
+      <button class="tab active" role="tab" data-tab="observatory"
+              aria-selected="true">Dashboard</button>
+      <button class="tab" role="tab" data-tab="methods"
+              aria-selected="false">Methods</button>
+      <button class="tab" role="tab" data-tab="publications"
+              aria-selected="false">Publications</button>
+    </nav>
+    <div class="data-status">
+      <span>Data updated <span id="generated-at">not yet</span></span>
+      <button id="refresh-btn" class="refresh-btn" hidden>Check for new data</button>
+      <span id="refresh-status" class="refresh-status" hidden></span>
+    </div>
+  </div>
 
   <main>
 
-    <section id="tab-observatory" class="tab-panel" role="tabpanel">
+    <section id="tab-observatory" class="tab-panel" role="tabpanel" hidden>
 
     <!-- Empty state: shown until the JSON exists -->
     <section id="empty-state" class="panel empty-state" hidden>
       <h2>No data to display</h2>
       <p>The file <code>data/swot_wse.json</code> has not been generated yet.</p>
-      <p class="mono">python pipeline/update_swot.py&nbsp;&nbsp;·&nbsp;&nbsp;or&nbsp;&nbsp;·&nbsp;&nbsp;python pipeline/update_swot.py --demo</p>
+      <p>Run <code>python pipeline/update_swot.py</code>, or add <code>--demo</code> for demonstration data.</p>
     </section>
 
     <section id="dashboard" hidden>
@@ -131,7 +126,6 @@
       <article class="panel level-series">
         <div class="level-card">
           <div class="level-card-head">
-            <p class="eyebrow">Current water level</p>
             <label class="site-select-wrap">
               <span class="visually-hidden">Extraction site</span>
               <select id="site-select" class="site-select"></select>
@@ -159,7 +153,6 @@
       <div class="chart-card">
         <div class="panel-head head-row">
           <div>
-            <p class="eyebrow">Time series</p>
             <h2 id="chart-title">SWOT water surface elevation</h2>
           </div>
           <span class="head-actions">
@@ -170,7 +163,7 @@
           </span>
         </div>
         <div id="chart" class="chart"></div>
-        <p class="chart-note">Each point is a SWOT observation (L2 HR Raster) extracted at the selected site — no observation, no point: sampling follows the satellite pass cycle. Water area, where available, follows the method of Rai et al. (2026); open circles mark passes that covered only part of the lake.</p>
+        <p class="chart-note">Each point is a SWOT observation (L2 HR Raster) extracted at the selected site. Without an observation there is no point: sampling follows the satellite pass cycle. Water area, where available, follows the method of Rai et al. (2026); open circles mark passes that covered only part of the lake.</p>
       </div>
 
       </article>
@@ -179,7 +172,6 @@
       <article class="panel weather-card">
         <div class="panel-head weather-head">
           <div>
-            <p class="eyebrow">Conditions around the lake</p>
             <h2>BOM weather stations</h2>
           </div>
           <div class="head-actions">
@@ -195,7 +187,6 @@
 
         <div id="rose-block" class="rose-block" hidden>
           <div class="rose-head">
-            <p class="eyebrow">Wind roses</p>
             <div class="seg" id="rose-seg" role="group" aria-label="Period"></div>
           </div>
           <div id="rose-legend" class="rose-legend"></div>
@@ -209,7 +200,6 @@
       <article class="panel birds-card" id="birds-card" hidden>
         <div class="panel-head head-row">
           <div>
-            <p class="eyebrow">Birds</p>
             <h2>Recent sightings around the lake</h2>
           </div>
           <p id="birds-updated" class="weather-updated mono"></p>
@@ -231,7 +221,6 @@
       <article class="panel chart-card" id="area-card" hidden>
         <div class="panel-head head-row">
           <div>
-            <p class="eyebrow">Surface water</p>
             <h2>Lake water area</h2>
           </div>
           <button type="button" id="dl-area2" class="dl-btn">Download CSV</button>
@@ -244,7 +233,6 @@
       <article class="panel model-card">
         <div class="panel-head scenario-head">
           <div>
-            <p class="eyebrow">Modelling</p>
             <h2>Matching Delft3D scenario</h2>
           </div>
           <div class="scenario-actions">
@@ -262,16 +250,57 @@
 
     </section>
 
+    <section id="tab-home" class="tab-panel home" role="tabpanel">
+      <div class="hero">
+        <div class="hero-text">
+          <h1 class="hero-title">Kati Thanda&ndash;<br>Lake Eyre</h1>
+          <p class="hero-lede">Australia&rsquo;s lowest point and largest salt lake, dry for most
+            of its history and, when the rivers of its basin reach it, an inland sea for a while.
+            This observatory follows its water from space, alongside its natural history, its
+            catchment and the Aboriginal peoples whose country it is.</p>
+          <div id="lake-now" class="lake-now" aria-live="polite">
+            <p>Reading the latest observations.</p>
+          </div>
+          <p class="hero-actions"><a class="text-link" href="#observatory">Open the observatory</a></p>
+        </div>
+        <figure class="hero-plate">
+          <div class="plate-frame">
+            <div class="plate-image">
+              <img id="hero-image" alt="Satellite image of Kati Thanda&ndash;Lake Eyre" hidden>
+              <p id="hero-fallback" class="plate-fallback">Loading the latest satellite image.</p>
+            </div>
+            <svg id="hero-gauge" class="hero-gauge" role="img" aria-labelledby="hero-gauge-title" hidden>
+              <title id="hero-gauge-title">Water surface at Belt Bay within its SWOT record</title>
+            </svg>
+          </div>
+          <figcaption id="hero-caption"></figcaption>
+        </figure>
+      </div>
+      <nav class="explore" aria-label="Parts of this site">
+        <a class="explore-row" href="#natural-history"><span class="explore-name">The lake</span>
+          <span class="explore-text">Geology, deep history, water and climate, plants and animals of Kati Thanda.</span></a>
+        <a class="explore-row" href="#catchment"><span class="explore-name">Catchment</span>
+          <span class="explore-text">The rivers of the Lake Eyre Basin, from the Channel Country to the lake, and how they are protected.</span></a>
+        <a class="explore-row" href="#culture"><span class="explore-name">Aboriginal culture</span>
+          <span class="explore-text">The peoples of the lake and its basin, and the stories they have chosen to share.</span></a>
+        <a class="explore-row" href="#observatory"><span class="explore-name">Observatory</span>
+          <span class="explore-text">Water level, extent and area from SWOT, weather, birds and hydrodynamic scenarios.</span></a>
+      </nav>
+    </section>
+
     <section id="tab-natural-history" class="tab-panel prose" role="tabpanel" hidden></section>
 
+    <section id="tab-catchment" class="tab-panel prose" role="tabpanel" hidden></section>
+
     <section id="tab-culture" class="tab-panel prose" role="tabpanel" hidden></section>
+
+    <section id="tab-stories" class="tab-panel prose" role="tabpanel" hidden></section>
 
     <section id="tab-methods" class="tab-panel prose" role="tabpanel" hidden></section>
 
     <section id="tab-publications" class="tab-panel prose" role="tabpanel" hidden>
       <article class="panel">
         <div class="panel-head">
-          <p class="eyebrow">Outputs</p>
           <h2>Publications</h2>
         </div>
         <div class="prose-body">
@@ -284,8 +313,8 @@
 
   <footer class="site-footer mono">
     <span>Kati Thanda&ndash;Lake Eyre lies on Arabana country. We acknowledge the Arabana as Traditional Owners and pay our respects to their Elders past and present.</span>
-    <span>Data: SWOT L2 HR Raster (NASA / CNES) · Weather © Bureau of Meteorology · Imagery NASA EOSDIS GIBS / Worldview</span>
-    <span>Base map: © OpenTopoMap (CC-BY-SA) · © OpenStreetMap</span>
+    <span>Data: SWOT L2 HR Raster (NASA / CNES), Weather © Bureau of Meteorology, Imagery NASA EOSDIS GIBS / Worldview</span>
+    <span>Base map: © OpenTopoMap (CC-BY-SA), © OpenStreetMap</span>
     <span>Bird observations: <a href="https://ebird.org" target="_blank" rel="noopener">eBird.org</a>, Cornell Lab of Ornithology</span>
   </footer>
 
@@ -295,6 +324,8 @@
   <script src="methods.js"></script>
   <script src="natural_history.js"></script>
   <script src="aboriginal_culture.js"></script>
+  <script src="catchment.js"></script>
+  <script src="stories.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

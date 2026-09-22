@@ -97,3 +97,22 @@ def build(refs, sections, *, var, eyebrow, title, acknowledgement,
     js = (f"/* {intro_comment} */\n"
           f"const {var} = {json.dumps(page, ensure_ascii=False)};\n")
     return js, words, len(refs)
+
+
+def shared_refs(keys, source="build_natural_history.py"):
+    """References d'une autre page, lues a la source plutot que recopiees.
+
+    Une reference verifiee n'existe ainsi qu'a un seul endroit. On
+    n'execute que le litteral REFS du script source, sans lancer sa
+    construction.
+    """
+    import ast
+    from pathlib import Path
+    src = (Path(__file__).resolve().parent / source).read_text(encoding="utf-8")
+    start = src.index("REFS = {")
+    end = src.index("\n}\n", start) + 2
+    refs = ast.literal_eval(src[start + len("REFS = "):end])
+    missing = [k for k in keys if k not in refs]
+    if missing:
+        sys.exit(f"Références absentes de {source} : {missing}")
+    return {k: refs[k] for k in keys}
