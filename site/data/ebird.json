@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-09-22T13:28:35Z",
+ "fetched_at": "2026-09-23T01:32:28Z",
  "demo": false,
  "stale": false,
  "partial": false,
@@ -487,6 +487,408 @@
      "sciName": "Ptilotula penicillata",
      "obsDt": "2026-09-08 11:15",
      "howMany": 8,
+     "indicator": false
+    }
+   ]
+  },
+  {
+   "locId": "L2554517",
+   "name": "Muloorina Station",
+   "lat": -29.23907,
+   "lng": 137.90605,
+   "latestObsDt": "2026-09-17 04:00",
+   "numSpeciesAllTime": 129,
+   "recent": [
+    {
+     "speciesCode": "brolga1",
+     "comName": "Brolga",
+     "sciName": "Antigone rubicunda",
+     "obsDt": "2026-09-17 04:00",
+     "howMany": 4,
+     "indicator": false
+    },
+    {
+     "speciesCode": "recplo1",
+     "comName": "Red-capped Plover",
+     "sciName": "Anarhynchus ruficapillus",
+     "obsDt": "2026-09-17 04:00",
+     "howMany": 2,
+     "indicator": false
+    },
+    {
+     "speciesCode": "darter4",
+     "comName": "Australasian Darter",
+     "sciName": "Anhinga novaehollandiae",
+     "obsDt": "2026-09-17 04:00",
+     "howMany": 2,
+     "indicator": false
+    },
+    {
+     "speciesCode": "lipcor1",
+     "comName": "Little Pied Cormorant",
+     "sciName": "Microcarbo melanoleucos",
+     "obsDt": "2026-09-17 04:00",
+     "howMany": 6,
+     "indicator": false
+    },
+    {
+     "speciesCode": "grecor",
+     "comName": "Great Cormorant",
+     "sciName": "Phalacrocorax carbo",
+     "obsDt": "2026-09-17 04:00",
+     "howMany": 3,
+     "indicator": false
+    },
+    {
+     "speciesCode": "greegr",
+     "comName": "Great Egret",
+     "sciName": "Ardea alba",
+     "obsDt": "2026-09-17 04:00",
+     "howMany": 2,
+     "indicator": false
+    },
+    {
+     "speciesCode": "auspel1",
+     "comName": "Australian Pelican",
+     "sciName": "Pelecanus conspicillatus",
+     "obsDt": "2026-09-17 04:00",
+     "howMany": 4,
+     "indicator": true
+    },
+    {
+     "speciesCode": "auskit1",
+     "comName": "Black-shouldered Kite",
+     "sciName": "Elanus axillaris",
+     "obsDt": "2026-09-17 04:00",
+     "howMany": 2,
+     "indicator": false
+    },
+    {
+     "speciesCode": "liteag1",
+     "comName": "Little Eagle",
+     "sciName": "Hieraaetus morphnoides",
+     "obsDt": "2026-09-17 04:00",
+     "howMany": 1,
+     "indicator": false
+    },
+    {
+     "speciesCode": "weteag1",
+     "comName": "Wedge-tailed Eagle",
+     "sciName": "Aquila audax",
+     "obsDt": "2026-09-17 04:00",
+     "howMany": 1,
+     "indicator": false
+    },
+    {
+     "speciesCode": "blakit1",
+     "comName": "Black Kite",
+     "sciName": "Milvus migrans",
+     "obsDt": "2026-09-17 04:00",
+     "howMany": 7,
+     "indicator": false
+    },
+    {
+     "speciesCode": "souboo8",
+     "comName": "Australian Boobook",
+     "sciName": "Ninox boobook",
+     "obsDt": "2026-09-17 04:00",
+     "howMany": 2,
+     "indicator": false
+    },
+    {
+     "speciesCode": "rabeat1",
+     "comName": "Rainbow Bee-eater",
+     "sciName": "Merops ornatus",
+     "obsDt": "2026-09-17 04:00",
+     "howMany": 1,
+     "indicator": false
+    },
+    {
+     "speciesCode": "auskes1",
+     "comName": "Nankeen Kestrel",
+     "sciName": "Falco cenchroides",
+     "obsDt": "2026-09-17 04:00",
+     "howMany": 1,
+     "indicator": false
+    },
+    {
+     "speciesCode": "galah",
+     "comName": "Galah",
+     "sciName": "Eolophus roseicapilla",
+     "obsDt": "2026-09-17 04:00",
+     "howMany": 2,
+     "indicator": false
+    },
+    {
+     "speciesCode": "polpar1",
+     "comName": "Australian Ringneck",
+     "sciName": "Barnardius zonarius",
+     "obsDt": "2026-09-17 04:00",
+     "howMany": 4,
+     "indicator": false
+    },
+    {
+     "speciesCode": "budger",
+     "comName": "Budgerigar",
+     "sciName": "Melopsittacus undulatus",
+     "obsDt": "2026-09-17 04:00",
+     "howMany": 16,
+     "indicator": false
+    },
+    {
+     "speciesCode": "brotre2",
+     "comName": "Brown Treecreeper",
+     "sciName": "Climacteris picumnus",
+     "obsDt": "2026-09-17 04:00",
+     "howMany": 1,
+     "indicator": false
+    },
+    {
+     "speciesCode": "sinhon1",
+     "comName": "Singing Honeyeater",
+     "sciName": "Gavicalis virescens",
+     "obsDt": "2026-09-17 04:00",
+     "howMany": 1,
+     "indicator": false
+    },
+    {
+     "speciesCode": "whphon1",
+     "comName": "White-plumed Honeyeater",
+     "sciName": "Ptilotula penicillata",
+     "obsDt": "2026-09-17 04:00",
+     "howMany": 2,
+     "indicator": false
+    },
+    {
+     "speciesCode": "hoorob1",
+     "comName": "Hooded Robin",
+     "sciName": "Melanodryas cucullata",
+     "obsDt": "2026-09-17 04:00",
+     "howMany": 2,
+     "indicator": false
+    },
+    {
+     "speciesCode": "aurwar1",
+     "comName": "Australian Reed Warbler",
+     "sciName": "Acrocephalus australis",
+     "obsDt": "2026-09-17 04:00",
+     "howMany": 1,
+     "indicator": false
+    },
+    {
+     "speciesCode": "welswa1",
+     "comName": "Welcome Swallow",
+     "sciName": "Hirundo neoxena",
+     "obsDt": "2026-09-17 04:00",
+     "howMany": 4,
+     "indicator": false
+    },
+    {
+     "speciesCode": "zebfin2",
+     "comName": "Zebra Finch",
+     "sciName": "Taeniopygia guttata",
+     "obsDt": "2026-09-17 04:00",
+     "howMany": 4,
+     "indicator": false
+    },
+    {
+     "speciesCode": "houspa",
+     "comName": "House Sparrow",
+     "sciName": "Passer domesticus",
+     "obsDt": "2026-09-17 04:00",
+     "howMany": 2,
+     "indicator": false
+    },
+    {
+     "speciesCode": "auspip2",
+     "comName": "Australian Pipit",
+     "sciName": "Anthus australis",
+     "obsDt": "2026-09-17 04:00",
+     "howMany": 2,
+     "indicator": false
+    },
+    {
+     "speciesCode": "runher1",
+     "comName": "Nankeen Night Heron",
+     "sciName": "Nycticorax caledonicus",
+     "obsDt": "2026-09-02 18:24",
+     "howMany": 1,
+     "indicator": false
+    },
+    {
+     "speciesCode": "diadov1",
+     "comName": "Diamond Dove",
+     "sciName": "Geopelia cuneata",
+     "obsDt": "2026-09-02 14:30",
+     "howMany": 5,
+     "indicator": false
+    },
+    {
+     "speciesCode": "peadov1",
+     "comName": "Peaceful Dove",
+     "sciName": "Geopelia placida",
+     "obsDt": "2026-09-02 14:30",
+     "howMany": 2,
+     "indicator": false
+    },
+    {
+     "speciesCode": "hobcuc1",
+     "comName": "Horsfield's Bronze-Cuckoo",
+     "sciName": "Chalcites basalis",
+     "obsDt": "2026-09-02 14:30",
+     "howMany": 1,
+     "indicator": false
+    },
+    {
+     "speciesCode": "eurcoo",
+     "comName": "Eurasian Coot",
+     "sciName": "Fulica atra",
+     "obsDt": "2026-09-02 14:30",
+     "howMany": 2,
+     "indicator": false
+    },
+    {
+     "speciesCode": "blfdot1",
+     "comName": "Black-fronted Dotterel",
+     "sciName": "Thinornis melanops",
+     "obsDt": "2026-09-02 14:30",
+     "howMany": 5,
+     "indicator": false
+    },
+    {
+     "speciesCode": "libcor1",
+     "comName": "Little Black Cormorant",
+     "sciName": "Phalacrocorax sulcirostris",
+     "obsDt": "2026-09-02 14:30",
+     "howMany": 3,
+     "indicator": false
+    },
+    {
+     "speciesCode": "piecor1",
+     "comName": "Pied Cormorant",
+     "sciName": "Phalacrocorax varius",
+     "obsDt": "2026-09-02 14:30",
+     "howMany": 2,
+     "indicator": false
+    },
+    {
+     "speciesCode": "whfher1",
+     "comName": "White-faced Heron",
+     "sciName": "Egretta novaehollandiae",
+     "obsDt": "2026-09-02 14:30",
+     "howMany": 1,
+     "indicator": false
+    },
+    {
+     "speciesCode": "pacher1",
+     "comName": "Pacific Heron",
+     "sciName": "Ardea pacifica",
+     "obsDt": "2026-09-02 14:30",
+     "howMany": 1,
+     "indicator": false
+    },
+    {
+     "speciesCode": "spohar1",
+     "comName": "Spotted Harrier",
+     "sciName": "Circus assimilis",
+     "obsDt": "2026-09-02 14:30",
+     "howMany": 1,
+     "indicator": false
+    },
+    {
+     "speciesCode": "whikit1",
+     "comName": "Whistling Kite",
+     "sciName": "Haliastur sphenurus",
+     "obsDt": "2026-09-02 14:30",
+     "howMany": 2,
+     "indicator": false
+    },
+    {
+     "speciesCode": "varfai1",
+     "comName": "Purple-backed Fairywren",
+     "sciName": "Malurus assimilis",
+     "obsDt": "2026-09-02 14:30",
+     "howMany": 2,
+     "indicator": false
+    },
+    {
+     "speciesCode": "spchon1",
+     "comName": "Spiny-cheeked Honeyeater",
+     "sciName": "Acanthagenys rufogularis",
+     "obsDt": "2026-09-02 14:30",
+     "howMany": 2,
+     "indicator": false
+    },
+    {
+     "speciesCode": "whwtri1",
+     "comName": "White-winged Triller",
+     "sciName": "Lalage tricolor",
+     "obsDt": "2026-09-02 14:30",
+     "howMany": 6,
+     "indicator": false
+    },
+    {
+     "speciesCode": "whbwoo4",
+     "comName": "White-breasted Woodswallow",
+     "sciName": "Artamus leucorynchus",
+     "obsDt": "2026-09-02 14:30",
+     "howMany": 2,
+     "indicator": false
+    },
+    {
+     "speciesCode": "blfwoo1",
+     "comName": "Black-faced Woodswallow",
+     "sciName": "Artamus cinereus",
+     "obsDt": "2026-09-02 14:30",
+     "howMany": 4,
+     "indicator": false
+    },
+    {
+     "speciesCode": "wilwag1",
+     "comName": "Willie-wagtail",
+     "sciName": "Rhipidura leucophrys",
+     "obsDt": "2026-09-02 14:30",
+     "howMany": 8,
+     "indicator": false
+    },
+    {
+     "speciesCode": "maglar1",
+     "comName": "Magpie-lark",
+     "sciName": "Grallina cyanoleuca",
+     "obsDt": "2026-09-02 14:30",
+     "howMany": 6,
+     "indicator": false
+    },
+    {
+     "speciesCode": "ausrav1",
+     "comName": "Australian Raven",
+     "sciName": "Corvus coronoides",
+     "obsDt": "2026-09-02 14:30",
+     "howMany": 5,
+     "indicator": false
+    },
+    {
+     "speciesCode": "rufson1",
+     "comName": "Rufous Songlark",
+     "sciName": "Cincloramphus mathewsi",
+     "obsDt": "2026-09-02 14:30",
+     "howMany": 20,
+     "indicator": false
+    },
+    {
+     "speciesCode": "faimar2",
+     "comName": "Fairy Martin",
+     "sciName": "Petrochelidon ariel",
+     "obsDt": "2026-09-02 14:30",
+     "howMany": 5,
+     "indicator": false
+    },
+    {
+     "speciesCode": "tremar2",
+     "comName": "Tree Martin",
+     "sciName": "Petrochelidon nigricans",
+     "obsDt": "2026-09-02 14:30",
+     "howMany": 15,
      "indicator": false
     }
    ]
@@ -2090,416 +2492,6 @@
    ]
   },
   {
-   "locId": "L2554517",
-   "name": "Muloorina Station",
-   "lat": -29.23907,
-   "lng": 137.90605,
-   "latestObsDt": "2026-09-02 18:24",
-   "numSpeciesAllTime": 123,
-   "recent": [
-    {
-     "speciesCode": "brolga1",
-     "comName": "Brolga",
-     "sciName": "Antigone rubicunda",
-     "obsDt": "2026-09-17 04:00",
-     "howMany": 4,
-     "indicator": false
-    },
-    {
-     "speciesCode": "recplo1",
-     "comName": "Red-capped Plover",
-     "sciName": "Anarhynchus ruficapillus",
-     "obsDt": "2026-09-17 04:00",
-     "howMany": 2,
-     "indicator": false
-    },
-    {
-     "speciesCode": "darter4",
-     "comName": "Australasian Darter",
-     "sciName": "Anhinga novaehollandiae",
-     "obsDt": "2026-09-17 04:00",
-     "howMany": 2,
-     "indicator": false
-    },
-    {
-     "speciesCode": "lipcor1",
-     "comName": "Little Pied Cormorant",
-     "sciName": "Microcarbo melanoleucos",
-     "obsDt": "2026-09-17 04:00",
-     "howMany": 6,
-     "indicator": false
-    },
-    {
-     "speciesCode": "grecor",
-     "comName": "Great Cormorant",
-     "sciName": "Phalacrocorax carbo",
-     "obsDt": "2026-09-17 04:00",
-     "howMany": 3,
-     "indicator": false
-    },
-    {
-     "speciesCode": "greegr",
-     "comName": "Great Egret",
-     "sciName": "Ardea alba",
-     "obsDt": "2026-09-17 04:00",
-     "howMany": 2,
-     "indicator": false
-    },
-    {
-     "speciesCode": "integr2",
-     "comName": "Plumed Egret",
-     "sciName": "Ardea plumifera",
-     "obsDt": "2026-09-17 04:00",
-     "howMany": 1,
-     "indicator": false
-    },
-    {
-     "speciesCode": "auspel1",
-     "comName": "Australian Pelican",
-     "sciName": "Pelecanus conspicillatus",
-     "obsDt": "2026-09-17 04:00",
-     "howMany": 4,
-     "indicator": true
-    },
-    {
-     "speciesCode": "auskit1",
-     "comName": "Black-shouldered Kite",
-     "sciName": "Elanus axillaris",
-     "obsDt": "2026-09-17 04:00",
-     "howMany": 2,
-     "indicator": false
-    },
-    {
-     "speciesCode": "liteag1",
-     "comName": "Little Eagle",
-     "sciName": "Hieraaetus morphnoides",
-     "obsDt": "2026-09-17 04:00",
-     "howMany": 1,
-     "indicator": false
-    },
-    {
-     "speciesCode": "weteag1",
-     "comName": "Wedge-tailed Eagle",
-     "sciName": "Aquila audax",
-     "obsDt": "2026-09-17 04:00",
-     "howMany": 1,
-     "indicator": false
-    },
-    {
-     "speciesCode": "blakit1",
-     "comName": "Black Kite",
-     "sciName": "Milvus migrans",
-     "obsDt": "2026-09-17 04:00",
-     "howMany": 7,
-     "indicator": false
-    },
-    {
-     "speciesCode": "souboo8",
-     "comName": "Australian Boobook",
-     "sciName": "Ninox boobook",
-     "obsDt": "2026-09-17 04:00",
-     "howMany": 2,
-     "indicator": false
-    },
-    {
-     "speciesCode": "rabeat1",
-     "comName": "Rainbow Bee-eater",
-     "sciName": "Merops ornatus",
-     "obsDt": "2026-09-17 04:00",
-     "howMany": 1,
-     "indicator": false
-    },
-    {
-     "speciesCode": "auskes1",
-     "comName": "Nankeen Kestrel",
-     "sciName": "Falco cenchroides",
-     "obsDt": "2026-09-17 04:00",
-     "howMany": 1,
-     "indicator": false
-    },
-    {
-     "speciesCode": "galah",
-     "comName": "Galah",
-     "sciName": "Eolophus roseicapilla",
-     "obsDt": "2026-09-17 04:00",
-     "howMany": 2,
-     "indicator": false
-    },
-    {
-     "speciesCode": "polpar1",
-     "comName": "Australian Ringneck",
-     "sciName": "Barnardius zonarius",
-     "obsDt": "2026-09-17 04:00",
-     "howMany": 4,
-     "indicator": false
-    },
-    {
-     "speciesCode": "budger",
-     "comName": "Budgerigar",
-     "sciName": "Melopsittacus undulatus",
-     "obsDt": "2026-09-17 04:00",
-     "howMany": 16,
-     "indicator": false
-    },
-    {
-     "speciesCode": "brotre2",
-     "comName": "Brown Treecreeper",
-     "sciName": "Climacteris picumnus",
-     "obsDt": "2026-09-17 04:00",
-     "howMany": 1,
-     "indicator": false
-    },
-    {
-     "speciesCode": "sinhon1",
-     "comName": "Singing Honeyeater",
-     "sciName": "Gavicalis virescens",
-     "obsDt": "2026-09-17 04:00",
-     "howMany": 1,
-     "indicator": false
-    },
-    {
-     "speciesCode": "whphon1",
-     "comName": "White-plumed Honeyeater",
-     "sciName": "Ptilotula penicillata",
-     "obsDt": "2026-09-17 04:00",
-     "howMany": 2,
-     "indicator": false
-    },
-    {
-     "speciesCode": "hoorob1",
-     "comName": "Hooded Robin",
-     "sciName": "Melanodryas cucullata",
-     "obsDt": "2026-09-17 04:00",
-     "howMany": 2,
-     "indicator": false
-    },
-    {
-     "speciesCode": "aurwar1",
-     "comName": "Australian Reed Warbler",
-     "sciName": "Acrocephalus australis",
-     "obsDt": "2026-09-17 04:00",
-     "howMany": 1,
-     "indicator": false
-    },
-    {
-     "speciesCode": "welswa1",
-     "comName": "Welcome Swallow",
-     "sciName": "Hirundo neoxena",
-     "obsDt": "2026-09-17 04:00",
-     "howMany": 4,
-     "indicator": false
-    },
-    {
-     "speciesCode": "zebfin2",
-     "comName": "Zebra Finch",
-     "sciName": "Taeniopygia guttata",
-     "obsDt": "2026-09-17 04:00",
-     "howMany": 4,
-     "indicator": false
-    },
-    {
-     "speciesCode": "houspa",
-     "comName": "House Sparrow",
-     "sciName": "Passer domesticus",
-     "obsDt": "2026-09-17 04:00",
-     "howMany": 2,
-     "indicator": false
-    },
-    {
-     "speciesCode": "auspip2",
-     "comName": "Australian Pipit",
-     "sciName": "Anthus australis",
-     "obsDt": "2026-09-17 04:00",
-     "howMany": 2,
-     "indicator": false
-    },
-    {
-     "speciesCode": "runher1",
-     "comName": "Nankeen Night Heron",
-     "sciName": "Nycticorax caledonicus",
-     "obsDt": "2026-09-02 18:24",
-     "howMany": 1,
-     "indicator": false
-    },
-    {
-     "speciesCode": "diadov1",
-     "comName": "Diamond Dove",
-     "sciName": "Geopelia cuneata",
-     "obsDt": "2026-09-02 14:30",
-     "howMany": 5,
-     "indicator": false
-    },
-    {
-     "speciesCode": "peadov1",
-     "comName": "Peaceful Dove",
-     "sciName": "Geopelia placida",
-     "obsDt": "2026-09-02 14:30",
-     "howMany": 2,
-     "indicator": false
-    },
-    {
-     "speciesCode": "hobcuc1",
-     "comName": "Horsfield's Bronze-Cuckoo",
-     "sciName": "Chalcites basalis",
-     "obsDt": "2026-09-02 14:30",
-     "howMany": 1,
-     "indicator": false
-    },
-    {
-     "speciesCode": "eurcoo",
-     "comName": "Eurasian Coot",
-     "sciName": "Fulica atra",
-     "obsDt": "2026-09-02 14:30",
-     "howMany": 2,
-     "indicator": false
-    },
-    {
-     "speciesCode": "blfdot1",
-     "comName": "Black-fronted Dotterel",
-     "sciName": "Thinornis melanops",
-     "obsDt": "2026-09-02 14:30",
-     "howMany": 5,
-     "indicator": false
-    },
-    {
-     "speciesCode": "libcor1",
-     "comName": "Little Black Cormorant",
-     "sciName": "Phalacrocorax sulcirostris",
-     "obsDt": "2026-09-02 14:30",
-     "howMany": 3,
-     "indicator": false
-    },
-    {
-     "speciesCode": "piecor1",
-     "comName": "Pied Cormorant",
-     "sciName": "Phalacrocorax varius",
-     "obsDt": "2026-09-02 14:30",
-     "howMany": 2,
-     "indicator": false
-    },
-    {
-     "speciesCode": "whfher1",
-     "comName": "White-faced Heron",
-     "sciName": "Egretta novaehollandiae",
-     "obsDt": "2026-09-02 14:30",
-     "howMany": 1,
-     "indicator": false
-    },
-    {
-     "speciesCode": "pacher1",
-     "comName": "Pacific Heron",
-     "sciName": "Ardea pacifica",
-     "obsDt": "2026-09-02 14:30",
-     "howMany": 1,
-     "indicator": false
-    },
-    {
-     "speciesCode": "spohar1",
-     "comName": "Spotted Harrier",
-     "sciName": "Circus assimilis",
-     "obsDt": "2026-09-02 14:30",
-     "howMany": 1,
-     "indicator": false
-    },
-    {
-     "speciesCode": "whikit1",
-     "comName": "Whistling Kite",
-     "sciName": "Haliastur sphenurus",
-     "obsDt": "2026-09-02 14:30",
-     "howMany": 2,
-     "indicator": false
-    },
-    {
-     "speciesCode": "varfai1",
-     "comName": "Purple-backed Fairywren",
-     "sciName": "Malurus assimilis",
-     "obsDt": "2026-09-02 14:30",
-     "howMany": 2,
-     "indicator": false
-    },
-    {
-     "speciesCode": "spchon1",
-     "comName": "Spiny-cheeked Honeyeater",
-     "sciName": "Acanthagenys rufogularis",
-     "obsDt": "2026-09-02 14:30",
-     "howMany": 2,
-     "indicator": false
-    },
-    {
-     "speciesCode": "whwtri1",
-     "comName": "White-winged Triller",
-     "sciName": "Lalage tricolor",
-     "obsDt": "2026-09-02 14:30",
-     "howMany": 6,
-     "indicator": false
-    },
-    {
-     "speciesCode": "whbwoo4",
-     "comName": "White-breasted Woodswallow",
-     "sciName": "Artamus leucorynchus",
-     "obsDt": "2026-09-02 14:30",
-     "howMany": 2,
-     "indicator": false
-    },
-    {
-     "speciesCode": "blfwoo1",
-     "comName": "Black-faced Woodswallow",
-     "sciName": "Artamus cinereus",
-     "obsDt": "2026-09-02 14:30",
-     "howMany": 4,
-     "indicator": false
-    },
-    {
-     "speciesCode": "wilwag1",
-     "comName": "Willie-wagtail",
-     "sciName": "Rhipidura leucophrys",
-     "obsDt": "2026-09-02 14:30",
-     "howMany": 8,
-     "indicator": false
-    },
-    {
-     "speciesCode": "maglar1",
-     "comName": "Magpie-lark",
-     "sciName": "Grallina cyanoleuca",
-     "obsDt": "2026-09-02 14:30",
-     "howMany": 6,
-     "indicator": false
-    },
-    {
-     "speciesCode": "ausrav1",
-     "comName": "Australian Raven",
-     "sciName": "Corvus coronoides",
-     "obsDt": "2026-09-02 14:30",
-     "howMany": 5,
-     "indicator": false
-    },
-    {
-     "speciesCode": "rufson1",
-     "comName": "Rufous Songlark",
-     "sciName": "Cincloramphus mathewsi",
-     "obsDt": "2026-09-02 14:30",
-     "howMany": 20,
-     "indicator": false
-    },
-    {
-     "speciesCode": "faimar2",
-     "comName": "Fairy Martin",
-     "sciName": "Petrochelidon ariel",
-     "obsDt": "2026-09-02 14:30",
-     "howMany": 5,
-     "indicator": false
-    },
-    {
-     "speciesCode": "tremar2",
-     "comName": "Tree Martin",
-     "sciName": "Petrochelidon nigricans",
-     "obsDt": "2026-09-02 14:30",
-     "howMany": 15,
-     "indicator": false
-    }
-   ]
-  },
-  {
    "locId": "L9563125",
    "name": "Halligan Bay Campground",
    "lat": -28.76435,
@@ -2823,7 +2815,7 @@
    "recent": []
   }
  ],
- "n_species": 105,
+ "n_species": 104,
  "indicators": [
   {
    "sciName": "Cladorhynchus leucocephalus",
@@ -3098,6 +3090,22 @@
    "indicator": false
   },
   {
+   "speciesCode": "lipcor1",
+   "comName": "Little Pied Cormorant",
+   "sciName": "Microcarbo melanoleucos",
+   "howMany": 1,
+   "obsDt": "2026-09-18 10:11",
+   "locId": "L2554516",
+   "locName": "Beresford Waterhole",
+   "lat": -29.24167,
+   "lng": 136.65833,
+   "obsValid": true,
+   "obsReviewed": false,
+   "locationPrivate": false,
+   "notable": false,
+   "indicator": false
+  },
+  {
    "speciesCode": "auskit1",
    "comName": "Black-shouldered Kite",
    "sciName": "Elanus axillaris",
@@ -3149,22 +3157,6 @@
    "speciesCode": "eurcoo",
    "comName": "Eurasian Coot",
    "sciName": "Fulica atra",
-   "howMany": 1,
-   "obsDt": "2026-09-18 10:11",
-   "locId": "L2554516",
-   "locName": "Beresford Waterhole",
-   "lat": -29.24167,
-   "lng": 136.65833,
-   "obsValid": true,
-   "obsReviewed": false,
-   "locationPrivate": false,
-   "notable": false,
-   "indicator": false
-  },
-  {
-   "speciesCode": "lipcor1",
-   "comName": "Little Pied Cormorant",
-   "sciName": "Microcarbo melanoleucos",
    "howMany": 1,
    "obsDt": "2026-09-18 10:11",
    "locId": "L2554516",
@@ -3418,54 +3410,6 @@
    "indicator": false
   },
   {
-   "speciesCode": "auskes1",
-   "comName": "Nankeen Kestrel",
-   "sciName": "Falco cenchroides",
-   "howMany": 1,
-   "obsDt": "2026-09-17 04:00",
-   "locId": "L2554517",
-   "locName": "Muloorina Station",
-   "lat": -29.23907,
-   "lng": 137.90605,
-   "obsValid": true,
-   "obsReviewed": false,
-   "locationPrivate": false,
-   "notable": false,
-   "indicator": false
-  },
-  {
-   "speciesCode": "houspa",
-   "comName": "House Sparrow",
-   "sciName": "Passer domesticus",
-   "howMany": 2,
-   "obsDt": "2026-09-17 04:00",
-   "locId": "L2554517",
-   "locName": "Muloorina Station",
-   "lat": -29.23907,
-   "lng": 137.90605,
-   "obsValid": true,
-   "obsReviewed": false,
-   "locationPrivate": false,
-   "notable": false,
-   "indicator": false
-  },
-  {
-   "speciesCode": "whphon1",
-   "comName": "White-plumed Honeyeater",
-   "sciName": "Ptilotula penicillata",
-   "howMany": 2,
-   "obsDt": "2026-09-17 04:00",
-   "locId": "L2554517",
-   "locName": "Muloorina Station",
-   "lat": -29.23907,
-   "lng": 137.90605,
-   "obsValid": true,
-   "obsReviewed": false,
-   "locationPrivate": false,
-   "notable": false,
-   "indicator": false
-  },
-  {
    "speciesCode": "brolga1",
    "comName": "Brolga",
    "sciName": "Antigone rubicunda",
@@ -3514,9 +3458,9 @@
    "indicator": false
   },
   {
-   "speciesCode": "rabeat1",
-   "comName": "Rainbow Bee-eater",
-   "sciName": "Merops ornatus",
+   "speciesCode": "liteag1",
+   "comName": "Little Eagle",
+   "sciName": "Hieraaetus morphnoides",
    "howMany": 1,
    "obsDt": "2026-09-17 04:00",
    "locId": "L2554517",
@@ -3546,42 +3490,42 @@
    "indicator": false
   },
   {
-   "speciesCode": "integr2",
-   "comName": "Plumed Egret",
-   "sciName": "Ardea plumifera",
-   "howMany": 1,
-   "obsDt": "2026-09-17 04:00",
-   "locId": "L2554517",
-   "locName": "Muloorina Station",
-   "lat": -29.23907,
-   "lng": 137.90605,
-   "obsValid": true,
-   "obsReviewed": false,
-   "locationPrivate": false,
-   "notable": false,
-   "indicator": false
-  },
-  {
-   "speciesCode": "liteag1",
-   "comName": "Little Eagle",
-   "sciName": "Hieraaetus morphnoides",
-   "howMany": 1,
-   "obsDt": "2026-09-17 04:00",
-   "locId": "L2554517",
-   "locName": "Muloorina Station",
-   "lat": -29.23907,
-   "lng": 137.90605,
-   "obsValid": true,
-   "obsReviewed": false,
-   "locationPrivate": false,
-   "notable": false,
-   "indicator": false
-  },
-  {
    "speciesCode": "souboo8",
    "comName": "Australian Boobook",
    "sciName": "Ninox boobook",
    "howMany": 2,
+   "obsDt": "2026-09-17 04:00",
+   "locId": "L2554517",
+   "locName": "Muloorina Station",
+   "lat": -29.23907,
+   "lng": 137.90605,
+   "obsValid": true,
+   "obsReviewed": false,
+   "locationPrivate": false,
+   "notable": false,
+   "indicator": false
+  },
+  {
+   "speciesCode": "rabeat1",
+   "comName": "Rainbow Bee-eater",
+   "sciName": "Merops ornatus",
+   "howMany": 1,
+   "obsDt": "2026-09-17 04:00",
+   "locId": "L2554517",
+   "locName": "Muloorina Station",
+   "lat": -29.23907,
+   "lng": 137.90605,
+   "obsValid": true,
+   "obsReviewed": false,
+   "locationPrivate": false,
+   "notable": false,
+   "indicator": false
+  },
+  {
+   "speciesCode": "auskes1",
+   "comName": "Nankeen Kestrel",
+   "sciName": "Falco cenchroides",
+   "howMany": 1,
    "obsDt": "2026-09-17 04:00",
    "locId": "L2554517",
    "locName": "Muloorina Station",
@@ -3626,9 +3570,41 @@
    "indicator": false
   },
   {
+   "speciesCode": "whphon1",
+   "comName": "White-plumed Honeyeater",
+   "sciName": "Ptilotula penicillata",
+   "howMany": 2,
+   "obsDt": "2026-09-17 04:00",
+   "locId": "L2554517",
+   "locName": "Muloorina Station",
+   "lat": -29.23907,
+   "lng": 137.90605,
+   "obsValid": true,
+   "obsReviewed": false,
+   "locationPrivate": false,
+   "notable": false,
+   "indicator": false
+  },
+  {
    "speciesCode": "hoorob1",
    "comName": "Hooded Robin",
    "sciName": "Melanodryas cucullata",
+   "howMany": 2,
+   "obsDt": "2026-09-17 04:00",
+   "locId": "L2554517",
+   "locName": "Muloorina Station",
+   "lat": -29.23907,
+   "lng": 137.90605,
+   "obsValid": true,
+   "obsReviewed": false,
+   "locationPrivate": false,
+   "notable": false,
+   "indicator": false
+  },
+  {
+   "speciesCode": "houspa",
+   "comName": "House Sparrow",
+   "sciName": "Passer domesticus",
    "howMany": 2,
    "obsDt": "2026-09-17 04:00",
    "locId": "L2554517",

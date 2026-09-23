@@ -181,6 +181,28 @@ The default collection is `SWOT_L2_HR_Raster_D`. Version C granules may still
 be kept as an archive, but a single processing version should be used for data
 intended for publication.
 
+### From rain to lake, fillings, data page and share preview
+
+`tools/build_rain_to_lake.py` builds *Catchment, From rain to lake*: the 2025
+sequence step by step, from the March rain in Queensland to the separation of
+Belt Bay and Madigan Gulf, and a live block that looks for the delay lining up
+rainfall, river flow and lake level. The delay is computed in
+`frontend/travel.js` by cross-correlation on a centred seven-day rainfall
+total, and says nothing until the series overlap by at least ninety days.
+`fetch_rainfall.py` now keeps a long series of daily basin-average rainfall,
+accumulated across runs, so the comparison improves as the site runs.
+
+`tools/build_floods.py` builds *The lake, Fillings*: 1950, 1974, 1984, 1989,
+the wet years of 2010 and 2011, and 2025, each with its sources. 2000 and 2019
+are deliberately absent, for want of a verified reference.
+
+*The lake, Data and citation* lists the downloads, the sources with their
+licences, and how to cite the site. `tools/make_share_image.py` writes
+`frontend/img/share.jpg` (1200 x 630, MODIS with a title band), which the
+`og:image` tag points at, so a shared link shows an image and a description.
+If the site changes address, update the three absolute URLs in the meta tags
+of `index.html`.
+
 ### One-command update from this machine
 
 ```bash

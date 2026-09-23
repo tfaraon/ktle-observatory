@@ -117,6 +117,15 @@ with tempfile.TemporaryDirectory() as td:
     for lat in (-24.2, -25.8):
         assert tuple(pixel(141.0, lat)[:3]) == fr._hex(fr.COLOURS[0]), lat
 
+    # ── Série longue : accumulée d'un passage à l'autre ──
+    assert len(p["series"]) == 29 and p["series"][0][0] < p["series"][-1][0]
+    p_next = fr.update({"rainfall": {"days": 30, "revisit_days": 3}}, fetch=fake_fetch,
+                       today=date(2026, 10, 12))          # trois semaines plus tard
+    dates = [d for d, _ in p_next["series"]]
+    assert "2026-08-24" in dates and "2026-10-11" in dates, "anciennes valeurs gardées"
+    assert len(dates) == len(set(dates)) and dates == sorted(dates)
+    assert len(dates) > 30, len(dates)
+
     # ── Cache : seuls les jours récents sont retéléchargés ──
     calls.clear()
     fr.update({"rainfall": {"days": 30, "revisit_days": 3}}, fetch=fake_fetch,

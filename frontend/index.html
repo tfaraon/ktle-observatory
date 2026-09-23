@@ -3,6 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Aperçu lors d'un partage. Si le site change d'adresse, mettre à jour
+       ces trois URL absolues, que les réseaux exigent. -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Kati Thanda–Lake Eyre Observatory">
+  <meta property="og:title" content="Kati Thanda–Lake Eyre Observatory">
+  <meta property="og:description"
+        content="Satellite measurements, hydrodynamic models and natural history of Australia's
+                 terminal lake: water level and extent, rain over the basin, river flow, birds and plants.">
+  <meta property="og:url" content="https://tfaraon.github.io/ktle-observatory/">
+  <meta property="og:image" content="https://tfaraon.github.io/ktle-observatory/img/share.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Satellite view of Kati Thanda–Lake Eyre holding water">
+  <meta name="twitter:card" content="summary_large_image">
   <title>Kati Thanda – Lake Eyre, Observatory</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -37,6 +51,8 @@
        aria-label="Catchment" hidden>
     <button class="tab" role="tab" data-tab="catchment"
             aria-selected="false">The basin</button>
+    <button class="tab" role="tab" data-tab="rain-to-lake"
+            aria-selected="false">From rain to lake</button>
     <button class="tab" role="tab" data-tab="river-flow"
             aria-selected="false">River flow</button>
   </nav>
@@ -71,12 +87,16 @@
   <nav class="tabs" id="lake-tabs" role="tablist" aria-label="The lake">
       <button class="tab" role="tab" data-tab="natural-history"
               aria-selected="false">Natural history</button>
+      <button class="tab" role="tab" data-tab="floods"
+              aria-selected="false">Fillings</button>
       <button class="tab" role="tab" data-tab="modelling"
               aria-selected="false">Modelling</button>
       <button class="tab" role="tab" data-tab="methods"
               aria-selected="false">Methods</button>
       <button class="tab" role="tab" data-tab="publications"
               aria-selected="false">Publications</button>
+      <button class="tab" role="tab" data-tab="data"
+              aria-selected="false">Data and citation</button>
     </nav>
     <div class="data-status">
       <span>Data updated <span id="generated-at">not yet</span></span>
@@ -305,6 +325,70 @@
 
     </section>
 
+    <section id="tab-floods" class="tab-panel prose" role="tabpanel" hidden></section>
+    <section id="tab-rain-to-lake" class="tab-panel prose" role="tabpanel" hidden></section>
+
+    <section id="tab-data" class="tab-panel rr-page" role="tabpanel" hidden>
+      <div class="rr-intro">
+        <h2>Data and citation</h2>
+        <p>Everything shown here comes from openly licensed sources, and everything the site computes can be
+          downloaded from the page that shows it. This page lists what those sources are, what their licences
+          require, and how to cite the site itself.</p>
+      </div>
+
+      <section class="rr-block">
+        <h3>Downloads</h3>
+        <p class="rr-note">Each dataset is exported as CSV from the page that displays it: water levels, weather
+          observations, water surface area and the model fields under
+          <a href="#modelling">The lake, Modelling</a>, and the model grids and current arrows for the scenario
+          on screen. Bird and community observations stay with the services that host them, linked from
+          <a href="#birds">Fauna and flora</a>.</p>
+      </section>
+
+      <section class="rr-block">
+        <h3>Sources and licences</h3>
+        <div class="table-wrap"><table class="rr-table">
+          <thead><tr><th>Source</th><th>Used for</th><th>Licence</th></tr></thead>
+          <tbody>
+            <tr><td><a href="https://podaac.jpl.nasa.gov/SWOT" target="_blank" rel="noopener">SWOT L2 HR Raster</a>, NASA and CNES</td>
+                <td>Water surface elevation and extent of the lake</td><td>Open, with attribution to NASA and CNES</td></tr>
+            <tr><td><a href="https://www.bom.gov.au/" target="_blank" rel="noopener">Bureau of Meteorology</a></td>
+                <td>Weather stations, wind roses, river gauges through Water Data Online</td>
+                <td>Creative Commons Attribution, unless the data supplier states otherwise</td></tr>
+            <tr><td><a href="https://www.longpaddock.qld.gov.au/silo/" target="_blank" rel="noopener">SILO</a>, Queensland Government</td>
+                <td>Daily rainfall grids over the basin</td><td>CC BY 4.0</td></tr>
+            <tr><td><a href="https://worldview.earthdata.nasa.gov/" target="_blank" rel="noopener">NASA GIBS</a></td>
+                <td>MODIS and VIIRS imagery of the lake and its basin</td><td>Open, with attribution to NASA</td></tr>
+            <tr><td><a href="https://ebird.org" target="_blank" rel="noopener">eBird</a>, Cornell Lab of Ornithology</td>
+                <td>Bird sightings and hotspots around the lake</td><td>eBird terms of use; observers retain their rights</td></tr>
+            <tr><td><a href="https://www.inaturalist.org" target="_blank" rel="noopener">iNaturalist</a></td>
+                <td>Community observations of plants and animals</td><td>Each observation and photograph keeps its own licence, shown with it</td></tr>
+            <tr><td>Delft3D-FLOW and SWAN model runs</td><td>Hydrodynamic scenarios of the lake</td>
+                <td>Produced for this work; cite the article below</td></tr>
+            <tr><td><a href="https://opentopomap.org" target="_blank" rel="noopener">OpenTopoMap</a> and OpenStreetMap</td>
+                <td>Base maps of the basin</td><td>CC BY-SA, and the Open Database Licence</td></tr>
+          </tbody>
+        </table></div>
+      </section>
+
+      <section class="rr-block">
+        <h3>Citing this site</h3>
+        <p class="rr-note">Until a versioned archive is published, cite the site by its address and the date you
+          consulted it, and cite the underlying work where it is the source of what you use. A permanent
+          identifier will be added here once the code and the scenario library are deposited.</p>
+        <p class="cite-block">Faraon, T. (2026) <i>Kati Thanda&ndash;Lake Eyre Observatory</i>.
+          https://tfaraon.github.io/ktle-observatory/ (accessed <span id="cite-date"></span>).</p>
+      </section>
+
+      <section class="rr-block">
+        <h3>How the site is kept current</h3>
+        <p class="rr-note">Weather is refreshed hourly, and bird sightings, community observations, rainfall and
+          river gauges daily. Satellite levels and the water extent are recomputed when a new SWOT pass is
+          available. Each page states when its data were last fetched, and says so plainly when a source could
+          not be reached.</p>
+      </section>
+    </section>
+
     <section id="tab-rainfall" class="tab-panel rr-page" role="tabpanel" hidden>
       <div class="rr-intro">
         <h2>Rainfall over the basin</h2>
@@ -523,6 +607,9 @@
   <script src="ebird.js"></script>
   <script src="inaturalist.js"></script>
   <script src="catchment_live.js"></script>
+  <script src="travel.js"></script>
+  <script src="floods.js"></script>
+  <script src="rain_to_lake.js"></script>
   <script src="methods.js"></script>
   <script src="natural_history.js"></script>
   <script src="aboriginal_culture.js"></script>

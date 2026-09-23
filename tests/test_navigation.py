@@ -71,7 +71,18 @@ with sync_playwright() as p:
     pg.click('.section-btn[data-section="lake"]'); pg.wait_for_timeout(200)
     s = state(pg)
     check("retour sur le dernier onglet de The lake", s["panel"] == ["tab-methods"], s)
-    pg.click('.tab[data-tab="modelling"]'); pg.wait_for_timeout(200)
+    pg.click('.tab[data-tab="floods"]'); pg.wait_for_timeout(400)
+    s = state(pg)
+    check("sous-onglet Fillings", s["panel"] == ["tab-floods"] and s["navs"] == ["lake"], s)
+    n = pg.evaluate("() => document.querySelectorAll('#tab-floods .fl-year').length")
+    check("frise des remplissages", n == 6, n)
+    pg.click('.tab[data-tab="data"]'); pg.wait_for_timeout(300)
+    check("page Data and citation",
+          pg.evaluate("() => document.getElementById('cite-date').textContent.length > 4"))
+    pg.goto(BASE + "#rain-to-lake"); pg.wait_for_timeout(600)
+    check("bloc vivant du temps de parcours",
+          pg.evaluate("() => Boolean(document.getElementById('travel-live'))"))
+    pg.goto(BASE + "#modelling"); pg.wait_for_timeout(400)
     s = state(pg)
     check("sous-onglet Modelling", s["panel"] == ["tab-modelling"] and s["navs"] == ["lake"], s)
     pg.click('.section-btn[data-section="climate"]'); pg.wait_for_timeout(200)
@@ -95,7 +106,8 @@ with sync_playwright() as p:
                     ("#ff-animals", "tab-fauna-flora"), ("#birds", "tab-birds"),
                     ("#inaturalist", "tab-inaturalist"), ("#river-flow", "tab-river-flow"),
                     ("#weather", "tab-weather"), ("#rainfall", "tab-rainfall"),
-                    ("#modelling", "tab-modelling")):
+                    ("#modelling", "tab-modelling"), ("#floods", "tab-floods"),
+                    ("#rain-to-lake", "tab-rain-to-lake"), ("#data", "tab-data")):
         pg.goto(BASE + h); pg.wait_for_timeout(500)
         s = state(pg)
         check(f"lien direct {h}", s["panel"] == [want] and s["hash"] == h, s)

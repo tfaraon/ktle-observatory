@@ -54,7 +54,8 @@ USER_AGENT = "ktle-observatory/1.0 (research outreach; github.com/tfaraon/ktle-o
 BREAKS = [1, 5, 10, 25, 50, 100, 200]
 COLOURS = ["#C9E7F2", "#8CC8E0", "#4FA3CF", "#2A73B8", "#3F4FA8", "#6A3D9A", "#A0307E"]
 
-DEFAULTS = {"days": 30, "revisit_days": 3, "pad_deg": 0.3, "image_width": 540}
+DEFAULTS = {"days": 30, "revisit_days": 3, "pad_deg": 0.3, "image_width": 540,
+            "series_days": 500}
 
 
 def settings(cfg):
@@ -254,11 +255,25 @@ def update(cfg, demo=False, fetch=download, today=None, write=True):
             "bounds": bounds,
             "scale": {"breaks_mm": BREAKS, "colours": COLOURS},
             "days": days, **totals,
+            # Serie longue de la pluie moyenne sur le bassin, accumulee d'un
+            # passage a l'autre : la fenetre d'images ne fait que 30 jours,
+            # trop court pour mesurer un decalage de plusieurs semaines entre
+            # une pluie du Queensland et la crue qui atteint le lac.
+            "series": merge_series(load_previous(demo), days, int(s["series_days"])),
         }
     if write:
         OUT_FILE.parent.mkdir(parents=True, exist_ok=True)
         OUT_FILE.write_text(json.dumps(payload, indent=1), encoding="utf-8")
     return payload
+
+
+def merge_series(prev, days, keep):
+    """Pluie moyenne quotidienne : anciennes valeurs, completees par les nouvelles."""
+    out = {d[0]: d[1] for d in ((prev or {}).get("series") or []) if d and d[0]}
+    for d in days:
+        if d.get("mean_mm") is not None:
+            out[d["date"]] = d["mean_mm"]
+    return [[k, out[k]] for k in sorted(out)][-keep:]
 
 
 def load_previous(demo):

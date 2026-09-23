@@ -1806,10 +1806,13 @@
   const SECTION_OF = {
     home: "home",
     "natural-history": "lake",
+    floods: "lake",
+    data: "lake",
     modelling: "lake",
     methods: "lake",
     publications: "lake",
     catchment: "catchment",
+    "rain-to-lake": "catchment",
     "river-flow": "catchment",
     weather: "climate",
     rainfall: "climate",
@@ -1838,6 +1841,14 @@
     "fauna-flora": {
       html: () => (typeof FAUNA_FLORA_HTML === "string" ? FAUNA_FLORA_HTML : null),
       anchors: /^(ff|ffref)-/,
+    },
+    floods: {
+      html: () => (typeof FLOODS_HTML === "string" ? FLOODS_HTML : null),
+      anchors: /^(fl|flref)-/,
+    },
+    "rain-to-lake": {
+      html: () => (typeof RAIN_TO_LAKE_HTML === "string" ? RAIN_TO_LAKE_HTML : null),
+      anchors: /^(rl|rlref)-/,
     },
     catchment: {
       html: () => (typeof CATCHMENT_HTML === "string" ? CATCHMENT_HTML : null),
@@ -1926,6 +1937,11 @@
     }
     if (name === "catchment" && state.catchmentMap) {
       requestAnimationFrame(() => state.catchmentMap.invalidateSize());
+    }
+    if (name === "rain-to-lake") requestAnimationFrame(renderTravel);
+    if (name === "data") {
+      const el = $("cite-date");
+      if (el) el.textContent = fmtLongDate(new Date().toISOString().slice(0, 10));
     }
     if (name === "rainfall") {
       requestAnimationFrame(() => {
@@ -2780,8 +2796,100 @@
     Promise.all([loadJson("/api/rainfall", "rainfall.json"), loadJson("/api/rivers", "rivers.json")])
       .then(([rain, rivers]) => {
         state.rain = rain; state.rivers = rivers;
-        renderRainfall(); renderRiverFlow();
+        renderRainfall(); renderRiverFlow(); renderTravel();
       });
+  }
+
+  // ── From rain to lake: how long the water takes ──────────
+  //
+  // Rain over the basin, flow at a gauge and the level of the lake are
+  // measured separately; this looks for the delay that lines them up. The
+  // calculation is first-order and says nothing until the series overlap
+  // enough, which the page states.
+
+  function levelSeries() {
+    const site = (state.data && state.data.sites && state.data.sites[state.site]) || null;
+    if (!site || !site.series) return [];
+    return site.series.map((p) => [String(p.t || p[0]).slice(0, 10), Number(p.wse !== undefined ? p.wse : p[1])])
+      .filter((p) => p[0] && Number.isFinite(p[1]));
+  }
+
+  function renderTravel() {
+    const box = $("travel-live");
+    if (!box || typeof Travel === "undefined") return;
+    const rain = (state.rain && state.rain.series) || [];
+    const gauges = ((state.rivers && state.rivers.stations) || [])
+      .filter((st) => st.discharge && (st.discharge.values || []).length > 30);
+    const level = levelSeries();
+
+    if (!rain.length && !gauges.length && !level.length) {
+      box.innerHTML = '<p class="rr-note">Rain, river and lake data have not been fetched yet.</p>';
+      return;
+    }
+
+    // La pluie ne fait une crue qu'accumulée : on compare des cumuls sur 7 jours
+    const rain7 = Travel.rolling(rain, 7);
+    const gauge = gauges.slice().sort((a, b) => (b.discharge.values.length - a.discharge.values.length))[0];
+    const lines = [];
+    let rainLag = null, lakeLag = null;
+    if (gauge) {
+      rainLag = Travel.bestLag(rain7, gauge.discharge.values, 120);
+      lines.push(Travel.sentence(`rain over the basin and the flow at ${esc(gauge.name)}`, rainLag));
+      if (level.length > 30) {
+        lakeLag = Travel.bestLag(gauge.discharge.values, Travel.dailyChange(level), 150);
+        lines.push(Travel.sentence(`that flow and the rise of the lake at ${esc(state.site || "Belt Bay")}`, lakeLag));
+      }
+    } else {
+      lines.push("No gauge has enough recent flow data to compare with the rain.");
+    }
+    if (rainLag && lakeLag) {
+      lines.push(`End to end, that is about ${Math.round((rainLag.lag + lakeLag.lag) / 7)} weeks `
+        + "between a wet week in the headwaters and the lake responding.");
+    }
+
+    box.innerHTML = `<div class="travel-lines">${lines.map((l) => `<p>${esc(l)}</p>`).join("")}</div>`
+      + '<div id="travel-chart" class="rr-chart"></div>'
+      + '<div id="travel-lagplot" class="rr-chart"></div>'
+      + '<p class="rr-note">Rainfall is a seven-day running total over the basin. A correlation lines '
+      + 'up two series in time; it does not prove that one caused the other.</p>';
+
+    const traces = [];
+    if (rain7.length) {
+      traces.push({ x: rain7.map((p) => p[0]), y: rain7.map((p) => p[1]), name: "Rain, 7 days (mm)",
+                    type: "scatter", mode: "lines", line: { color: "#2A73B8", width: 1.5 } });
+    }
+    if (gauge) {
+      traces.push({ x: gauge.discharge.values.map((p) => p[0]), y: gauge.discharge.values.map((p) => p[1]),
+                    name: `Flow, ${gauge.name}`, yaxis: "y2", type: "scatter", mode: "lines",
+                    line: { color: "#1F6470", width: 1.8 } });
+    }
+    if (level.length) {
+      traces.push({ x: level.map((p) => p[0]), y: level.map((p) => p[1]), name: "Lake level (m)",
+                    yaxis: "y3", type: "scatter", mode: "lines+markers",
+                    line: { color: "#C0476A", width: 1.6 }, marker: { size: 4 } });
+    }
+    if (traces.length) {
+      Plotly.newPlot($("travel-chart"), traces, {
+        margin: { l: 58, r: 58, t: 10, b: 40 }, height: 340, showlegend: true,
+        legend: { orientation: "h", y: 1.12 },
+        xaxis: { type: "date" },
+        yaxis: { title: "mm", rangemode: "tozero" },
+        yaxis2: { overlaying: "y", side: "right", rangemode: "tozero", showgrid: false },
+        yaxis3: { overlaying: "y", side: "right", position: 1, showgrid: false, visible: false },
+        paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
+      }, { displayModeBar: false, responsive: true });
+    }
+    if (rainLag) {
+      Plotly.newPlot($("travel-lagplot"), [{
+        x: rainLag.curve.map((p) => p.lag), y: rainLag.curve.map((p) => p.r),
+        type: "scatter", mode: "lines", line: { color: "#134450", width: 1.6 },
+      }], {
+        margin: { l: 58, r: 16, t: 24, b: 44 }, height: 220,
+        title: { text: "How well rain and flow line up, by delay", font: { size: 13 } },
+        xaxis: { title: "delay, days" }, yaxis: { title: "correlation" },
+        paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
+      }, { displayModeBar: false, responsive: true });
+    }
   }
 
   async function init() {

@@ -1738,3 +1738,30 @@ nav.tabs, .subbar { max-width: calc(var(--page) - 56px); padding-left: 0; paddin
 .rr-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 7px; vertical-align: -1px; }
 .rr-date { display: block; font-size: 0.78rem; color: var(--dune); }
 @media (max-width: 700px) { .rr-map { height: 380px; } }
+
+/* ── Frise des remplissages ────────────────────────────────── */
+
+.fl-strip { display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0 8px; }
+.fl-year {
+  flex: 1 1 130px; text-decoration: none; color: var(--basin);
+  border: 1px solid var(--panel-edge); border-top: 4px solid var(--flood);
+  padding: 10px 12px; background: #FFFFFF; border-radius: var(--radius);
+}
+.fl-year b { display: block; font-family: var(--font-display); font-weight: 600; font-size: 1.15rem; }
+.fl-year span { font-family: var(--font-read); font-size: 0.85rem; color: var(--dune); }
+.fl-year:hover { border-color: var(--flood); }
+.fl-year.fl-full { border-top-color: var(--flood-deep); }
+.fl-year.fl-small { border-top-color: #8CC8E0; }
+.fl-year.fl-wet { border-top-color: #C9A66B; }
+
+/* ── De la pluie au lac ────────────────────────────────────── */
+
+.travel-live { margin: 16px 0 8px; }
+.travel-lines p {
+  font-family: var(--font-read); font-size: 1rem; line-height: 1.6; margin: 0 0 8px;
+  padding-left: 16px; border-left: 3px solid var(--flood); max-width: var(--measure);
+}
+.cite-block {
+  font-family: var(--font-read); background: var(--grid); padding: 12px 14px;
+  border-radius: var(--radius); max-width: var(--measure); line-height: 1.6;
+}
