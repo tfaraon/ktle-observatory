@@ -115,6 +115,17 @@ with tempfile.TemporaryDirectory() as td:
     r = sh("./update.sh --no-push < /dev/null", work, env, check=False)
     assert r.returncode == 0 and "--no-publish" in args() and remote_head() == before
     assert "Site    :" not in r.stdout
+    # ── Poussée manquée : le commit prêt est envoyé au lieu d'être abandonné ──
+    stub = work / "deploy" / "refresh.sh"
+    stub.write_text(STUB_REFRESH.replace('git add -A && git commit -qm "$2" && git push -q origin HEAD 2>/dev/null',
+                                         'git add -A && git commit -qm "$2"'))   # commit sans pousser
+    before = remote_head()
+    r = sh("./update.sh -y < /dev/null", work, env, check=False)
+    assert "pas encore envoyées" in r.stdout, r.stdout
+    assert r.returncode == 0 and remote_head() != before, "le commit est finalement publié"
+    assert "(en ligne)" in r.stdout, r.stdout
+    stub.write_text(STUB_REFRESH)
+
     # ── Dépôt injoignable : la cause est affichée, rien ne tourne ──
     sh(f"git remote set-url origin {td / 'absent.git'}", work)
     (work / "refresh_args.txt").unlink()
@@ -124,5 +135,6 @@ with tempfile.TemporaryDirectory() as td:
     srv.shutdown()
 
 print("OK — aide, arrêt sans publier si personne ne confirme, publication vérifiée en ligne, "
-      "mode rapide sans disque SWOT, --no-push, dépôt injoignable expliqué, réglages locaux lus "
+      "mode rapide sans disque SWOT, --no-push, poussée manquée rattrapée, dépôt injoignable "
+      "expliqué, réglages locaux lus "
       "et jamais versionnés, journal.")

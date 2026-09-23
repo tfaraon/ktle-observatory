@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-09-22T23:14:34Z",
+ "fetched_at": "2026-09-23T02:08:57Z",
  "demo": false,
  "stale": false,
  "errors": [],
@@ -144,7 +144,7 @@
    "id": 402438473,
    "url": "https://www.inaturalist.org/observations/402438473",
    "observed_on": "2026-09-16",
-   "quality": "needs_id",
+   "quality": "research",
    "taxon": {
     "name": "Himantopus leucocephalus",
     "common": "Pied Stilt",

@@ -10,6 +10,8 @@ const METHODS_HTML = `
     <p class="eyebrow">Documentation</p>
     <h2>Methods</h2>
   </div>
+  <figure class="fig" data-fig="model-grid"><figcaption>The Delft3D computational grid over the lake
+    bathymetry, on which the hydrodynamic scenarios are run.</figcaption></figure>
   <div class="prose-body">
 
     <p class="lede">This observatory places satellite altimetry, ground

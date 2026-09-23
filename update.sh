@@ -90,6 +90,20 @@ fi
 # ── Depot : acces et modifications en attente ───────────────
 [ -d .git ] || fail "pas de dépôt Git dans $ROOT"
 if [ "$PUSH" -eq 1 ]; then
+  # La cle SSH est chargee maintenant, au besoin : sinon sa phrase secrete
+  # est demandee en plein travail, et une publication peut echouer dix
+  # minutes apres le debut du calcul.
+  case "$(git remote get-url origin 2>/dev/null)" in
+    *git@*|ssh://*)
+      if [ -t 0 ] && ! ssh-add -l >/dev/null 2>&1; then
+        for k in "${SSH_KEY:-}" ~/.ssh/id_ed25519 ~/.ssh/id_rsa; do
+          [ -n "$k" ] && [ -f "$k" ] || continue
+          echo "Chargement de la clé SSH ($k) : la phrase secrète n'est demandée qu'une fois."
+          ssh-add --apple-use-keychain "$k" 2>/dev/null || ssh-add -K "$k" 2>/dev/null || ssh-add "$k" || true
+          break
+        done
+      fi ;;
+  esac
   # Au terminal, ssh peut demander la phrase secrete de la cle ; sans
   # terminal (tache planifiee), il ne doit jamais attendre de reponse.
   SSH_OPTS="-o ConnectTimeout=10"
@@ -148,6 +162,24 @@ HEAD_BEFORE="$(git rev-parse HEAD)"
 # shellcheck disable=SC2086
 PYTHON="$PY" ./deploy/refresh.sh $ARGS -m "$MESSAGE"
 STATUS=$?
+
+# ── Poussee : un commit deja pret n'est pas abandonne ───────
+upstream() { git rev-parse '@{u}' 2>/dev/null || echo "-"; }
+if [ "$PUSH" -eq 1 ] && [ "$(git rev-parse HEAD)" != "$HEAD_BEFORE" ] \
+   && [ "$(git rev-parse HEAD)" != "$(upstream)" ]; then
+  echo
+  echo "Les données sont enregistrées mais pas encore envoyées. Nouvel essai de publication…"
+  if git push; then
+    STATUS=0
+  else
+    echo
+    echo "La poussée a encore échoué. Rien n'est perdu : le commit est prêt en local."
+    echo "Charge ta clé puis pousse-la :"
+    echo "    ssh-add --apple-use-keychain ~/.ssh/id_ed25519"
+    echo "    git push"
+    STATUS=1
+  fi
+fi
 
 # ── Verification en ligne ───────────────────────────────────
 ONLINE="non vérifié"

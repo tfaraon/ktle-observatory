@@ -34,6 +34,7 @@
     birdsLayer: null,
     lastTab: { lake: "natural-history", catchment: "catchment", climate: "weather",
                "fauna-flora": "fauna-flora", culture: "culture" },
+    figures: null, showPlaceholders: true,
     rain: null, rivers: null, rainMap: null, flowMap: null, rainOverlay: null, flowStations: null, rrView: "sum7",
     birdsMap: null,
     inat: null,
@@ -1882,6 +1883,7 @@
     });
     state.loadedPages[name] = true;
     if (name === "catchment") initCatchmentMap();
+    fillFigures($("tab-" + name));
     if (name === "fauna-flora") renderGroupBlocks();
   }
 
@@ -2890,6 +2892,59 @@
         paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
       }, { displayModeBar: false, responsive: true });
     }
+  }
+
+  // ── Figures ──────────────────────────────────────────────
+  //
+  // Each page reserves slots with <figure data-fig="slug">. figures.json
+  // says which of them have an image; the rest stay as a frame naming the
+  // file that is expected, so a page is never silently incomplete. Figures
+  // from the books and articles cited here are under copyright and are not
+  // reproduced: these are satellite imagery, or photographs supplied for
+  // this site.
+
+  async function loadFigures() {
+    if (state.figures) return state.figures;
+    try {
+      const res = await fetch("figures.json", { cache: "no-store" });
+      const doc = res.ok ? await res.json() : {};
+      state.showPlaceholders = doc.show_placeholders !== false;
+      state.figures = doc.figures || {};
+    } catch (_) {
+      state.figures = {};
+    }
+    return state.figures;
+  }
+
+  function fillFigures(root) {
+    const slots = (root || document).querySelectorAll("figure.fig[data-fig]");
+    if (!slots.length) return;
+    loadFigures().then((figs) => {
+      slots.forEach((el) => {
+        if (el.dataset.filled) return;
+        const slug = el.dataset.fig;
+        const f = figs[slug] || {};
+        const caption = el.querySelector("figcaption");
+        const text = caption ? caption.innerHTML : "";
+        if (f.file) {
+          const credit = f.credit
+            ? `<span class="fig-credit">${f.url
+                ? `<a href="${esc(f.url)}" target="_blank" rel="noopener">${esc(f.credit)}</a>`
+                : esc(f.credit)}${f.date ? `, ${esc(fmtLongDate(f.date))}` : ""}</span>`
+            : "";
+          el.innerHTML = `<img src="img/${esc(f.file)}" alt="${esc(el.textContent.trim())}" loading="lazy">`
+            + `<figcaption>${text}${credit}</figcaption>`;
+        } else if (!state.showPlaceholders) {
+          // Cadres masqués : la page se lit sans trou, en attendant les images
+          el.hidden = true;
+        } else {
+          el.classList.add("fig-empty");
+          el.innerHTML = '<div class="fig-box"><span>Image to come</span>'
+            + `<code>img/figures/${esc(slug)}.jpg</code></div><figcaption>${text}</figcaption>`;
+        }
+        el.dataset.filled = "1";
+      });
+    });
   }
 
   async function init() {

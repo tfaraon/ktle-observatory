@@ -1765,3 +1765,25 @@ nav.tabs, .subbar { max-width: calc(var(--page) - 56px); padding-left: 0; paddin
   font-family: var(--font-read); background: var(--grid); padding: 12px 14px;
   border-radius: var(--radius); max-width: var(--measure); line-height: 1.6;
 }
+
+/* ── Figures des pages de texte ────────────────────────────── */
+
+.fig { margin: 26px 0; max-width: 62rem; }
+.fig img {
+  display: block; width: 100%; height: auto;
+  border: 1px solid var(--panel-edge); border-radius: var(--radius); background: var(--grid);
+}
+.fig figcaption {
+  font-family: var(--font-read); font-style: italic; font-size: 0.92rem; line-height: 1.5;
+  color: var(--dune); margin-top: 8px; max-width: var(--measure);
+}
+.fig .fig-credit { display: block; font-style: normal; font-size: 0.8rem; margin-top: 4px; }
+.fig .fig-credit a { color: var(--dune); }
+.fig-box {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+  min-height: 190px; border: 1px dashed var(--flood); border-radius: var(--radius);
+  background: repeating-linear-gradient(135deg, var(--grid), var(--grid) 12px, transparent 12px, transparent 24px);
+  font-family: var(--font-display); color: var(--dune);
+}
+.fig-box span { font-weight: 600; font-size: 0.95rem; }
+.fig-box code { font-size: 0.8rem; background: #FFFFFF; padding: 3px 8px; border-radius: var(--radius); }

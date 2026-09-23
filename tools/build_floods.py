@@ -41,6 +41,7 @@ SECTIONS = [
 "{c:kotwicki1991}, and {n:kotwicki1986} counted 1891, 1906, 1941, 1949&ndash;1951, 1953, 1955&ndash;1959 and "
 "1963 among the significant filling years. The fillings below are those this site can document from published "
 "sources; others, such as 2000 and 2019, are missing here for want of a reference rather than for want of water.",
+"{fig:dry-lake|The lake between fillings: a white plain of salt, the state in which it spends most of any decade.}",
 STRIP,
 ]),
 ("1950", "fl-1950", [
@@ -77,6 +78,7 @@ STRIP,
 "interior in 2011 made a measurable contribution to the global land carbon sink {c:poulter2014}, and the water "
 "held inland that year briefly lowered global mean sea level {c:fasullo2013}. They are a reminder that what "
 "fills this lake is a continental event, not a local one.",
+"{fig:flood-2011-lake|The lake holding water in May 2011, at the end of two wet years.}",
 ]),
 ("2025", "fl-2025", [
 "The 2025 flood produced the highest discharge ever recorded on Cooper Creek, surpassing 1974 with a peak of "
@@ -85,6 +87,7 @@ STRIP,
 "through the second half of the year {c:faraon2026}. Large though it was, the event sits within the basin&rsquo;s "
 "ordinary range rather than beyond it, which is what makes it worth following closely: its sequence is set out "
 "under <a href=\"#rain-to-lake\">From rain to lake</a>.",
+"{fig:flood-2025-lake|The first flood wave spreading across the northern lake bed in May 2025, down the Warburton and Kalaweerina Grooves.}",
 ]),
 ]
 

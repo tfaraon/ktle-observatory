@@ -41,11 +41,12 @@ fi
 # oublie (methods.js, windrose.js, download.js...) laisserait le site
 # en ligne partiellement casse.
 copied=0
-# Images du site (aperçu de partage notamment)
+# Images du site (aperçu de partage, figures des pages) et leur manifeste
 if [ -d frontend/img ]; then
   mkdir -p site/img
-  cp -f frontend/img/* site/img/ 2>/dev/null || true
+  cp -R frontend/img/. site/img/ 2>/dev/null || true
 fi
+cp -f frontend/figures.json site/ 2>/dev/null || true
 for f in frontend/*.html frontend/*.css frontend/*.js; do
   [ -e "$f" ] || continue
   if ! cmp -s "$f" "site/$(basename "$f")"; then

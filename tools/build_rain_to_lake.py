@@ -38,6 +38,7 @@ SECTIONS = [
 "updated daily. Flow comes from the river gauges still operating, read from Water Data Online. The level of "
 "the lake itself comes from the SWOT satellite at Belt Bay. Each is shown on its own page; here they are put "
 "on the same time axis, which is the only way to see the delay between them.",
+"{fig:travel-time-diagram|The three stages between rain and lake: runoff in the Queensland headwaters, routing through the Channel Country, and redistribution once the water enters the lake.}",
 ]),
 ("How long the water takes", "rl-lag", [
 "The figures below compare the three series and look for the delay that best lines them up. It is a "
@@ -59,12 +60,14 @@ SECTIONS = [
 "mid-February, the difference measuring how much the flood is delayed by the country it crosses "
 "{c:faraon2026}. On the Cooper, the same event produced the highest discharge ever recorded, 814&nbsp;GL a "
 "day, on a floodplain up to 55&nbsp;km wide {c:rai2026b}.",
+"{fig:flood-2025-channel-country|Floodwaters filling channels, floodplains and interdunal corridors across the Channel Country in April 2025, on their way to the lake.}",
 "The first wave reached the lake on 29 April 2025, down the Warburton, about two months after the March "
 "rain. Some 20&nbsp;km upstream of the lake bed the flow divided in two: the Warburton Groove to the west, "
 "which stayed confined to the centre of its channel and advanced at about 0.1&nbsp;m per second, and the "
 "Kalaweerina Groove to the east, which spread directly onto the lake bed, peaked some ten days later and "
 "advanced at about half that speed. A first-order partition of roughly three quarters to one quarter between "
 "the two follows from their propagation {c:faraon2026}.",
+"{fig:warburton-delta|The Warburton River dividing about 20 km upstream of the lake bed, into the Warburton Groove to the west and the Kalaweerina Groove to the east.}",
 "Cooper Creek began flowing into the lake around 28 June, two months after the Warburton and three after the "
 "rain that fed it, and its sediment plume built up steadily rather than arriving as a surge {c:faraon2026}. "
 "Once in the lake, the water stopped behaving like a river: under moderate westerly winds the waterline moved "

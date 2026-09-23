@@ -181,6 +181,40 @@ The default collection is `SWOT_L2_HR_Raster_D`. Version C granules may still
 be kept as an archive, but a single processing version should be used for data
 intended for publication.
 
+### Figures in the text pages
+
+Text pages reserve figure slots, written in the builders as
+`{fig:slug|Caption}`. `frontend/figures.json` says which slots have an image;
+a slot without one renders as a frame naming the file it expects, so a page is
+never silently incomplete. Images live in `frontend/img/figures/` and are
+published with the site.
+
+```bash
+python tools/fetch_figures.py --list   # what is planned, and what is missing
+python tools/fetch_figures.py          # download the satellite views
+```
+
+```bash
+python tools/figure_slots.py                     # every slot, and what it waits for
+python tools/add_figure.py <slug> <file> \
+    --credit "Photograph: Thomas Faraon"         # install one of your own images
+```
+
+`add_figure.py` resizes the image to 1600 px wide, saves it without any
+metadata (phone photographs carry GPS coordinates and a timestamp, which have
+no place online), and records it in the manifest with its credit. Set
+`"show_placeholders": false` in `figures.json` to hide empty frames from
+visitors while you work through them.
+
+`tools/fetch_figures.py` fetches MODIS views from NASA GIBS for the six
+satellite slots, at dates chosen to illustrate the text, and records the scene
+date and credit in the manifest. The remaining slots wait for photographs or
+figures you supply: drop the file into `frontend/img/figures/` under the name
+the frame shows, then add its `file` and `credit` to `figures.json`.
+
+Figures from the books and articles cited on the site are under copyright and
+are not reproduced here, photographs of their pages included.
+
 ### From rain to lake, fillings, data page and share preview
 
 `tools/build_rain_to_lake.py` builds *Catchment, From rain to lake*: the 2025
@@ -217,6 +251,12 @@ publishing files modified outside the data, runs `deploy/refresh.sh`, then
 waits until GitHub Pages serves the new version. If the SWOT disk is not
 mounted, it skips SWOT and water area and updates the rest. The full log is
 kept in `logs/`; `deploy/local.env` and `logs/` are never committed.
+
+`update.sh` loads the SSH key into the agent before the long run, so the
+passphrase is asked once at the start rather than in the middle of the work,
+and if the data are committed but the push fails it retries and, failing that,
+tells you the commit is waiting locally. On macOS, adding `AddKeysToAgent yes`
+and `UseKeychain yes` to `~/.ssh/config` removes the prompt altogether.
 
 If the check of the GitHub repository fails, `update.sh` prints Git's own
 message and a hint. A network that blocks SSH on port 22 (common on

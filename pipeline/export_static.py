@@ -351,6 +351,13 @@ def build(cfg, out_dir=SITE, colors=64, limit=None, sample=40):
         if src_file.exists():
             shutil.copy(src_file, data_dir / name)
 
+    # Manifeste des figures, et images du site (aperçu de partage, figures)
+    fig_manifest = ROOT / "frontend" / "figures.json"
+    if fig_manifest.exists():
+        shutil.copy2(fig_manifest, out_dir / "figures.json")
+    if (ROOT / "frontend" / "img").is_dir():
+        shutil.copytree(ROOT / "frontend" / "img", out_dir / "img", dirs_exist_ok=True)
+
     # Masques d'eau : un PNG par date, quelques kilo-octets chacun
     for folder in ("area_maps", "extent_maps", "rain_maps"):
         maps_src = ROOT / "data" / folder

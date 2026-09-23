@@ -46,6 +46,17 @@ def build(refs, sections, *, var, eyebrow, title, acknowledgement,
             sys.exit(f"Identifiant de section hors préfixe : {sid}")
         body.append(f'<section class="nh-section" id="{sid}"><h3>{heading}</h3>')
         for item in items:
+            # Emplacement de figure : {fig:slug|Légende}. Le site y met l'image
+            # si frontend/figures.json en connait une, sinon un cadre qui dit
+            # laquelle manque. Les figures des livres cités ne peuvent pas y
+            # aller : elles restent protegees par le droit d'auteur.
+            if item.startswith("{fig:"):
+                slug, _, caption = item[5:-1].partition("|")
+                if not re.fullmatch(r"[a-z0-9-]+", slug):
+                    sys.exit(f"Identifiant de figure invalide : {slug}")
+                body.append(f'<figure class="fig" data-fig="{slug}">'
+                            f'<figcaption>{render(caption)}</figcaption></figure>')
+                continue
             if item.lstrip().startswith("<"):
                 body.append(render(item))
                 continue

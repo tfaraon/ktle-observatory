@@ -1,0 +1,111 @@
+{
+  "_comment": "Images du site, par emplacement. Une entrée ne porte « file » qu'une fois l'image présente dans frontend/img/ : tant qu'elle manque, la page affiche un cadre nommant le fichier attendu. tools/fetch_figures.py télécharge les vues satellite et complète ce fichier. Les figures des livres et articles cités sont sous droit d'auteur et ne peuvent pas y être ajoutées.",
+  "figures": {
+    "lake-from-space": {
+      "credit": "NASA Worldview, MODIS Terra",
+      "licence": "Open, with attribution to NASA",
+      "url": "https://worldview.earthdata.nasa.gov/",
+      "note": "Le lac en eau après la crue de 2025 : téléchargée par tools/fetch_figures.py",
+      "file": "figures/lake-from-space.jpg",
+      "date": "2025-07-08"
+    },
+    "flood-2025-lake": {
+      "credit": "NASA Worldview, MODIS Terra",
+      "licence": "Open, with attribution to NASA",
+      "url": "https://worldview.earthdata.nasa.gov/",
+      "note": "La première vague sur le lit du lac, mai 2025 : téléchargée par tools/fetch_figures.py",
+      "file": "figures/flood-2025-lake.jpg",
+      "date": "2025-05-21"
+    },
+    "flood-2025-channel-country": {
+      "credit": "NASA Worldview, MODIS Terra",
+      "licence": "Open, with attribution to NASA",
+      "url": "https://worldview.earthdata.nasa.gov/",
+      "note": "La Channel Country en crue, avril 2025 : téléchargée par tools/fetch_figures.py",
+      "file": "figures/flood-2025-channel-country.jpg",
+      "date": "2025-04-10"
+    },
+    "flood-2011-lake": {
+      "credit": "NASA Worldview, MODIS Terra",
+      "licence": "Open, with attribution to NASA",
+      "url": "https://worldview.earthdata.nasa.gov/",
+      "note": "Le lac en eau, mai 2011 : téléchargée par tools/fetch_figures.py",
+      "file": "figures/flood-2011-lake.jpg",
+      "date": "2011-05-15"
+    },
+    "dry-lake": {
+      "credit": "NASA Worldview, MODIS Terra",
+      "licence": "Open, with attribution to NASA",
+      "url": "https://worldview.earthdata.nasa.gov/",
+      "note": "Le lac à sec, croûte de sel : téléchargée par tools/fetch_figures.py",
+      "file": "figures/dry-lake.jpg",
+      "date": "2024-09-15"
+    },
+    "channel-country-dry": {
+      "credit": "NASA Worldview, MODIS Terra",
+      "licence": "Open, with attribution to NASA",
+      "url": "https://worldview.earthdata.nasa.gov/",
+      "note": "La Channel Country à sec : téléchargée par tools/fetch_figures.py",
+      "file": "figures/channel-country-dry.jpg",
+      "date": "2024-09-15"
+    },
+    "mound-spring": {
+      "credit": "",
+      "note": "Photograph of a mound spring, to be supplied."
+    },
+    "gibber-plain": {
+      "credit": "",
+      "note": "Photograph of the gibber plains and their chenopod shrubland, to be supplied."
+    },
+    "warburton-delta": {
+      "credit": "",
+      "note": "Sentinel-2 view of the Warburton and Kalaweerina Grooves, to be supplied from the article figures."
+    },
+    "salt-crust": {
+      "note": "Photographie de la croûte de sel"
+    },
+    "geology-cross-section": {
+      "note": "Coupe géologique du bassin, à dessiner"
+    },
+    "palaeo-lake-dieri": {
+      "note": "Carte de l'extension du lac Dieri, à dessiner"
+    },
+    "goyder-channel": {
+      "note": "Photographie ou carte du Goyder Channel"
+    },
+    "marree-track": {
+      "note": "Photographie de la piste de Birdsville près de Marree"
+    },
+    "basin-map": {
+      "note": "Carte du bassin et de ses rivières, à dessiner"
+    },
+    "coongie-lakes": {
+      "note": "Photographie des Coongie Lakes"
+    },
+    "cooper-waterhole": {
+      "note": "Photographie d'un waterhole de la Cooper"
+    },
+    "samphire": {
+      "note": "Photographie de samphire (Tecticornia)"
+    },
+    "lake-eyre-dragon": {
+      "note": "Photographie du dragon du lac Eyre"
+    },
+    "waterbird-colony": {
+      "note": "Photographie d'oiseaux d'eau sur le lac en crue"
+    },
+    "travel-time-diagram": {
+      "note": "Schéma des trois étapes, pluie, rivières, lac"
+    },
+    "wind-on-the-lake": {
+      "note": "Photographie du vent sur le lac en eau"
+    },
+    "river-gauge": {
+      "note": "Photographie d'une station de jaugeage"
+    },
+    "model-grid": {
+      "note": "Figure de la grille Delft3D sur la bathymétrie"
+    }
+  },
+  "show_placeholders": true
+}
