@@ -5,49 +5,37 @@
       "credit": "NASA Worldview, MODIS Terra",
       "licence": "Open, with attribution to NASA",
       "url": "https://worldview.earthdata.nasa.gov/",
-      "note": "Le lac en eau après la crue de 2025 : téléchargée par tools/fetch_figures.py",
-      "file": "figures/lake-from-space.jpg",
-      "date": "2025-07-08"
+      "note": "Le lac en eau après la crue de 2025 : téléchargée par tools/fetch_figures.py"
     },
     "flood-2025-lake": {
       "credit": "NASA Worldview, MODIS Terra",
       "licence": "Open, with attribution to NASA",
       "url": "https://worldview.earthdata.nasa.gov/",
-      "note": "La première vague sur le lit du lac, mai 2025 : téléchargée par tools/fetch_figures.py",
-      "file": "figures/flood-2025-lake.jpg",
-      "date": "2025-05-21"
+      "note": "La première vague sur le lit du lac, mai 2025 : téléchargée par tools/fetch_figures.py"
     },
     "flood-2025-channel-country": {
       "credit": "NASA Worldview, MODIS Terra",
       "licence": "Open, with attribution to NASA",
       "url": "https://worldview.earthdata.nasa.gov/",
-      "note": "La Channel Country en crue, avril 2025 : téléchargée par tools/fetch_figures.py",
-      "file": "figures/flood-2025-channel-country.jpg",
-      "date": "2025-04-10"
+      "note": "La Channel Country en crue, avril 2025 : téléchargée par tools/fetch_figures.py"
     },
     "flood-2011-lake": {
       "credit": "NASA Worldview, MODIS Terra",
       "licence": "Open, with attribution to NASA",
       "url": "https://worldview.earthdata.nasa.gov/",
-      "note": "Le lac en eau, mai 2011 : téléchargée par tools/fetch_figures.py",
-      "file": "figures/flood-2011-lake.jpg",
-      "date": "2011-05-15"
+      "note": "Le lac en eau, mai 2011 : téléchargée par tools/fetch_figures.py"
     },
     "dry-lake": {
       "credit": "NASA Worldview, MODIS Terra",
       "licence": "Open, with attribution to NASA",
       "url": "https://worldview.earthdata.nasa.gov/",
-      "note": "Le lac à sec, croûte de sel : téléchargée par tools/fetch_figures.py",
-      "file": "figures/dry-lake.jpg",
-      "date": "2024-09-15"
+      "note": "Le lac à sec, croûte de sel : téléchargée par tools/fetch_figures.py"
     },
     "channel-country-dry": {
       "credit": "NASA Worldview, MODIS Terra",
       "licence": "Open, with attribution to NASA",
       "url": "https://worldview.earthdata.nasa.gov/",
-      "note": "La Channel Country à sec : téléchargée par tools/fetch_figures.py",
-      "file": "figures/channel-country-dry.jpg",
-      "date": "2024-09-15"
+      "note": "La Channel Country à sec : téléchargée par tools/fetch_figures.py"
     },
     "mound-spring": {
       "credit": "",

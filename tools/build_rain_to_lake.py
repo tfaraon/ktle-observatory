@@ -14,7 +14,7 @@ jour ; le reste est du texte reference.
 import refbuild
 
 REFS = dict(refbuild.shared_refs([
-    "badman1991a", "knighton1994", "costelloe2003", "rai2026b",
+    "badman1991a", "knighton1994", "costelloe2003", "rai2026b", "kotwicki1986",
 ]))
 REFS["faraon2026"] = (
     "Faraon et al. in preparation", "Faraon et al. (in preparation)",
@@ -34,6 +34,12 @@ SECTIONS = [
 "to infiltration and evaporation, and arrives attenuated and late {c:knighton1994,costelloe2003}. Cooper Creek, "
 "the largest of the rivers, reached the lake only eleven times between 1890 and 1991 for this reason: the lakes "
 "and swamps of its lower course must fill before anything flows on {c:badman1991a}.",
+"What any of this measures deserves a caution, and {n:kotwicki1986} gave it plainly for the 1974 flood: the "
+"four gauging stations on the Cooper, the Diamantina, the Georgina and the Burke between them watch only 40% "
+"of the basin, much of the water they record never reaches the lake, and what they do record is itself "
+"underestimated, because the flood advances on a front several kilometres wide of which a gauge sees only "
+"part. In 1974 those stations recorded 24.9&nbsp;km&sup3; while the inflow to the lake was put at "
+"34.2&nbsp;km&sup3; {c:kotwicki1986}.",
 "This site measures the journey at three points. Rainfall over the whole basin comes from the SILO grids, "
 "updated daily. Flow comes from the river gauges still operating, read from Water Data Online. The level of "
 "the lake itself comes from the SWOT satellite at Belt Bay. Each is shown on its own page; here they are put "

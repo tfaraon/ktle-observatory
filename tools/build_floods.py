@@ -59,14 +59,28 @@ STRIP,
 "local rivers {c:badman1991a}. The Goyder Channel carried water from the northern lake to the southern, and "
 "boats reached the lake in numbers for the first time {c:leycboat}. Shorelines at or near that level show that "
 "such fillings belong to the lake&rsquo;s ordinary behaviour rather than to accident {c:habeck2014}.",
+"{n:kotwicki1986} set out the full balance of that filling. Between January 1974 and June 1976 the lake took in "
+"38&nbsp;km&sup3; from the Diamantina system, 2&nbsp;km&sup3; from the Cooper, 8&nbsp;km&sup3; from the local "
+"rivers and another 8&nbsp;km&sup3; as rain falling directly on its surface, 56&nbsp;km&sup3; in all, against "
+"39.5&nbsp;km&sup3; lost to evaporation, leaving 16.5&nbsp;km&sup3; in June 1976. The Goyder Channel began to "
+"flow on 19 March 1974 and ran until October, when the two lakes settled at the same level of "
+"&minus;9.5&nbsp;m. The salt crust went the same way as the water: dissolved in Jackboot Bay by September "
+"1974, in Belt Bay by August 1975, and in the thickest part of Madigan Gulf by the end of that year, so that "
+"by early 1976 no crust remained and the brine of Madigan Gulf had concentrated to 57&nbsp;g of salt a "
+"kilogram {c:kotwicki1986}.",
 ]),
 ("1984", "fl-1984", [
-"Two accounts of 1984 survive, and they differ. The Lake Eyre Yacht Club records local rain filling Lake Eyre "
-"South, which then overflowed northward through the Goyder Channel to fill Lake Eyre North to 3.5&nbsp;m, the "
-"first time Europeans had seen the channel run from south to north {c:leycboat}. {n:badman1991a} attributed the "
-"same filling to the western rivers alone, the Macumba, the Neales, Peake Creek and Douglas Creek, after up to "
-"375&nbsp;mm of rain fell over their catchments in about a week. Both agree that the water came from the south "
-"and west rather than from Queensland.",
+"January 1984 was extraordinary in a way that has nothing to do with its size. {n:kotwicki1986}, who devoted a "
+"chapter of his study to it, judged it so for two reasons: for the first time on record Lake Eyre South filled "
+"independently and overflowed into Lake Eyre North, an event that had been regarded as obviously impossible, "
+"and both lakes filled in a matter of days from rain that fell on or near them rather than from any river. The "
+"rain came from a tropical depression that formed in the north-west of the continent on 9 and 10 January and "
+"tracked slowly south-east across northern South Australia; the Frome, ten kilometres south of Marree, cut the "
+"road and the old railway line {c:kotwicki1986}. The Lake Eyre Yacht Club records the same sequence, the "
+"channel running from south to north for the first time Europeans had seen, and Lake Eyre North filling to "
+"3.5&nbsp;m {c:leycboat}. {n:badman1991a} gave a different account, attributing the filling to the western "
+"rivers alone after up to 375&nbsp;mm of rain fell over their catchments in about a week; the two records made "
+"at the time of the event agree against him.",
 ]),
 ("1989", "fl-1989", [
 "Local rain again filled Lake Eyre South, which overflowed north and brought Lake Eyre North to 3.0&nbsp;m "
