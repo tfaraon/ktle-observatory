@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-09-23T23:06:46Z",
+ "fetched_at": "2026-09-24T23:24:20Z",
  "demo": false,
  "stale": false,
  "errors": [],
@@ -14,8 +14,8 @@
  },
  "attribution": "Observations and photos from iNaturalist, each photo under the licence chosen by its observer.",
  "totals": {
-  "observations": 2624,
-  "species": 579,
+  "observations": 2627,
+  "species": 581,
   "observers": 297
  },
  "top_species": 12,
@@ -124,14 +124,14 @@
    "id": 402438478,
    "url": "https://www.inaturalist.org/observations/402438478",
    "observed_on": "2026-09-16",
-   "quality": "needs_id",
+   "quality": "research",
    "taxon": {
-    "name": "Calidris",
-    "common": "Calidris Sandpipers",
-    "rank": "genus",
+    "name": "Calidris acuminata",
+    "common": "Sharp-tailed Sandpiper",
+    "rank": "species",
     "group": "Aves"
    },
-   "guess": "Bécasseaux",
+   "guess": "Bécasseau à queue pointue",
    "observer": "thomas64548",
    "obscured": false,
    "coords": [
@@ -521,28 +521,28 @@
    }
   },
   {
-   "id": 399830336,
-   "url": "https://www.inaturalist.org/observations/399830336",
-   "observed_on": "2026-09-07",
-   "quality": "needs_id",
+   "id": 402927178,
+   "url": "https://www.inaturalist.org/observations/402927178",
+   "observed_on": "2026-09-08",
+   "quality": "research",
    "taxon": {
-    "name": "Gunniopsis kochii",
-    "common": null,
+    "name": "Hypolimnas bolina",
+    "common": "Great Eggfly",
     "rank": "species",
-    "group": "Plantae"
+    "group": "Insecta"
    },
-   "guess": "Gunniopsis kochii",
-   "observer": "kateecrow",
+   "guess": "Varied Eggfly",
+   "observer": "willsy65",
    "obscured": false,
    "coords": [
-    -29.4844,
-    137.1804
+    -29.5993,
+    137.3556
    ],
    "photo": {
-    "square": "https://inaturalist-open-data.s3.amazonaws.com/photos/733615372/square.jpg",
-    "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/733615372/medium.jpg",
+    "square": "https://inaturalist-open-data.s3.amazonaws.com/photos/739739475/square.jpg",
+    "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/739739475/medium.jpg",
     "license": "CC-BY-NC",
-    "attribution": "(c) kateecrow, some rights reserved (CC BY-NC)"
+    "attribution": "(c) willsy65, some rights reserved (CC BY-NC)"
    }
   }
  ],
@@ -1235,10 +1235,10 @@
     "group": "Aves"
    },
    "photo": {
-    "square": "https://inaturalist-open-data.s3.amazonaws.com/photos/220886176/square.jpg",
-    "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/220886176/medium.jpg",
+    "square": "https://inaturalist-open-data.s3.amazonaws.com/photos/214297918/square.jpeg",
+    "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/214297918/medium.jpeg",
     "license": "CC-BY-NC",
-    "attribution": "(c) Greg West, some rights reserved (CC BY-NC), uploaded by Greg West"
+    "attribution": "(c) jpshahady, algunos derechos reservados (CC BY-NC)"
    }
   },
   {
@@ -2181,23 +2181,6 @@
    }
   },
   {
-   "count": 6,
-   "taxon_id": 1115587,
-   "url": "https://www.inaturalist.org/taxa/1115587",
-   "taxon": {
-    "name": "Trianthema triquetrum",
-    "common": "Red Spinach",
-    "rank": "species",
-    "group": "Plantae"
-   },
-   "photo": {
-    "square": "https://inaturalist-open-data.s3.amazonaws.com/photos/86721697/square.jpeg",
-    "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/86721697/medium.jpeg",
-    "license": "CC-BY-NC",
-    "attribution": "(c) John Eichler, some rights reserved (CC BY-NC), uploaded by John Eichler"
-   }
-  },
-  {
    "count": 5,
    "taxon_id": 108,
    "url": "https://www.inaturalist.org/taxa/108",
@@ -2607,6 +2590,23 @@
   },
   {
    "count": 5,
+   "taxon_id": 1115587,
+   "url": "https://www.inaturalist.org/taxa/1115587",
+   "taxon": {
+    "name": "Trianthema triquetrum",
+    "common": "Red Spinach",
+    "rank": "species",
+    "group": "Plantae"
+   },
+   "photo": {
+    "square": "https://inaturalist-open-data.s3.amazonaws.com/photos/86721697/square.jpeg",
+    "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/86721697/medium.jpeg",
+    "license": "CC-BY-NC",
+    "attribution": "(c) John Eichler, some rights reserved (CC BY-NC), uploaded by John Eichler"
+   }
+  },
+  {
+   "count": 5,
    "taxon_id": 1458641,
    "url": "https://www.inaturalist.org/taxa/1458641",
    "taxon": {
@@ -2804,6 +2804,23 @@
     "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/102016482/medium.jpg",
     "license": "CC-BY",
     "attribution": "(c) dhfischer, some rights reserved (CC BY), uploaded by dhfischer"
+   }
+  },
+  {
+   "count": 4,
+   "taxon_id": 51583,
+   "url": "https://www.inaturalist.org/taxa/51583",
+   "taxon": {
+    "name": "Papilio demoleus",
+    "common": "Lime Swallowtail",
+    "rank": "species",
+    "group": "Insecta"
+   },
+   "photo": {
+    "square": "https://inaturalist-open-data.s3.amazonaws.com/photos/735164115/square.jpg",
+    "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/735164115/medium.jpg",
+    "license": "CC-BY-NC",
+    "attribution": "(c) Jordan H, some rights reserved (CC BY-NC), uploaded by Jordan H"
    }
   },
   {
@@ -3374,23 +3391,6 @@
     "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/520690657/medium.jpg",
     "license": "CC-BY-NC",
     "attribution": "(c) jitensha2021, some rights reserved (CC BY-NC)"
-   }
-  },
-  {
-   "count": 3,
-   "taxon_id": 51583,
-   "url": "https://www.inaturalist.org/taxa/51583",
-   "taxon": {
-    "name": "Papilio demoleus",
-    "common": "Lime Swallowtail",
-    "rank": "species",
-    "group": "Insecta"
-   },
-   "photo": {
-    "square": "https://inaturalist-open-data.s3.amazonaws.com/photos/735164115/square.jpg",
-    "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/735164115/medium.jpg",
-    "license": "CC-BY-NC",
-    "attribution": "(c) Jordan H, some rights reserved (CC BY-NC), uploaded by Jordan H"
    }
   },
   {
@@ -4046,6 +4046,23 @@
     "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/101675446/medium.jpeg",
     "license": "CC-BY",
     "attribution": "(c) Tim, some rights reserved (CC BY), uploaded by Tim"
+   }
+  },
+  {
+   "count": 2,
+   "taxon_id": 3844,
+   "url": "https://www.inaturalist.org/taxa/3844",
+   "taxon": {
+    "name": "Calidris acuminata",
+    "common": "Sharp-tailed Sandpiper",
+    "rank": "species",
+    "group": "Aves"
+   },
+   "photo": {
+    "square": "https://inaturalist-open-data.s3.amazonaws.com/photos/447383422/square.jpg",
+    "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/447383422/medium.jpg",
+    "license": "CC-BY-NC",
+    "attribution": "(c) Samuel Amaris, some rights reserved (CC BY-NC), uploaded by Samuel Amaris"
    }
   },
   {
@@ -5438,23 +5455,6 @@
     "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/331073598/medium.jpg",
     "license": "CC-BY-NC",
     "attribution": "(c) Gunter Maywald, some rights reserved (CC BY-NC), uploaded by Gunter Maywald"
-   }
-  },
-  {
-   "count": 2,
-   "taxon_id": 1126607,
-   "url": "https://www.inaturalist.org/taxa/1126607",
-   "taxon": {
-    "name": "Dissocarpus fontinalis",
-    "common": null,
-    "rank": "species",
-    "group": "Plantae"
-   },
-   "photo": {
-    "square": "https://inaturalist-open-data.s3.amazonaws.com/photos/151985644/square.jpeg",
-    "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/151985644/medium.jpeg",
-    "license": "CC-BY-NC-SA",
-    "attribution": "(c) Arthur Chapman, some rights reserved (CC BY-NC-SA), uploaded by Arthur Chapman"
    }
   }
  ]
