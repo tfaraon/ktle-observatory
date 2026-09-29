@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-09-27T23:22:21Z",
+ "fetched_at": "2026-09-29T00:30:45Z",
  "demo": false,
  "stale": false,
  "errors": [],
@@ -2216,7 +2216,7 @@
     "square": "https://inaturalist-open-data.s3.amazonaws.com/photos/105669156/square.jpg",
     "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/105669156/medium.jpg",
     "license": "CC-BY-NC",
-    "attribution": "(c) Steve Dew, algunos derechos reservados (CC BY-NC), subido por Steve Dew"
+    "attribution": "(c) Steve Dew, some rights reserved (CC BY-NC), uploaded by Steve Dew"
    }
   },
   {
@@ -3024,7 +3024,7 @@
     "square": "https://inaturalist-open-data.s3.amazonaws.com/photos/2836373/square.JPG",
     "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/2836373/medium.JPG",
     "license": "CC-BY-SA",
-    "attribution": "(c) Colin Meurk，保留部分权利（CC BY-SA）, 由 Colin Meurk 上传"
+    "attribution": "(c) Colin Meurk, some rights reserved (CC BY-SA), uploaded by Colin Meurk"
    }
   },
   {
