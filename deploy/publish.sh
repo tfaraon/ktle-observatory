@@ -95,8 +95,16 @@ fi
 # ── Commit ──────────────────────────────────────────────────
 # Le pilote « ours » de .gitattributes doit etre declare une fois par
 # depot ; sans lui, Git ignore la regle et le conflit revient.
-git config --get merge.ours.driver >/dev/null 2>&1 || \
-  git config merge.ours.driver true
+# Le resolveur est mis a l'abri : pendant un rebase, l'arbre de travail
+# est celui du commit rejoue, ou ce fichier peut ne pas exister encore.
+RESOLVER="$(mktemp -t ktle-resolve)"
+cp deploy/resolve_conflicts.sh "$RESOLVER" 2>/dev/null && chmod +x "$RESOLVER"
+trap 'rm -f "$RESOLVER"' EXIT
+
+# Donnees regenerables : on garde la version calculee par ce passage
+# plutot que de fusionner. Pendant un rebase, %B est le commit rejoue.
+git config --get merge.keepnew.driver >/dev/null 2>&1 || \
+  git config merge.keepnew.driver 'cp -f %B %A'
 
 git add -A
 if git diff --cached --quiet; then
@@ -119,7 +127,14 @@ fi
 
 # Le workflow météo pousse sur main toutes les heures : on rejoue
 # par-dessus plutot que d'echouer sur un rejet.
-git pull --rebase --autostash
+if ! git pull --rebase --autostash; then
+  # Conflit de donnees entre cette machine et le workflow GitHub : la
+  # version calculee ici est gardee, le reste revient a l'utilisateur.
+  "$RESOLVER" || {
+    echo "Publication interrompue : dépôt laissé en l'état pour inspection."
+    exit 1
+  }
+fi
 git push
 echo
 echo "Publié. Le workflow « Deploy site » démarre si site/ a changé."

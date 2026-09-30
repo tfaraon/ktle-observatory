@@ -115,6 +115,16 @@ with tempfile.TemporaryDirectory() as td:
     r = sh("./update.sh --no-push < /dev/null", work, env, check=False)
     assert r.returncode == 0 and "--no-publish" in args() and remote_head() == before
     assert "Site    :" not in r.stdout
+    # ── Dépôt en tête détachée : arrêt immédiat, avant tout calcul ──
+    (work / "refresh_args.txt").unlink(missing_ok=True)
+    head = sh("git rev-parse HEAD", work).stdout.strip()
+    sh(f"git checkout -q {head}", work)                 # tête détachée, comme après un rebase interrompu
+    r = sh("./update.sh -y < /dev/null", work, env, check=False)
+    assert r.returncode == 1 and "pas sur une branche" in r.stdout, r.stdout
+    assert "git reset --hard origin/main" in r.stdout, "la marche à suivre est donnée"
+    assert not (work / "refresh_args.txt").exists(), "aucun calcul lancé"
+    sh("git checkout -q main 2>/dev/null || git checkout -q master", work)
+
     # ── Poussée manquée : le commit prêt est envoyé au lieu d'être abandonné ──
     stub = work / "deploy" / "refresh.sh"
     stub.write_text(STUB_REFRESH.replace('git add -A && git commit -qm "$2" && git push -q origin HEAD 2>/dev/null',
@@ -135,6 +145,7 @@ with tempfile.TemporaryDirectory() as td:
     srv.shutdown()
 
 print("OK — aide, arrêt sans publier si personne ne confirme, publication vérifiée en ligne, "
-      "mode rapide sans disque SWOT, --no-push, poussée manquée rattrapée, dépôt injoignable "
+      "mode rapide sans disque SWOT, --no-push, tête détachée détectée avant tout calcul, "
+      "poussée manquée rattrapée, dépôt injoignable "
       "expliqué, réglages locaux lus "
       "et jamais versionnés, journal.")

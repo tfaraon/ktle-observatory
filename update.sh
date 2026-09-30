@@ -46,7 +46,7 @@ SITE_URL="${SITE_URL%/}/"
 
 # Fichiers locaux jamais versionnes
 touch .gitignore
-for pattern in "deploy/local.env" "logs/"; do
+for pattern in "deploy/local.env" "logs/" "data/rain_cache/"; do
   grep -qxF "$pattern" .gitignore || echo "$pattern" >> .gitignore
 done
 
@@ -89,6 +89,26 @@ fi
 
 # ── Depot : acces et modifications en attente ───────────────
 [ -d .git ] || fail "pas de dépôt Git dans $ROOT"
+
+# Un rebase interrompu laisse le dépôt en tête détachée : tout commit y est
+# alors hors branche et ne peut pas être poussé. Le vérifier ici évite de
+# calculer plusieurs minutes pour rien.
+BRANCH="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo HEAD)"
+GITDIR="$(git rev-parse --git-dir 2>/dev/null || echo .git)"
+if [ "$BRANCH" = "HEAD" ] || [ -d "$GITDIR/rebase-merge" ] || [ -d "$GITDIR/rebase-apply" ] \
+   || [ -f "$GITDIR/MERGE_HEAD" ] || [ -n "$(git diff --name-only --diff-filter=U)" ]; then
+  echo "Le dépôt n'est pas sur une branche, ou une opération Git est en cours."
+  echo "Rien n'a été calculé. Pour repartir d'un état propre :"
+  echo
+  echo "    git rebase --abort 2>/dev/null || git merge --abort 2>/dev/null || true"
+  echo "    git checkout main"
+  echo "    git fetch origin && git reset --hard origin/main"
+  echo "    unzip -o ~/Downloads/lake-eyre-update.zip   # réinstalle le code"
+  echo "    git add -A && git commit -m \"Publication fixes\" && git push"
+  echo
+  echo "Les données perdues ainsi sont recalculées au prochain ./update.sh."
+  fail "état du dépôt à réparer"
+fi
 if [ "$PUSH" -eq 1 ]; then
   # La cle SSH est chargee maintenant, au besoin : sinon sa phrase secrete
   # est demandee en plein travail, et une publication peut echouer dix

@@ -237,6 +237,52 @@ licences, and how to cite the site. `tools/make_share_image.py` writes
 If the site changes address, update the three absolute URLs in the meta tags
 of `index.html`.
 
+### Keeping the site current without doing anything
+
+Two layers share the work. The GitHub workflows refresh the weather every
+hour, and eBird, iNaturalist, the basin rainfall and the river gauges every
+day, with no machine of yours involved. Everything that reads the SWOT disk,
+that is the satellite levels, the water area and the water extent, needs this
+computer, and `deploy/install_schedule.sh` schedules it:
+
+```bash
+./deploy/install_schedule.sh              # every day at 09:15
+./deploy/install_schedule.sh --hour 7     # at another time
+./deploy/install_schedule.sh --status     # is it running, and what did it say
+./deploy/install_schedule.sh --run        # run it now
+./deploy/install_schedule.sh --uninstall
+```
+
+The task calls `./update.sh -y`, which computes, publishes and checks that the
+update is online; its output goes to `logs/schedule.log`. If the SWOT disk is
+not mounted it skips SWOT and the water area and updates the rest. If the Mac
+is asleep at that hour, launchd runs the task when it wakes. For the
+publication to need no typing, load the SSH key into the keychain once
+(`ssh-add --apple-use-keychain ~/.ssh/id_ed25519`) and set `UseKeychain yes` in
+`~/.ssh/config`.
+
+### If a publication is ever interrupted
+
+An interrupted rebase leaves the repository on no branch at all, and every
+commit made afterwards is stranded there. `update.sh` checks for that before
+computing anything and prints the way back, which is to abort the operation,
+return to `main`, reset it to `origin/main`, reinstall the code and publish
+again. Nothing of value is lost: the data are recomputed on the next run.
+
+### When this machine and GitHub Actions compute the same day
+
+Both refresh the same files, and Git cannot merge two PNG maps. The data paths
+are therefore declared in `.gitattributes` to be replaced rather than merged,
+by a `keepnew` driver that `deploy/publish.sh` configures on first use and that
+keeps the version this run has just computed. Note that the `binary` macro
+unsets `merge`, so it must never follow `merge=keepnew` on the same line: that
+mistake is what once left a publication stuck mid-rebase, and
+`tests/test_publish_conflict.py` now replays the case.
+
+Should a conflict still arise, `deploy/resolve_conflicts.sh` finishes the
+rebase when only `site/data` is involved, and hands anything else back to you
+untouched.
+
 ### One-command update from this machine
 
 ```bash

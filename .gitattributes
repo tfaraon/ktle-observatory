@@ -3,13 +3,17 @@
 # lieu de tenter une fusion ligne a ligne, qui n'a aucun sens sur du
 # JSON de donnees.
 #
-# Necessite, une fois :  git config merge.ours.driver true
-site/data/weather.json    merge=ours
-site/data/swot_wse.json   merge=ours
-site/data/lake_area.json  merge=ours
-site/data/water_extent.json  merge=ours
-site/data/ebird.json      merge=ours
-site/data/inaturalist.json  merge=ours
-site/data/rainfall.json    merge=ours
-site/data/rivers.json      merge=ours
-site/data/rain_maps/*.png  merge=ours binary
+# La regle garde la version qui vient d'etre calculee : pendant un
+# rebase, c'est celle du commit rejoue. deploy/publish.sh declare le
+# pilote « keepnew » automatiquement.
+site/data/weather.json    merge=keepnew
+site/data/swot_wse.json   merge=keepnew
+site/data/lake_area.json  merge=keepnew
+site/data/water_extent.json  merge=keepnew
+site/data/ebird.json      merge=keepnew
+site/data/inaturalist.json  merge=keepnew
+site/data/rainfall.json    merge=keepnew
+site/data/rivers.json      merge=keepnew
+# Attention : la macro « binary » desactive la fusion et annulerait
+# merge=keepnew ; on pose donc ses effets utiles un par un.
+site/data/rain_maps/*.png  -diff -text merge=keepnew
