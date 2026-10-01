@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-09-30T23:29:41Z",
+ "fetched_at": "2026-10-01T23:32:16Z",
  "demo": false,
  "stale": false,
  "partial": false,
@@ -95,6 +95,176 @@
   -27.5
  ],
  "hotspots": [
+  {
+   "locId": "L2553197",
+   "name": "Marree",
+   "lat": -29.64807,
+   "lng": 138.06724,
+   "latestObsDt": "2026-10-01 16:41",
+   "numSpeciesAllTime": 80,
+   "recent": [
+    {
+     "speciesCode": "crepig1",
+     "comName": "Crested Pigeon",
+     "sciName": "Ocyphaps lophotes",
+     "obsDt": "2026-10-01 16:41",
+     "howMany": 2,
+     "indicator": false
+    },
+    {
+     "speciesCode": "blakit1",
+     "comName": "Black Kite",
+     "sciName": "Milvus migrans",
+     "obsDt": "2026-10-01 16:41",
+     "howMany": 1,
+     "indicator": false
+    },
+    {
+     "speciesCode": "whikit1",
+     "comName": "Whistling Kite",
+     "sciName": "Haliastur sphenurus",
+     "obsDt": "2026-10-01 16:41",
+     "howMany": 1,
+     "indicator": false
+    },
+    {
+     "speciesCode": "rebkin2",
+     "comName": "Red-backed Kingfisher",
+     "sciName": "Todiramphus pyrrhopygius",
+     "obsDt": "2026-10-01 16:41",
+     "howMany": 1,
+     "indicator": false
+    },
+    {
+     "speciesCode": "auskes1",
+     "comName": "Nankeen Kestrel",
+     "sciName": "Falco cenchroides",
+     "obsDt": "2026-10-01 16:41",
+     "howMany": 2,
+     "indicator": false
+    },
+    {
+     "speciesCode": "galah",
+     "comName": "Galah",
+     "sciName": "Eolophus roseicapilla",
+     "obsDt": "2026-10-01 16:41",
+     "howMany": 2,
+     "indicator": false
+    },
+    {
+     "speciesCode": "whwfai1",
+     "comName": "White-winged Fairywren",
+     "sciName": "Malurus leucopterus",
+     "obsDt": "2026-10-01 16:41",
+     "howMany": 3,
+     "indicator": false
+    },
+    {
+     "speciesCode": "sinhon1",
+     "comName": "Singing Honeyeater",
+     "sciName": "Gavicalis virescens",
+     "obsDt": "2026-10-01 16:41",
+     "howMany": 1,
+     "indicator": false
+    },
+    {
+     "speciesCode": "whphon1",
+     "comName": "White-plumed Honeyeater",
+     "sciName": "Ptilotula penicillata",
+     "obsDt": "2026-10-01 16:41",
+     "howMany": 1,
+     "indicator": false
+    },
+    {
+     "speciesCode": "whbwoo4",
+     "comName": "White-breasted Woodswallow",
+     "sciName": "Artamus leucorynchus",
+     "obsDt": "2026-10-01 16:41",
+     "howMany": 1,
+     "indicator": false
+    },
+    {
+     "speciesCode": "blfwoo1",
+     "comName": "Black-faced Woodswallow",
+     "sciName": "Artamus cinereus",
+     "obsDt": "2026-10-01 16:41",
+     "howMany": 5,
+     "indicator": false
+    },
+    {
+     "speciesCode": "rufson1",
+     "comName": "Rufous Songlark",
+     "sciName": "Cincloramphus mathewsi",
+     "obsDt": "2026-10-01 16:41",
+     "howMany": 1,
+     "indicator": false
+    },
+    {
+     "speciesCode": "welswa1",
+     "comName": "Welcome Swallow",
+     "sciName": "Hirundo neoxena",
+     "obsDt": "2026-10-01 16:41",
+     "howMany": 1,
+     "indicator": false
+    },
+    {
+     "speciesCode": "tremar2",
+     "comName": "Tree Martin",
+     "sciName": "Petrochelidon nigricans",
+     "obsDt": "2026-10-01 16:41",
+     "howMany": 9,
+     "indicator": false
+    },
+    {
+     "speciesCode": "houspa",
+     "comName": "House Sparrow",
+     "sciName": "Passer domesticus",
+     "obsDt": "2026-10-01 16:41",
+     "howMany": 4,
+     "indicator": false
+    },
+    {
+     "speciesCode": "wilwag1",
+     "comName": "Willie-wagtail",
+     "sciName": "Rhipidura leucophrys",
+     "obsDt": "2026-09-12 15:08",
+     "howMany": 1,
+     "indicator": false
+    },
+    {
+     "speciesCode": "maglar1",
+     "comName": "Magpie-lark",
+     "sciName": "Grallina cyanoleuca",
+     "obsDt": "2026-09-11 07:09",
+     "howMany": 2,
+     "indicator": false
+    },
+    {
+     "speciesCode": "broson1",
+     "comName": "Brown Songlark",
+     "sciName": "Cincloramphus cruralis",
+     "obsDt": "2026-09-11 07:09",
+     "howMany": 1,
+     "indicator": false
+    },
+    {
+     "speciesCode": "faimar2",
+     "comName": "Fairy Martin",
+     "sciName": "Petrochelidon ariel",
+     "obsDt": "2026-09-11 07:09",
+     "howMany": 3,
+     "indicator": false
+    },
+    {
+     "speciesCode": "zebfin2",
+     "comName": "Zebra Finch",
+     "sciName": "Taeniopygia guttata",
+     "obsDt": "2026-09-11 07:09",
+     "howMany": 2,
+     "indicator": false
+    }
+   ]
+  },
   {
    "locId": "L2364082",
    "name": "Lake Eyre South Lookout",
@@ -1412,144 +1582,6 @@
    ]
   },
   {
-   "locId": "L2553197",
-   "name": "Marree",
-   "lat": -29.64807,
-   "lng": 138.06724,
-   "latestObsDt": "2026-09-12 15:08",
-   "numSpeciesAllTime": 80,
-   "recent": [
-    {
-     "speciesCode": "crepig1",
-     "comName": "Crested Pigeon",
-     "sciName": "Ocyphaps lophotes",
-     "obsDt": "2026-09-12 15:08",
-     "howMany": 1,
-     "indicator": false
-    },
-    {
-     "speciesCode": "blakit1",
-     "comName": "Black Kite",
-     "sciName": "Milvus migrans",
-     "obsDt": "2026-09-12 15:08",
-     "howMany": 5,
-     "indicator": false
-    },
-    {
-     "speciesCode": "wilwag1",
-     "comName": "Willie-wagtail",
-     "sciName": "Rhipidura leucophrys",
-     "obsDt": "2026-09-12 15:08",
-     "howMany": 1,
-     "indicator": false
-    },
-    {
-     "speciesCode": "auskes1",
-     "comName": "Nankeen Kestrel",
-     "sciName": "Falco cenchroides",
-     "obsDt": "2026-09-11 07:09",
-     "howMany": 2,
-     "indicator": false
-    },
-    {
-     "speciesCode": "galah",
-     "comName": "Galah",
-     "sciName": "Eolophus roseicapilla",
-     "obsDt": "2026-09-11 07:09",
-     "howMany": 2,
-     "indicator": false
-    },
-    {
-     "speciesCode": "sinhon1",
-     "comName": "Singing Honeyeater",
-     "sciName": "Gavicalis virescens",
-     "obsDt": "2026-09-11 07:09",
-     "howMany": 2,
-     "indicator": false
-    },
-    {
-     "speciesCode": "whphon1",
-     "comName": "White-plumed Honeyeater",
-     "sciName": "Ptilotula penicillata",
-     "obsDt": "2026-09-11 07:09",
-     "howMany": 1,
-     "indicator": false
-    },
-    {
-     "speciesCode": "blfwoo1",
-     "comName": "Black-faced Woodswallow",
-     "sciName": "Artamus cinereus",
-     "obsDt": "2026-09-11 07:09",
-     "howMany": 2,
-     "indicator": false
-    },
-    {
-     "speciesCode": "maglar1",
-     "comName": "Magpie-lark",
-     "sciName": "Grallina cyanoleuca",
-     "obsDt": "2026-09-11 07:09",
-     "howMany": 2,
-     "indicator": false
-    },
-    {
-     "speciesCode": "broson1",
-     "comName": "Brown Songlark",
-     "sciName": "Cincloramphus cruralis",
-     "obsDt": "2026-09-11 07:09",
-     "howMany": 1,
-     "indicator": false
-    },
-    {
-     "speciesCode": "rufson1",
-     "comName": "Rufous Songlark",
-     "sciName": "Cincloramphus mathewsi",
-     "obsDt": "2026-09-11 07:09",
-     "howMany": 4,
-     "indicator": false
-    },
-    {
-     "speciesCode": "faimar2",
-     "comName": "Fairy Martin",
-     "sciName": "Petrochelidon ariel",
-     "obsDt": "2026-09-11 07:09",
-     "howMany": 3,
-     "indicator": false
-    },
-    {
-     "speciesCode": "zebfin2",
-     "comName": "Zebra Finch",
-     "sciName": "Taeniopygia guttata",
-     "obsDt": "2026-09-11 07:09",
-     "howMany": 2,
-     "indicator": false
-    },
-    {
-     "speciesCode": "houspa",
-     "comName": "House Sparrow",
-     "sciName": "Passer domesticus",
-     "obsDt": "2026-09-11 07:09",
-     "howMany": 20,
-     "indicator": false
-    },
-    {
-     "speciesCode": "whbwoo4",
-     "comName": "White-breasted Woodswallow",
-     "sciName": "Artamus leucorynchus",
-     "obsDt": "2026-09-10 17:26",
-     "howMany": 2,
-     "indicator": false
-    },
-    {
-     "speciesCode": "tremar2",
-     "comName": "Tree Martin",
-     "sciName": "Petrochelidon nigricans",
-     "obsDt": "2026-09-10 17:26",
-     "howMany": 6,
-     "indicator": false
-    }
-   ]
-  },
-  {
    "locId": "L2554003",
    "name": "Wabma Kadarbu Mound Springs Conservation Park",
    "lat": -29.45223,
@@ -1643,14 +1675,6 @@
      "sciName": "Anas gracilis",
      "obsDt": "2026-09-08 07:40",
      "howMany": 20,
-     "indicator": false
-    },
-    {
-     "speciesCode": "auspra1",
-     "comName": "Australian Pratincole",
-     "sciName": "Glareola isabella",
-     "obsDt": "2026-09-01 15:16",
-     "howMany": 2,
      "indicator": false
     }
    ]
@@ -2839,7 +2863,7 @@
    "recent": []
   }
  ],
- "n_species": 97,
+ "n_species": 96,
  "indicators": [
   {
    "sciName": "Cladorhynchus leucocephalus",
@@ -2873,6 +2897,246 @@
   }
  ],
  "species": [
+  {
+   "speciesCode": "whwfai1",
+   "comName": "White-winged Fairywren",
+   "sciName": "Malurus leucopterus",
+   "howMany": 3,
+   "obsDt": "2026-10-01 16:41",
+   "locId": "L2553197",
+   "locName": "Marree",
+   "lat": -29.64807,
+   "lng": 138.06724,
+   "obsValid": true,
+   "obsReviewed": false,
+   "locationPrivate": false,
+   "notable": false,
+   "indicator": false
+  },
+  {
+   "speciesCode": "rufson1",
+   "comName": "Rufous Songlark",
+   "sciName": "Cincloramphus mathewsi",
+   "howMany": 1,
+   "obsDt": "2026-10-01 16:41",
+   "locId": "L2553197",
+   "locName": "Marree",
+   "lat": -29.64807,
+   "lng": 138.06724,
+   "obsValid": true,
+   "obsReviewed": false,
+   "locationPrivate": false,
+   "notable": false,
+   "indicator": false
+  },
+  {
+   "speciesCode": "crepig1",
+   "comName": "Crested Pigeon",
+   "sciName": "Ocyphaps lophotes",
+   "howMany": 2,
+   "obsDt": "2026-10-01 16:41",
+   "locId": "L2553197",
+   "locName": "Marree",
+   "lat": -29.64807,
+   "lng": 138.06724,
+   "obsValid": true,
+   "obsReviewed": false,
+   "locationPrivate": false,
+   "notable": false,
+   "indicator": false
+  },
+  {
+   "speciesCode": "welswa1",
+   "comName": "Welcome Swallow",
+   "sciName": "Hirundo neoxena",
+   "howMany": 1,
+   "obsDt": "2026-10-01 16:41",
+   "locId": "L2553197",
+   "locName": "Marree",
+   "lat": -29.64807,
+   "lng": 138.06724,
+   "obsValid": true,
+   "obsReviewed": false,
+   "locationPrivate": false,
+   "notable": false,
+   "indicator": false
+  },
+  {
+   "speciesCode": "blfwoo1",
+   "comName": "Black-faced Woodswallow",
+   "sciName": "Artamus cinereus",
+   "howMany": 5,
+   "obsDt": "2026-10-01 16:41",
+   "locId": "L2553197",
+   "locName": "Marree",
+   "lat": -29.64807,
+   "lng": 138.06724,
+   "obsValid": true,
+   "obsReviewed": false,
+   "locationPrivate": false,
+   "notable": false,
+   "indicator": false
+  },
+  {
+   "speciesCode": "tremar2",
+   "comName": "Tree Martin",
+   "sciName": "Petrochelidon nigricans",
+   "howMany": 9,
+   "obsDt": "2026-10-01 16:41",
+   "locId": "L2553197",
+   "locName": "Marree",
+   "lat": -29.64807,
+   "lng": 138.06724,
+   "obsValid": true,
+   "obsReviewed": false,
+   "locationPrivate": false,
+   "notable": false,
+   "indicator": false
+  },
+  {
+   "speciesCode": "sinhon1",
+   "comName": "Singing Honeyeater",
+   "sciName": "Gavicalis virescens",
+   "howMany": 1,
+   "obsDt": "2026-10-01 16:41",
+   "locId": "L2553197",
+   "locName": "Marree",
+   "lat": -29.64807,
+   "lng": 138.06724,
+   "obsValid": true,
+   "obsReviewed": false,
+   "locationPrivate": false,
+   "notable": false,
+   "indicator": false
+  },
+  {
+   "speciesCode": "blakit1",
+   "comName": "Black Kite",
+   "sciName": "Milvus migrans",
+   "howMany": 1,
+   "obsDt": "2026-10-01 16:41",
+   "locId": "L2553197",
+   "locName": "Marree",
+   "lat": -29.64807,
+   "lng": 138.06724,
+   "obsValid": true,
+   "obsReviewed": false,
+   "locationPrivate": false,
+   "notable": false,
+   "indicator": false
+  },
+  {
+   "speciesCode": "galah",
+   "comName": "Galah",
+   "sciName": "Eolophus roseicapilla",
+   "howMany": 2,
+   "obsDt": "2026-10-01 16:41",
+   "locId": "L2553197",
+   "locName": "Marree",
+   "lat": -29.64807,
+   "lng": 138.06724,
+   "obsValid": true,
+   "obsReviewed": false,
+   "locationPrivate": false,
+   "notable": false,
+   "indicator": false
+  },
+  {
+   "speciesCode": "whikit1",
+   "comName": "Whistling Kite",
+   "sciName": "Haliastur sphenurus",
+   "howMany": 1,
+   "obsDt": "2026-10-01 16:41",
+   "locId": "L2553197",
+   "locName": "Marree",
+   "lat": -29.64807,
+   "lng": 138.06724,
+   "obsValid": true,
+   "obsReviewed": false,
+   "locationPrivate": false,
+   "notable": false,
+   "indicator": false
+  },
+  {
+   "speciesCode": "rebkin2",
+   "comName": "Red-backed Kingfisher",
+   "sciName": "Todiramphus pyrrhopygius",
+   "howMany": 1,
+   "obsDt": "2026-10-01 16:41",
+   "locId": "L2553197",
+   "locName": "Marree",
+   "lat": -29.64807,
+   "lng": 138.06724,
+   "obsValid": true,
+   "obsReviewed": false,
+   "locationPrivate": false,
+   "notable": false,
+   "indicator": false
+  },
+  {
+   "speciesCode": "auskes1",
+   "comName": "Nankeen Kestrel",
+   "sciName": "Falco cenchroides",
+   "howMany": 2,
+   "obsDt": "2026-10-01 16:41",
+   "locId": "L2553197",
+   "locName": "Marree",
+   "lat": -29.64807,
+   "lng": 138.06724,
+   "obsValid": true,
+   "obsReviewed": false,
+   "locationPrivate": false,
+   "notable": false,
+   "indicator": false
+  },
+  {
+   "speciesCode": "whphon1",
+   "comName": "White-plumed Honeyeater",
+   "sciName": "Ptilotula penicillata",
+   "howMany": 1,
+   "obsDt": "2026-10-01 16:41",
+   "locId": "L2553197",
+   "locName": "Marree",
+   "lat": -29.64807,
+   "lng": 138.06724,
+   "obsValid": true,
+   "obsReviewed": false,
+   "locationPrivate": false,
+   "notable": false,
+   "indicator": false
+  },
+  {
+   "speciesCode": "whbwoo4",
+   "comName": "White-breasted Woodswallow",
+   "sciName": "Artamus leucorynchus",
+   "howMany": 1,
+   "obsDt": "2026-10-01 16:41",
+   "locId": "L2553197",
+   "locName": "Marree",
+   "lat": -29.64807,
+   "lng": 138.06724,
+   "obsValid": true,
+   "obsReviewed": false,
+   "locationPrivate": false,
+   "notable": false,
+   "indicator": false
+  },
+  {
+   "speciesCode": "houspa",
+   "comName": "House Sparrow",
+   "sciName": "Passer domesticus",
+   "howMany": 4,
+   "obsDt": "2026-10-01 16:41",
+   "locId": "L2553197",
+   "locName": "Marree",
+   "lat": -29.64807,
+   "lng": 138.06724,
+   "obsValid": true,
+   "obsReviewed": false,
+   "locationPrivate": false,
+   "notable": false,
+   "indicator": false
+  },
   {
    "speciesCode": "emu1",
    "comName": "Emu",
@@ -2970,22 +3234,6 @@
    "indicator": false
   },
   {
-   "speciesCode": "whwfai1",
-   "comName": "White-winged Fairywren",
-   "sciName": "Malurus leucopterus",
-   "howMany": 9,
-   "obsDt": "2026-09-28 14:35",
-   "locId": "L2364082",
-   "locName": "Lake Eyre South Lookout",
-   "lat": -29.515,
-   "lng": 137.23639,
-   "obsValid": true,
-   "obsReviewed": false,
-   "locationPrivate": false,
-   "notable": false,
-   "indicator": false
-  },
-  {
    "speciesCode": "oracha1",
    "comName": "Orange Chat",
    "sciName": "Epthianura aurifrons",
@@ -3066,22 +3314,6 @@
    "indicator": false
   },
   {
-   "speciesCode": "crepig1",
-   "comName": "Crested Pigeon",
-   "sciName": "Ocyphaps lophotes",
-   "howMany": 1,
-   "obsDt": "2026-09-27 06:05",
-   "locId": "L2362192",
-   "locName": "William Creek",
-   "lat": -28.9068423,
-   "lng": 136.3388193,
-   "obsValid": true,
-   "obsReviewed": false,
-   "locationPrivate": false,
-   "notable": false,
-   "indicator": false
-  },
-  {
    "speciesCode": "zebfin2",
    "comName": "Zebra Finch",
    "sciName": "Taeniopygia guttata",
@@ -3114,22 +3346,6 @@
    "indicator": false
   },
   {
-   "speciesCode": "welswa1",
-   "comName": "Welcome Swallow",
-   "sciName": "Hirundo neoxena",
-   "howMany": 20,
-   "obsDt": "2026-09-27 06:05",
-   "locId": "L2362192",
-   "locName": "William Creek",
-   "lat": -28.9068423,
-   "lng": 136.3388193,
-   "obsValid": true,
-   "obsReviewed": false,
-   "locationPrivate": false,
-   "notable": false,
-   "indicator": false
-  },
-  {
    "speciesCode": "broson1",
    "comName": "Brown Songlark",
    "sciName": "Cincloramphus cruralis",
@@ -3146,58 +3362,10 @@
    "indicator": false
   },
   {
-   "speciesCode": "blfwoo1",
-   "comName": "Black-faced Woodswallow",
-   "sciName": "Artamus cinereus",
-   "howMany": 2,
-   "obsDt": "2026-09-27 06:05",
-   "locId": "L2362192",
-   "locName": "William Creek",
-   "lat": -28.9068423,
-   "lng": 136.3388193,
-   "obsValid": true,
-   "obsReviewed": false,
-   "locationPrivate": false,
-   "notable": false,
-   "indicator": false
-  },
-  {
-   "speciesCode": "sinhon1",
-   "comName": "Singing Honeyeater",
-   "sciName": "Gavicalis virescens",
-   "howMany": 1,
-   "obsDt": "2026-09-27 06:05",
-   "locId": "L2362192",
-   "locName": "William Creek",
-   "lat": -28.9068423,
-   "lng": 136.3388193,
-   "obsValid": true,
-   "obsReviewed": false,
-   "locationPrivate": false,
-   "notable": false,
-   "indicator": false
-  },
-  {
    "speciesCode": "btnhen1",
    "comName": "Black-tailed Nativehen",
    "sciName": "Tribonyx ventralis",
    "howMany": 1,
-   "obsDt": "2026-09-27 06:05",
-   "locId": "L2362192",
-   "locName": "William Creek",
-   "lat": -28.9068423,
-   "lng": 136.3388193,
-   "obsValid": true,
-   "obsReviewed": false,
-   "locationPrivate": false,
-   "notable": false,
-   "indicator": false
-  },
-  {
-   "speciesCode": "blakit1",
-   "comName": "Black Kite",
-   "sciName": "Milvus migrans",
-   "howMany": 7,
    "obsDt": "2026-09-27 06:05",
    "locId": "L2362192",
    "locName": "William Creek",
@@ -3242,22 +3410,6 @@
    "indicator": false
   },
   {
-   "speciesCode": "galah",
-   "comName": "Galah",
-   "sciName": "Eolophus roseicapilla",
-   "howMany": 20,
-   "obsDt": "2026-09-27 06:05",
-   "locId": "L2362192",
-   "locName": "William Creek",
-   "lat": -28.9068423,
-   "lng": 136.3388193,
-   "obsValid": true,
-   "obsReviewed": false,
-   "locationPrivate": false,
-   "notable": false,
-   "indicator": false
-  },
-  {
    "speciesCode": "varfai1",
    "comName": "Purple-backed Fairywren",
    "sciName": "Malurus assimilis",
@@ -3290,42 +3442,10 @@
    "indicator": false
   },
   {
-   "speciesCode": "houspa",
-   "comName": "House Sparrow",
-   "sciName": "Passer domesticus",
-   "howMany": 4,
-   "obsDt": "2026-09-27 06:05",
-   "locId": "L2362192",
-   "locName": "William Creek",
-   "lat": -28.9068423,
-   "lng": 136.3388193,
-   "obsValid": true,
-   "obsReviewed": false,
-   "locationPrivate": false,
-   "notable": false,
-   "indicator": false
-  },
-  {
    "speciesCode": "faimar2",
    "comName": "Fairy Martin",
    "sciName": "Petrochelidon ariel",
    "howMany": 3,
-   "obsDt": "2026-09-27 06:05",
-   "locId": "L2362192",
-   "locName": "William Creek",
-   "lat": -28.9068423,
-   "lng": 136.3388193,
-   "obsValid": true,
-   "obsReviewed": false,
-   "locationPrivate": false,
-   "notable": false,
-   "indicator": false
-  },
-  {
-   "speciesCode": "whbwoo4",
-   "comName": "White-breasted Woodswallow",
-   "sciName": "Artamus leucorynchus",
-   "howMany": 5,
    "obsDt": "2026-09-27 06:05",
    "locId": "L2362192",
    "locName": "William Creek",
@@ -3358,22 +3478,6 @@
    "comName": "Diamond Dove",
    "sciName": "Geopelia cuneata",
    "howMany": 2,
-   "obsDt": "2026-09-27 06:05",
-   "locId": "L2362192",
-   "locName": "William Creek",
-   "lat": -28.9068423,
-   "lng": 136.3388193,
-   "obsValid": true,
-   "obsReviewed": false,
-   "locationPrivate": false,
-   "notable": false,
-   "indicator": false
-  },
-  {
-   "speciesCode": "whikit1",
-   "comName": "Whistling Kite",
-   "sciName": "Haliastur sphenurus",
-   "howMany": 1,
    "obsDt": "2026-09-27 06:05",
    "locId": "L2362192",
    "locName": "William Creek",
@@ -3455,22 +3559,6 @@
    "sciName": "Cheramoeca leucosterna",
    "howMany": 5,
    "obsDt": "2026-09-27 06:05",
-   "locId": "L2362192",
-   "locName": "William Creek",
-   "lat": -28.9068423,
-   "lng": 136.3388193,
-   "obsValid": true,
-   "obsReviewed": false,
-   "locationPrivate": false,
-   "notable": false,
-   "indicator": false
-  },
-  {
-   "speciesCode": "auskes1",
-   "comName": "Nankeen Kestrel",
-   "sciName": "Falco cenchroides",
-   "howMany": 1,
-   "obsDt": "2026-09-26 16:49",
    "locId": "L2362192",
    "locName": "William Creek",
    "lat": -28.9068423,
@@ -3930,22 +4018,6 @@
    "indicator": false
   },
   {
-   "speciesCode": "whphon1",
-   "comName": "White-plumed Honeyeater",
-   "sciName": "Ptilotula penicillata",
-   "howMany": 2,
-   "obsDt": "2026-09-17 16:00",
-   "locId": "L2554517",
-   "locName": "Muloorina Station",
-   "lat": -29.23907,
-   "lng": 137.90605,
-   "obsValid": true,
-   "obsReviewed": false,
-   "locationPrivate": false,
-   "notable": false,
-   "indicator": false
-  },
-  {
    "speciesCode": "hoorob1",
    "comName": "Hooded Robin",
    "sciName": "Melanodryas cucullata",
@@ -3998,22 +4070,6 @@
    "comName": "Black-fronted Dotterel",
    "sciName": "Thinornis melanops",
    "howMany": 1,
-   "obsDt": "2026-09-15 15:24",
-   "locId": null,
-   "locName": null,
-   "lat": null,
-   "lng": null,
-   "obsValid": true,
-   "obsReviewed": false,
-   "locationPrivate": true,
-   "notable": false,
-   "indicator": false
-  },
-  {
-   "speciesCode": "rufson1",
-   "comName": "Rufous Songlark",
-   "sciName": "Cincloramphus mathewsi",
-   "howMany": 2,
    "obsDt": "2026-09-15 15:24",
    "locId": null,
    "locName": null,
@@ -4122,22 +4178,6 @@
    "indicator": false
   },
   {
-   "speciesCode": "tremar2",
-   "comName": "Tree Martin",
-   "sciName": "Petrochelidon nigricans",
-   "howMany": 1,
-   "obsDt": "2026-09-11 10:19",
-   "locId": "L2554003",
-   "locName": "Wabma Kadarbu Mound Springs Conservation Park",
-   "lat": -29.45223,
-   "lng": 136.86149,
-   "obsValid": true,
-   "obsReviewed": false,
-   "locationPrivate": false,
-   "notable": false,
-   "indicator": false
-  },
-  {
    "speciesCode": "chiwed2",
    "comName": "Chirruping Wedgebill",
    "sciName": "Psophodes cristatus",
@@ -4227,22 +4267,6 @@
    "locName": "Lake Eyre South at -29.47861, 137.17722",
    "lat": -29.47861,
    "lng": 137.17722,
-   "obsValid": true,
-   "obsReviewed": false,
-   "locationPrivate": false,
-   "notable": false,
-   "indicator": false
-  },
-  {
-   "speciesCode": "rebkin2",
-   "comName": "Red-backed Kingfisher",
-   "sciName": "Todiramphus pyrrhopygius",
-   "howMany": 1,
-   "obsDt": "2026-09-09 10:46",
-   "locId": "L2553205",
-   "locName": "Callanna Creek at Oodnadatta Track",
-   "lat": -29.63944,
-   "lng": 137.915,
    "obsValid": true,
    "obsReviewed": false,
    "locationPrivate": false,
@@ -4407,22 +4431,6 @@
    "obsReviewed": true,
    "locationPrivate": false,
    "notable": true,
-   "indicator": false
-  },
-  {
-   "speciesCode": "banlap1",
-   "comName": "Banded Lapwing",
-   "sciName": "Vanellus tricolor",
-   "howMany": null,
-   "obsDt": "2026-09-01",
-   "locId": null,
-   "locName": null,
-   "lat": null,
-   "lng": null,
-   "obsValid": true,
-   "obsReviewed": false,
-   "locationPrivate": true,
-   "notable": false,
    "indicator": false
   }
  ],
