@@ -369,7 +369,8 @@ def build(cfg, out_dir=SITE, colors=64, limit=None, sample=40):
                  "aboriginal_culture.js", "ebird.js",
                  "catchment.js", "stories.js", "fauna_flora.js",
                  "inaturalist.js",
-                 "catchment_live.js", "travel.js", "floods.js", "rain_to_lake.js"):
+                 "catchment_live.js", "travel.js", "floods.js", "rain_to_lake.js",
+                 "lake_page.js", "country.js"):
         shutil.copy(ROOT / "frontend" / name, out_dir / name)
     (out_dir / ".nojekyll").write_text("", encoding="utf-8")
 

@@ -1787,3 +1787,50 @@ nav.tabs, .subbar { max-width: calc(var(--page) - 56px); padding-left: 0; paddin
 }
 .fig-box span { font-weight: 600; font-size: 0.95rem; }
 .fig-box code { font-size: 0.8rem; background: #FFFFFF; padding: 3px 8px; border-radius: var(--radius); }
+
+/* ── En-tête et navigation visibles au défilement ─────────── */
+
+.masthead {
+  position: sticky; top: 0; z-index: 900;
+  background: var(--salt);
+  border-bottom: 1px solid var(--grid);
+}
+.subbar, nav.tabs {
+  position: sticky; top: 56px; z-index: 880;
+  background: var(--salt);
+}
+@media (max-width: 700px) { .subbar, nav.tabs { top: 50px; } }
+
+/* Methods : mêmes titres et même sommaire que les autres pages */
+
+#tab-methods .panel { border: none; background: transparent; padding: 0; }
+#tab-methods h3 {
+  font-family: var(--font-display); font-stretch: 110%; font-weight: 600;
+  font-size: 1.45rem; line-height: 1.2; margin: 34px 0 10px;
+}
+#tab-methods .prose-body { display: grid; grid-template-columns: 1fr; gap: 0; }
+
+/* ── Images agrandies au clic ──────────────────────────────── */
+
+.zoomable { cursor: zoom-in; }
+.lightbox {
+  position: fixed; inset: 0; z-index: 2000;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 14px; padding: 28px;
+  background: rgba(22, 51, 59, 0.92);
+  cursor: zoom-out;
+}
+.lightbox img { max-width: min(1400px, 94vw); max-height: 82vh; object-fit: contain; background: var(--salt); }
+.lightbox figcaption {
+  font-family: var(--font-read); color: #FFFFFF; font-size: 0.95rem;
+  max-width: 70ch; text-align: center; line-height: 1.5;
+}
+.lightbox .lb-close {
+  position: absolute; top: 18px; right: 22px;
+  background: none; border: none; color: #FFFFFF; font-size: 1.6rem; cursor: pointer;
+}
+.obs-list img { cursor: zoom-in; }
+
+.wx-plate { margin: 22px 0 30px; }
+.wx-map { height: 380px; border: 1px solid var(--panel-edge); background: var(--grid); }
+.obs-list img { width: 64px; height: 64px; }

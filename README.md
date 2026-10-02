@@ -18,17 +18,17 @@ The site opens on a **home page** that shows the lake as it is now, as a map
 sheet: the latest MODIS image from NASA GIBS with a graticule, place names, a
 scale bar and the SWOT sites drawn at their coordinates, a gauge placing the
 SWOT water surface at Belt Bay within its own record, and a few sentences
-written from the data. Five parts follow, each answering one question.
-**The lake** describes the lake and models it: *Natural history*, referenced
-prose; *Modelling*, the water level, extent and area from SWOT and the matched
-Delft3D scenarios with their map layers; *Methods* and *Publications*.
-**Catchment** follows the rivers that feed it: *The basin*, referenced prose, and
-*River flow*, the gauges still operating with their hydrographs.
-**Climate and meteorology** gathers rain and weather: *Weather*, the Bureau of
-Meteorology stations with wind roses, and *Rainfall*, the SILO rainfall map of
-the basin. **Fauna and flora** has *Plants and animals*, *Bird sightings* and
-*iNaturalist*. **Aboriginal culture** has *Peoples* and *Stories*. Links to the
-former addresses `#observatory` and `#rain-rivers` still work. Any section can be linked directly, for example `#ct-rivers`,
+written from the data. Five parts follow, each answering one question. **Lake** is the lake itself:
+*The lake*, referenced prose, and *Fillings*, from 1950 to the record flood of
+2025. **Basin** follows the rivers that feed it: *The basin*, *From rain to
+lake* and *River flow*. **Water** is how it is measured and modelled:
+*Methods*, *Modelling* (SWOT levels and extent, Delft3D scenarios), *Rainfall*,
+*Weather* and *Publications*. **Natural history** holds *Geology and climate*,
+*Plants and animals*, *Bird sightings* and *Observe and share*. **People and
+country** holds *Country and people*, *Peoples*, *Stories* and *Data and
+citation*. `tools/build_natural_history.py` writes three of those pages from
+one source, each carrying only the references it cites. Links to the former
+addresses `#observatory`, `#rain-rivers` and `#lake` still work. Any section can be linked directly, for example `#ct-rivers`,
 `#st-arabana` or `#nh-geology`.
 
 The *Stories* page lists only stories that Aboriginal knowledge holders, or

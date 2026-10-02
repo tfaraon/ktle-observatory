@@ -159,21 +159,22 @@ CITE = re.compile(r"\{([cn]):([a-z0-9,]+)\}")
 used = set()
 
 
-def link(key, text):
+def link(key, text, prefix="ref-"):
     if key not in REFS:
         sys.exit(f"Clé de citation inconnue : {key}")
     used.add(key)
-    return f'<a class="cite" href="#ref-{key}">{text}</a>'
+    full = html.unescape(re.sub(r"<[^>]+>", "", REFS[key][2])).replace('"', "'").strip()
+    return f'<a class="cite" href="#{prefix}{key}" title="{full}">{text}</a>'
 
 
-def render(par):
+def render(par, prefix="ref-"):
     def sub(m):
         kind, keys = m.group(1), m.group(2).split(",")
         if kind == "n":
             if len(keys) != 1:
                 sys.exit("Une citation narrative ne prend qu'une clé")
-            return link(keys[0], REFS[keys[0]][1] if keys[0] in REFS else keys[0])
-        return "(" + "; ".join(link(k, REFS[k][0] if k in REFS else k)
+            return link(keys[0], REFS[keys[0]][1] if keys[0] in REFS else keys[0], prefix)
+        return "(" + "; ".join(link(k, REFS[k][0] if k in REFS else k, prefix)
                                for k in keys) + ")"
     return CITE.sub(sub, par)
 
@@ -185,66 +186,87 @@ for title, _, pars in SECTIONS:
         if "\u2014" in plain or " \u2013 " in plain or " - " in plain:
             sys.exit(f"Tiret de ponctuation dans « {title} » : {plain[:80]}")
 
-toc = "".join(f'<li><a href="#{sid}">{t}</a></li>' for t, sid, _ in SECTIONS)
-toc += '<li><a href="#nh-references">References</a></li>'
+# Trois pages, tirees de la meme source : les sections sont reparties
+# entre les parties Lake, Natural history et People and country, et
+# chacune n'emporte que les references qu'elle cite.
+PAGES = [
+    ("LAKE_HTML", "lake_page.js", "Lake", "Kati Thanda&ndash;Lake Eyre",
+     "lk", ["nh-lake"]),
+    ("NATURAL_HISTORY_HTML", "natural_history.js", "Natural history",
+     "Geology and climate", "nh", ["nh-geology", "nh-deep-time", "nh-water"]),
+    ("COUNTRY_HTML", "country.js", "People and country", "Country and people",
+     "cp", ["nh-country"]),
+]
 
-body = []
-for title, sid, pars in SECTIONS:
-    body.append(f'<section class="nh-section" id="{sid}"><h3>{title}</h3>')
-    for par in pars:
-        # Emplacement de figure : {fig:slug|Légende}, comme dans refbuild
-        if par.startswith("{fig:"):
-            slug, _, caption = par[5:-1].partition("|")
-            if not re.fullmatch(r"[a-z0-9-]+", slug):
-                sys.exit(f"Identifiant de figure invalide : {slug}")
-            body.append(f'<figure class="fig" data-fig="{slug}">'
-                        f'<figcaption>{render(caption)}</figcaption></figure>')
-            continue
-        body.append(f"<p>{render(par)}</p>")
-    body.append("</section>")
+ACK = ("Kati Thanda&ndash;Lake Eyre lies on the country of the Arabana people. We acknowledge "
+       "the Arabana as the Traditional Owners of the lake and its surrounds, and pay our "
+       "respects to their Elders past and present.")
 
-unused = sorted(set(REFS) - used)
-if unused:
-    sys.exit(f"Références jamais citées : {unused}")
+by_id = {sid: (title, pars) for title, sid, pars in SECTIONS}
+missing = [sid for _, _, _, _, _, ids in PAGES for sid in ids if sid not in by_id]
+if missing:
+    sys.exit(f"Sections inconnues : {missing}")
+orphans = sorted(set(by_id) - {sid for _, _, _, _, _, ids in PAGES for sid in ids})
+if orphans:
+    sys.exit(f"Sections dans aucune page : {orphans}")
 
+total_words = 0
+for var, filename, eyebrow, title, prefix, ids in PAGES:
+    used.clear()
+    REF_PREFIX = f"{prefix}ref-"
+    body, toc = [], []
+    for sid in ids:
+        sec_title, pars = by_id[sid]
+        toc.append(f'<li><a href="#{sid}">{sec_title}</a></li>')
+        body.append(f'<section class="nh-section" id="{sid}"><h3>{sec_title}</h3>')
+        for par in pars:
+            if par.startswith("{fig:"):
+                slug, _, caption = par[5:-1].partition("|")
+                if not re.fullmatch(r"[a-z0-9-]+", slug):
+                    sys.exit(f"Identifiant de figure invalide : {slug}")
+                body.append(f'<figure class="fig" data-fig="{slug}">'
+                            f'<figcaption>{render(caption, REF_PREFIX)}</figcaption></figure>')
+                continue
+            body.append(f"<p>{render(par, REF_PREFIX)}</p>")
+        body.append("</section>")
+    toc.append(f'<li><a href="#{prefix}-references">References</a></li>')
 
-def sort_key(k):
-    return re.sub(r"<[^>]+>", "", REFS[k][2]).lower()
+    def sort_key(k):
+        return re.sub(r"<[^>]+>", "", REFS[k][2]).lower()
 
+    refs_html = []
+    for k in sorted(used, key=sort_key):
+        _, _, full, url = REFS[k]
+        extra = (f' <a href="{url}" target="_blank" rel="noopener">'
+                 f'{html.escape(url.replace("https://", ""))}</a>') if url else ""
+        refs_html.append(f'<li id="{REF_PREFIX}{k}">{full}{extra}</li>')
 
-refs_html = []
-for k in sorted(REFS, key=sort_key):
-    _, _, full, url = REFS[k]
-    extra = (f' <a href="{url}" target="_blank" rel="noopener">'
-             f'{html.escape(url.replace("https://", ""))}</a>') if url else ""
-    refs_html.append(f'<li id="ref-{k}">{full}{extra}</li>')
-
-page = f"""<article class="panel nh-article">
+    page = f"""<article class="panel nh-article">
 <div class="panel-head">
-<p class="eyebrow">Natural history</p>
-<h2>Kati Thanda&ndash;Lake Eyre</h2>
+<p class="eyebrow">{eyebrow}</p>
+<h2>{title}</h2>
 </div>
 <div class="nh-layout">
 <aside class="nh-toc" aria-label="Contents">
 <p class="nh-toc-title">Contents</p>
-<ol>{toc}</ol>
+<ol>{''.join(toc)}</ol>
 </aside>
 <div class="nh-body prose-body">
-<p class="nh-acknowledgement">Kati Thanda&ndash;Lake Eyre lies on the country of the Arabana people. We acknowledge the Arabana as the Traditional Owners of the lake and its surrounds, and pay our respects to their Elders past and present.</p>
+<p class="nh-acknowledgement">{ACK}</p>
 {''.join(body)}
-<section class="nh-section" id="nh-references"><h3>References</h3>
+<section class="nh-section" id="{prefix}-references"><h3>References</h3>
 <ol class="nh-references">{''.join(refs_html)}</ol>
 </section>
 </div>
 </div>
 </article>"""
 
-js = ("/* Contenu de la partie Natural History, genere a partir d'une source\n"
-      " * structuree dont chaque citation est verifiee contre la liste des\n"
-      " * references. Injecte par app.js a la premiere ouverture. */\n"
-      f"const NATURAL_HISTORY_HTML = {json.dumps(page, ensure_ascii=False)};\n")
-OUT.write_text(js, encoding="utf-8")
+    js = ("/* Page construite a partir d'une source structuree dont chaque citation\n"
+          " * est verifiee contre la liste des references. Injectee par app.js. */\n"
+          f"const {var} = {json.dumps(page, ensure_ascii=False)};\n")
+    (OUT.parent / filename).write_text(js, encoding="utf-8")
+    words = len(re.sub(r"<[^>]+>", " ", "".join(body)).split())
+    total_words += words
+    print(f"{filename} : {len(ids)} section(s), {words} mots, {len(used)} références citées")
 
-words = len(re.sub(r"<[^>]+>", " ", "".join(body)).split())
-print(f"{OUT.name} : {len(SECTIONS)} sections, {words} mots, "
-      f"{len(REFS)} références, toutes citées")
+print(f"total : {total_words} mots sur {len(SECTIONS)} sections")

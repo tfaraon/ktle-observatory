@@ -200,3 +200,18 @@ if problems:
 
 print("OK — libellés, avertissements, messages d'erreur et frontend "
       "entièrement en anglais.")
+
+
+# ── Libellés visibles définis dans la configuration ──
+# « MODIS couleur » y avait survécu : la configuration est en français,
+# mais tout ce qu'elle fait afficher doit être en anglais.
+import yaml  # noqa: E402
+
+cfg = yaml.safe_load((ROOT / "config.yaml").read_text(encoding="utf-8"))
+visible = [l.get("label", "") for l in (cfg.get("imagery") or {}).get("layers", [])]
+visible += [(cfg.get("scenarios") or {}).get("datum_label", "")]
+visible += [s.get("name", "") for s in (cfg.get("weather") or {}).get("stations", [])]
+for label in visible:
+    bad = offending(label)
+    assert not bad, f"libellé de config en français : {label!r} ({bad})"
+print(f"OK — {len(visible)} libellé(s) de configuration en anglais.")

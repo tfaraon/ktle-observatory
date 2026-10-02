@@ -32,9 +32,9 @@
     loadedPages: {},
     ebird: null,
     birdsLayer: null,
-    lastTab: { lake: "natural-history", catchment: "catchment", climate: "weather",
-               "fauna-flora": "fauna-flora", culture: "culture" },
-    figures: null, showPlaceholders: true,
+    lastTab: { lake: "lake-overview", basin: "catchment", water: "methods",
+               nature: "natural-history", people: "country" },
+    figures: null, showPlaceholders: true, wxMap: null,
     rain: null, rivers: null, rainMap: null, flowMap: null, rainOverlay: null, flowStations: null, rrView: "sum7",
     birdsMap: null,
     inat: null,
@@ -1062,6 +1062,13 @@
 
   // ── Delft3D scenario ─────────────────────────────────────
 
+  // L'index des scénarios peut avoir été généré par une version ancienne,
+  // dont les libellés étaient en français : on impose ceux du site.
+  const PARAM_LABELS = {
+    wind_speed: "Wind speed", wind_dir: "Wind direction",
+    wlvl: "Water level", salinity: "Salinity",
+  };
+
   function fmtParam(key, v, units) {
     if (v === null || v === undefined) return "—";
     const u = units[key] ? " " + units[key] : "";
@@ -1076,7 +1083,7 @@
       : `offset ${d > 0 ? "+" : ""}${d.toFixed(key === "wind_dir" ? 0 : 2)}`
         + (units[key] ? " " + units[key] : "");
     return `<div class="match-item${out ? " out" : ""}">
-      <span class="match-label">${labels[key] || key}</span>
+      <span class="match-label">${PARAM_LABELS[key] || labels[key] || key}</span>
       <span class="match-values">
         <span class="match-obs">${fmtParam(key, target[key], units)}</span>
         <span class="match-arrow">→</span>
@@ -1806,25 +1813,27 @@
   // méthodes et les publications. Chaque onglet appartient à une partie.
   const SECTION_OF = {
     home: "home",
-    "natural-history": "lake",
+    "lake-overview": "lake",
     floods: "lake",
-    data: "lake",
-    modelling: "lake",
-    methods: "lake",
-    publications: "lake",
-    catchment: "catchment",
-    "rain-to-lake": "catchment",
-    "river-flow": "catchment",
-    weather: "climate",
-    rainfall: "climate",
-    "fauna-flora": "fauna-flora",
-    birds: "fauna-flora",
-    inaturalist: "fauna-flora",
-    culture: "culture",
-    stories: "culture",
+    catchment: "basin",
+    "rain-to-lake": "basin",
+    "river-flow": "basin",
+    methods: "water",
+    modelling: "water",
+    rainfall: "water",
+    weather: "water",
+    publications: "water",
+    "natural-history": "nature",
+    "fauna-flora": "nature",
+    birds: "nature",
+    inaturalist: "nature",
+    country: "people",
+    culture: "people",
+    stories: "people",
+    data: "people",
   };
   // Anciennes adresses, pour que les liens déjà partagés continuent de marcher
-  const ALIASES = { observatory: "modelling", "rain-rivers": "river-flow" };
+  const ALIASES = { observatory: "modelling", "rain-rivers": "river-flow", lake: "lake-overview" };
   // Contenus injectés à la première ouverture, et préfixes des ancres
   // qu'ils portent : sections et références de chaque page.
   // Un « const » global n'est pas une propriété de window : window[nom]
@@ -1833,7 +1842,15 @@
   const LAZY_PAGES = {
     "natural-history": {
       html: () => (typeof NATURAL_HISTORY_HTML === "string" ? NATURAL_HISTORY_HTML : null),
-      anchors: /^(nh|ref)-/,
+      anchors: /^(nh|nhref)-/,
+    },
+    "lake-overview": {
+      html: () => (typeof LAKE_HTML === "string" ? LAKE_HTML : null),
+      anchors: /^(nh-lake|lk|lkref)-/,
+    },
+    country: {
+      html: () => (typeof COUNTRY_HTML === "string" ? COUNTRY_HTML : null),
+      anchors: /^(nh-country|cp|cpref)-/,
     },
     culture: {
       html: () => (typeof ABORIGINAL_CULTURE_HTML === "string" ? ABORIGINAL_CULTURE_HTML : null),
@@ -1941,6 +1958,13 @@
       requestAnimationFrame(() => state.catchmentMap.invalidateSize());
     }
     if (name === "rain-to-lake") requestAnimationFrame(renderTravel);
+    if (name === "methods") requestAnimationFrame(methodsContents);
+    if (name === "weather") {
+      requestAnimationFrame(() => {
+        initWeatherMap();
+        if (state.wxMap) state.wxMap.invalidateSize();
+      });
+    }
     if (name === "data") {
       const el = $("cite-date");
       if (el) el.textContent = fmtLongDate(new Date().toISOString().slice(0, 10));
@@ -2494,7 +2518,8 @@
     $("inat-species").innerHTML = (data.species || []).slice(0, data.top_species || 12).map((sp) => {
       const nm = inatName(sp);
       const pic = sp.photo
-        ? `<img src="${esc(sp.photo.square)}" alt="" loading="lazy" title="${esc(sp.photo.attribution)}">`
+        ? `<img src="${esc(sp.photo.square)}" data-full="${esc(sp.photo.medium || sp.photo.square)}" `
+          + `alt="${esc(INat.names(sp).primary || "")}" loading="lazy" title="${esc(sp.photo.attribution)}">`
         : '<span class="inat-thumb-empty"></span>';
       const name = sp.url
         ? `<a class="inat-sp-name" href="${esc(sp.url)}" target="_blank" rel="noopener">${nm.first}</a>`
@@ -2583,7 +2608,8 @@
 
       const items = list.slice(0, OBS_SHOWN).map((x) => {
         const pic = x.photo
-          ? `<img src="${esc(x.photo.square)}" alt="" loading="lazy" title="${esc(x.photo.attribution)}">`
+          ? `<img src="${esc(x.photo.square)}" data-full="${esc(x.photo.medium || x.photo.square)}" `
+            + `alt="${esc(x.name)}" loading="lazy" title="${esc(x.photo.attribution)}">`
           : '<span class="obs-thumb-empty"></span>';
         const nm = x.nameIsScientific ? `<i>${esc(x.name)}</i>` : esc(x.name);
         const name = x.url ? `<a href="${esc(x.url)}" target="_blank" rel="noopener">${nm}</a>` : nm;
@@ -2947,6 +2973,89 @@
     });
   }
 
+  // ── Enlarging images, Methods contents, weather map ──────
+  //
+  // Three small things the first readers asked for: figures are too small
+  // to read at the size they sit in the text; the Methods page lacked the
+  // contents box every other page of The lake has; and the weather page
+  // gave no idea where its three stations are.
+
+  function openLightbox(src, caption) {
+    const box = document.createElement("div");
+    box.className = "lightbox";
+    box.innerHTML = `<button type="button" class="lb-close" aria-label="Close">&times;</button>`
+      + `<img src="${esc(src)}" alt="${esc(caption || "")}">`
+      + (caption ? `<figcaption>${esc(caption)}</figcaption>` : "");
+    const close = () => box.remove();
+    box.addEventListener("click", close);
+    document.addEventListener("keydown", function esc2(e) {
+      if (e.key === "Escape") { close(); document.removeEventListener("keydown", esc2); }
+    });
+    document.body.appendChild(box);
+  }
+
+  function wireZoom() {
+    document.addEventListener("click", (e) => {
+      const img = e.target.closest("main img");
+      if (img && (img.closest(".leaflet-container") || img.closest(".map-bar"))) return;
+      if (!img) return;
+      const fig = img.closest("figure");
+      const cap = fig && fig.querySelector("figcaption")
+        ? fig.querySelector("figcaption").textContent.trim()
+        : (img.alt || img.title || "");
+      openLightbox(img.dataset.full || img.src, cap);
+    });
+  }
+
+  // Sommaire de la page Methods, construit à partir de ses propres titres
+  function methodsContents() {
+    const panel = $("tab-methods");
+    if (!panel || panel.querySelector(".nh-toc")) return;
+    const heads = [...panel.querySelectorAll("h3")];
+    if (heads.length < 3) return;
+    const items = heads.map((h, i) => {
+      if (!h.id) h.id = "meth-" + (i + 1);
+      return `<li><a href="#${h.id}">${esc(h.textContent)}</a></li>`;
+    }).join("");
+    const aside = document.createElement("aside");
+    aside.className = "nh-toc";
+    aside.setAttribute("aria-label", "Contents");
+    aside.innerHTML = `<p class="nh-toc-title">Contents</p><ol>${items}</ol>`;
+    const body = panel.querySelector(".prose-body") || panel.firstElementChild;
+    body.parentNode.insertBefore(aside, body);
+  }
+
+  // Les trois stations BOM, situées par rapport au lac
+  function initWeatherMap() {
+    const el = $("wx-map");
+    if (!el || typeof L === "undefined" || el.offsetParent === null || state.wxMap) return;
+    const stations = ((state.weather && state.weather.stations) || [])
+      .filter((st) => Number.isFinite(st.lat) && Number.isFinite(st.lon));
+    if (!stations.length) return;
+    state.wxMap = L.map(el, { scrollWheelZoom: false }).setView([-28.6, 137.5], 6);
+    L.tileLayer("https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png", {
+      maxZoom: 12,
+      attribution: "&copy; OpenTopoMap (CC-BY-SA), &copy; OpenStreetMap contributors",
+    }).addTo(state.wxMap);
+    const pts = [];
+    stations.forEach((st) => {
+      const l = st.latest || {};
+      L.circleMarker([st.lat, st.lon], {
+        radius: 7, color: "#FFFFFF", weight: 2, fillColor: "#C9A66B", fillOpacity: 0.95,
+      }).bindTooltip(`<b>${esc(st.name)}</b>`
+        + (l.wind_dir ? `<br>${esc(l.wind_dir)} ${esc(l.wind_spd_kmh)} km/h` : ""))
+        .addTo(state.wxMap);
+      pts.push([st.lat, st.lon]);
+    });
+    (state.data && state.data.sites ? Object.values(state.data.sites) : []).forEach((site) => {
+      L.circleMarker([site.lat, site.lon], {
+        radius: 6, color: "#FFFFFF", weight: 2, fillColor: "#1F6470", fillOpacity: 0.9,
+      }).bindTooltip(`<b>${esc(site.name)}</b>`).addTo(state.wxMap);
+      pts.push([site.lat, site.lon]);
+    });
+    state.wxMap.fitBounds(pts, { padding: [24, 24] });
+  }
+
   async function init() {
     loadHeroImage();
     const { data, viaApi } = await loadData();
@@ -3042,6 +3151,7 @@
     wireTabs();
     wireDownloads();
     wireRainRivers();
+    wireZoom();
     init();
   });
 })();

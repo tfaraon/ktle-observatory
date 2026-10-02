@@ -19,6 +19,13 @@ import sys
 CITE = re.compile(r"\{([cn]):([a-z0-9,]+)\}")
 
 
+
+def ref_plain(text):
+    """Reference en texte brut, pour l'infobulle d'un appel de citation."""
+    import html as _html
+    return _html.unescape(re.sub(r"<[^>]+>", "", text)).replace('"', "'").strip()
+
+
 def build(refs, sections, *, var, eyebrow, title, acknowledgement,
           section_prefix, ref_prefix, intro_comment):
     used = set()
@@ -27,8 +34,8 @@ def build(refs, sections, *, var, eyebrow, title, acknowledgement,
         if key not in refs:
             sys.exit(f"Clé de citation inconnue : {key}")
         used.add(key)
-        return (f'<a class="cite" href="#{ref_prefix}{key}">'
-                f'{refs[key][text_index]}</a>')
+        return (f'<a class="cite" href="#{ref_prefix}{key}" '
+                f'title="{ref_plain(refs[key][2])}">{refs[key][text_index]}</a>')
 
     def render(block):
         def sub(m):

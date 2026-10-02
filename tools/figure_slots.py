@@ -18,7 +18,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 FRONTEND = ROOT / "frontend"
 MANIFEST = FRONTEND / "figures.json"
-BUILT = {"natural_history": "NATURAL_HISTORY_HTML", "floods": "FLOODS_HTML",
+BUILT = {"natural_history": "NATURAL_HISTORY_HTML", "lake_page": "LAKE_HTML",
+         "country": "COUNTRY_HTML", "floods": "FLOODS_HTML",
          "rain_to_lake": "RAIN_TO_LAKE_HTML", "catchment": "CATCHMENT_HTML",
          "fauna_flora": "FAUNA_FLORA_HTML"}
 HANDWRITTEN = {"index.html": "index.html", "methods.js": "methods.js"}

@@ -39,64 +39,46 @@
   <header class="masthead">
     <a class="wordmark" href="#home">Kati Thanda&ndash;Lake Eyre<span>Observatory</span></a>
     <nav class="sections" aria-label="Site">
-      <button type="button" class="section-btn" data-section="lake">The lake</button>
-      <button type="button" class="section-btn" data-section="catchment">Catchment</button>
-      <button type="button" class="section-btn" data-section="climate">Climate and meteorology</button>
-      <button type="button" class="section-btn" data-section="fauna-flora">Fauna and flora</button>
-      <button type="button" class="section-btn" data-section="culture">Aboriginal culture</button>
+      <button type="button" class="section-btn" data-section="lake">Lake</button>
+      <button type="button" class="section-btn" data-section="basin">Basin</button>
+      <button type="button" class="section-btn" data-section="water">Water</button>
+      <button type="button" class="section-btn" data-section="nature">Natural history</button>
+      <button type="button" class="section-btn" data-section="people">People and country</button>
     </nav>
   </header>
 
-  <nav class="tabs" id="catchment-tabs" data-for="catchment" role="tablist"
-       aria-label="Catchment" hidden>
-    <button class="tab" role="tab" data-tab="catchment"
-            aria-selected="false">The basin</button>
-    <button class="tab" role="tab" data-tab="rain-to-lake"
-            aria-selected="false">From rain to lake</button>
-    <button class="tab" role="tab" data-tab="river-flow"
-            aria-selected="false">River flow</button>
+  <nav class="tabs" id="basin-tabs" data-for="basin" role="tablist" aria-label="Basin" hidden>
+    <button class="tab" role="tab" data-tab="catchment" aria-selected="false">The basin</button>
+    <button class="tab" role="tab" data-tab="rain-to-lake" aria-selected="false">From rain to lake</button>
+    <button class="tab" role="tab" data-tab="river-flow" aria-selected="false">River flow</button>
   </nav>
 
-  <nav class="tabs" id="climate-tabs" data-for="climate" role="tablist"
-       aria-label="Climate and meteorology" hidden>
-    <button class="tab" role="tab" data-tab="weather"
-            aria-selected="false">Weather</button>
-    <button class="tab" role="tab" data-tab="rainfall"
-            aria-selected="false">Rainfall</button>
+  <nav class="tabs" id="water-tabs" data-for="water" role="tablist" aria-label="Water" hidden>
+    <button class="tab" role="tab" data-tab="methods" aria-selected="false">Methods</button>
+    <button class="tab" role="tab" data-tab="modelling" aria-selected="false">Modelling</button>
+    <button class="tab" role="tab" data-tab="rainfall" aria-selected="false">Rainfall</button>
+    <button class="tab" role="tab" data-tab="weather" aria-selected="false">Weather</button>
+    <button class="tab" role="tab" data-tab="publications" aria-selected="false">Publications</button>
   </nav>
 
-  <nav class="tabs" id="fauna-tabs" data-for="fauna-flora" role="tablist"
-       aria-label="Fauna and flora" hidden>
-    <button class="tab" role="tab" data-tab="fauna-flora"
-            aria-selected="false">Plants and animals</button>
-    <button class="tab" role="tab" data-tab="birds"
-            aria-selected="false">Bird sightings</button>
-    <button class="tab" role="tab" data-tab="inaturalist"
-            aria-selected="false">iNaturalist</button>
+  <nav class="tabs" id="nature-tabs" data-for="nature" role="tablist" aria-label="Natural history" hidden>
+    <button class="tab" role="tab" data-tab="natural-history" aria-selected="false">Geology and climate</button>
+    <button class="tab" role="tab" data-tab="fauna-flora" aria-selected="false">Plants and animals</button>
+    <button class="tab" role="tab" data-tab="birds" aria-selected="false">Bird sightings</button>
+    <button class="tab" role="tab" data-tab="inaturalist" aria-selected="false">Observe and share</button>
   </nav>
 
-  <nav class="tabs" id="culture-tabs" data-for="culture" role="tablist"
-       aria-label="Aboriginal culture" hidden>
-    <button class="tab" role="tab" data-tab="culture"
-            aria-selected="false">Peoples</button>
-    <button class="tab" role="tab" data-tab="stories"
-            aria-selected="false">Stories</button>
+  <nav class="tabs" id="people-tabs" data-for="people" role="tablist" aria-label="People and country" hidden>
+    <button class="tab" role="tab" data-tab="country" aria-selected="false">Country and people</button>
+    <button class="tab" role="tab" data-tab="culture" aria-selected="false">Peoples</button>
+    <button class="tab" role="tab" data-tab="stories" aria-selected="false">Stories</button>
+    <button class="tab" role="tab" data-tab="data" aria-selected="false">Data and citation</button>
   </nav>
 
   <div class="subbar" data-for="lake" hidden>
-  <nav class="tabs" id="lake-tabs" role="tablist" aria-label="The lake">
-      <button class="tab" role="tab" data-tab="natural-history"
-              aria-selected="false">Natural history</button>
-      <button class="tab" role="tab" data-tab="floods"
-              aria-selected="false">Fillings</button>
-      <button class="tab" role="tab" data-tab="modelling"
-              aria-selected="false">Modelling</button>
-      <button class="tab" role="tab" data-tab="methods"
-              aria-selected="false">Methods</button>
-      <button class="tab" role="tab" data-tab="publications"
-              aria-selected="false">Publications</button>
-      <button class="tab" role="tab" data-tab="data"
-              aria-selected="false">Data and citation</button>
+  <nav class="tabs" id="lake-tabs" role="tablist" aria-label="Lake">
+      <button class="tab" role="tab" data-tab="lake-overview" aria-selected="false">The lake</button>
+      <button class="tab" role="tab" data-tab="floods" aria-selected="false">Fillings</button>
     </nav>
     <div class="data-status">
       <span>Data updated <span id="generated-at">not yet</span></span>
@@ -273,16 +255,16 @@
         </figure>
       </div>
       <nav class="explore" aria-label="Parts of this site">
-        <a class="explore-row" href="#natural-history"><span class="explore-name">The lake</span>
-          <span class="explore-text">The lake&rsquo;s country, geology, deep history and water, and its water level, extent and hydrodynamic models, from SWOT and Delft3D.</span></a>
-        <a class="explore-row" href="#catchment"><span class="explore-name">Catchment</span>
-          <span class="explore-text">The rivers of the Lake Eyre Basin, from the Channel Country to the lake, how they are protected, and the flow measured at their gauges.</span></a>
-        <a class="explore-row" href="#weather"><span class="explore-name">Climate and meteorology</span>
-          <span class="explore-text">Wind, temperature and rain at the weather stations around the lake, and rainfall over the whole basin.</span></a>
-        <a class="explore-row" href="#fauna-flora"><span class="explore-name">Fauna and flora</span>
-          <span class="explore-text">The plants and animals that live with the lake&rsquo;s cycles of flood and drought, the birds reported this month, and how to share your own observations on iNaturalist.</span></a>
-        <a class="explore-row" href="#culture"><span class="explore-name">Aboriginal culture</span>
-          <span class="explore-text">The peoples of the lake and its basin, and the stories they have chosen to share.</span></a>
+        <a class="explore-row" href="#lake-overview"><span class="explore-name">Lake</span>
+          <span class="explore-text">What Kati Thanda is, and the fillings it has known, from 1950 to the record flood of 2025.</span></a>
+        <a class="explore-row" href="#catchment"><span class="explore-name">Basin</span>
+          <span class="explore-text">The rivers of the Channel Country, the weeks the water takes to cross them, and the flow measured at the gauges still operating.</span></a>
+        <a class="explore-row" href="#methods"><span class="explore-name">Water</span>
+          <span class="explore-text">How the lake is measured and modelled: SWOT levels and extent, Delft3D scenarios, rainfall over the basin and the weather stations.</span></a>
+        <a class="explore-row" href="#natural-history"><span class="explore-name">Natural history</span>
+          <span class="explore-text">Geology, deep time and climate, the plants and animals that live with flood and drought, and the birds reported this month.</span></a>
+        <a class="explore-row" href="#country"><span class="explore-name">People and country</span>
+          <span class="explore-text">The peoples of the lake and its basin, the stories they have chosen to share, and how to use and cite this work.</span></a>
       </nav>
     </section>
 
@@ -296,6 +278,12 @@
         <p>Wind drives the shallow water of a filled lake across its bed, piling it against one shore and
           raising waves, and it is one of the conditions the hydrodynamic scenarios are matched against.
           The Bureau of Meteorology stations around the lake report wind, temperature and rain every half hour.</p>
+        <figure class="plate wx-plate">
+          <div id="wx-map" class="wx-map" role="img"
+               aria-label="Map of the weather stations around the lake"></div>
+          <figcaption>The Bureau of Meteorology stations whose observations are shown below, and their
+            position relative to the lake.</figcaption>
+        </figure>
         <figure class="fig" data-fig="wind-on-the-lake"><figcaption>Wind on the flooded lake, which piles
           water against one shore and raises the waves that rework its margins.</figcaption></figure>
       </div>
@@ -327,6 +315,8 @@
 
     </section>
 
+    <section id="tab-lake-overview" class="tab-panel prose" role="tabpanel" hidden></section>
+    <section id="tab-country" class="tab-panel prose" role="tabpanel" hidden></section>
     <section id="tab-floods" class="tab-panel prose" role="tabpanel" hidden></section>
     <section id="tab-rain-to-lake" class="tab-panel prose" role="tabpanel" hidden></section>
 
@@ -614,6 +604,8 @@
   <script src="travel.js"></script>
   <script src="floods.js"></script>
   <script src="rain_to_lake.js"></script>
+  <script src="lake_page.js"></script>
+  <script src="country.js"></script>
   <script src="methods.js"></script>
   <script src="natural_history.js"></script>
   <script src="aboriginal_culture.js"></script>
