@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-10-03T23:18:15Z",
+ "fetched_at": "2026-10-04T23:33:35Z",
  "demo": false,
  "stale": false,
  "errors": [],
@@ -74,7 +74,7 @@
    "id": 404904683,
    "url": "https://www.inaturalist.org/observations/404904683",
    "observed_on": "2026-09-30",
-   "quality": "needs_id",
+   "quality": "research",
    "taxon": {
     "name": "Pogona vitticeps",
     "common": "Central Bearded Dragon",
@@ -4714,7 +4714,7 @@
     "square": "https://inaturalist-open-data.s3.amazonaws.com/photos/48348837/square.jpg",
     "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/48348837/medium.jpg",
     "license": "CC-BY-NC-ND",
-    "attribution": "(c) Alan Melville, algunos derechos reservados (CC BY-NC-ND), subido por Alan Melville"
+    "attribution": "(c) Alan Melville, some rights reserved (CC BY-NC-ND), uploaded by Alan Melville"
    }
   },
   {
