@@ -1,8 +1,10 @@
 {
  "fetched_at": "2026-10-02T01:50:31Z",
  "demo": false,
- "stale": false,
- "errors": [],
+ "stale": true,
+ "errors": [
+  "HTTPError: HTTP Error 503: Service Unavailable"
+ ],
  "source": "Water Data Online, Bureau of Meteorology",
  "source_url": "https://www.bom.gov.au/waterdata/",
  "licence": "Creative Commons Attribution unless the data supplier states otherwise",
