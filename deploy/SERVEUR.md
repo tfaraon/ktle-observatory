@@ -16,6 +16,11 @@ Les chemins supposent une installation dans `/srv/lake-eyre-dashboard`, avec un
 utilisateur système `lakeeyre`. Si tu en choisis d'autres, modifie-les aussi
 dans les fichiers de `deploy/systemd/` et dans `deploy/lake-eyre.service`.
 
+Avant de choisir cette voie, lis `deploy/HEBERGEMENT.md` : depuis que les
+chaînes SWOT sont incrémentales, GitHub Actions peut tout calculer sans
+machine à entretenir. Ce guide-ci reste le bon choix si tu veux l'API Flask
+vivante, les données hors de GitHub, ou un certificat que tu contrôles.
+
 ## 1. La machine
 
 - Linux (Ubuntu LTS par exemple), toujours allumée, avec un accès Internet

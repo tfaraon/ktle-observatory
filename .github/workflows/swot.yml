@@ -1,0 +1,144 @@
+# Rafraichit les niveaux SWOT, la surface et l'etendue d'eau, sans
+# disque externe : les granules du jour sont telecharges dans le dossier
+# temporaire du runner, lus, puis jetes avec lui.
+#
+# Ce qui rend cela possible : les deux chaines sont incrementales et
+# gardent leur memoire dans state/ (versionne). Les granules deja lus ne
+# sont donc jamais relus, et l'archive complete peut rester sur le
+# disque de Thomas.
+#
+# PREALABLES, une seule fois :
+#  1. Secrets du depot (Settings > Secrets and variables > Actions) :
+#     EARTHDATA_USERNAME et EARTHDATA_PASSWORD (compte urs.earthdata.nasa.gov).
+#  2. Versionner l'etat et la bathymetrie, depuis la machine de Thomas :
+#       mkdir -p state
+#       cp data/extraction_cache.json data/area_cache.json state/
+#       git add -f state/ data/bathymetry.npz && git commit && git push
+#     Sans state/, ce workflow refuse de tourner : il ne doit jamais
+#     publier une serie reconstruite sur les seuls granules du jour.
+#     Sans data/bathymetry.npz, l'etape « etendue d'eau » est sautee.
+#  3. Lancer une fois a la main (Run workflow) et lire le journal.
+#
+# Un workflow planifie est desactive apres 60 jours sans activite dans
+# le depot : les commits quotidiens des autres workflows suffisent a le
+# maintenir en vie.
+name: Refresh SWOT levels and lake area
+
+on:
+  schedule:
+    - cron: "40 21 * * *"      # apres la mise a jour du bassin
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: swot-refresh          # deux passages simultanes se marcheraient
+  cancel-in-progress: false    # sur l'etat versionne
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      # Les granules vivent et meurent avec le runner.
+      KTLE_SWOT_DIR: ${{ runner.temp }}/swot
+      # La memoire des chaines, elle, est versionnee.
+      KTLE_STATE_DIR: state
+      EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+      EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Check the committed state
+        run: |
+          missing=""
+          for f in state/extraction_cache.json state/area_cache.json; do
+            [ -f "$f" ] || missing="$missing $f"
+          done
+          if [ -n "$missing" ]; then
+            echo "::error::État manquant :$missing"
+            echo "Voir l'en-tête de ce workflow, étape 2 des préalables."
+            echo "Sans ces caches, la série serait reconstruite sur les"
+            echo "seuls granules du jour et l'historique du site serait"
+            echo "écrasé."
+            exit 1
+          fi
+          python3 -c "import json,sys; d=json.load(open('state/area_cache.json')); \
+            print(len(d.get('days') or {}), 'journées en cache')"
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - run: pip install PyYAML numpy netCDF4 Pillow scipy pandas earthaccess
+
+      - name: Download the new granules and extract the levels
+        run: |
+          mkdir -p "$KTLE_SWOT_DIR"
+          # La fenetre de recherche vient de download.lookback_days
+          # (config.yaml) : 45 jours couvrent largement un passage par
+          # jour, et une execution manquee est rattrapee le lendemain.
+          python pipeline/update_swot.py --download
+          du -sh "$KTLE_SWOT_DIR" || true
+
+      - name: Reuse the published maps
+        run: |
+          # Le cache verifie que le PNG du jour existe toujours : sans
+          # cette copie, les journees retelechargees par la fenetre de
+          # 45 jours seraient recalculees a chaque passage.
+          for folder in area_maps extent_maps; do
+            if [ -d "site/data/$folder" ]; then
+              mkdir -p "data/$folder"
+              cp -f site/data/$folder/*.png "data/$folder/" 2>/dev/null || true
+            fi
+          done
+
+      - name: Lake area
+        run: python pipeline/lake_area.py
+
+      - name: Water extent
+        run: |
+          if [ -f data/bathymetry.npz ]; then
+            python pipeline/water_extent.py
+          else
+            echo "data/bathymetry.npz absent : étape sautée."
+          fi
+
+      - name: Copy to the published site
+        run: |
+          mkdir -p site/data
+          for name in swot_wse.json lake_area.json water_extent.json; do
+            [ -f "data/$name" ] && cp -f "data/$name" site/data/
+          done
+          for folder in area_maps extent_maps; do
+            if [ -d "data/$folder" ]; then
+              mkdir -p "site/data/$folder"
+              cp -f data/$folder/*.png "site/data/$folder/" 2>/dev/null || true
+            fi
+          done
+
+      - name: Sanity check before publishing
+        run: |
+          # Une serie plus courte que celle deja en ligne signale un
+          # cache ignore : c'est le seul symptome, le calcul lui-meme
+          # reussit. tests/test_check_series.py couvre ce garde-fou.
+          python tools/check_series.py \
+            site/data/swot_wse.json \
+            site/data/lake_area.json \
+            site/data/water_extent.json
+
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          # Meme pilote de fusion que deploy/publish.sh : sur une serie
+          # recalculee, on remplace, on ne fusionne pas ligne a ligne.
+          git config merge.keepnew.driver 'cp -f %B %A' 
+          git add -f state/*.json
+          git add -f site/data/swot_wse.json site/data/lake_area.json 2>/dev/null || true
+          git add -f site/data/water_extent.json 2>/dev/null || true
+          git add -f site/data/area_maps site/data/extent_maps 2>/dev/null || true
+          git diff --staged --quiet || git commit -m "SWOT levels and lake area refresh"
+          git pull --rebase --autostash || true
+          git push

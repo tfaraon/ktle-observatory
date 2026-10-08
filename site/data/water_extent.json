@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-10-08T05:12:40Z",
+ "generated_at": "2026-10-08T23:53:18Z",
  "method": "SWOT water level intersected with the Delft3D bathymetry; only the pool hydraulically connected to the low point is retained",
  "note": "SWOT measures elevation reliably; its per-pixel water classification is not robust over a salt playa, so the extent is derived from the level rather than read from the radar",
  "datum_note": "Bathymetry is AHD, SWOT levels are EGM2008 — scenarios.wlvl_offset applied: +0.00 m",
@@ -96,7 +96,7 @@
    "level_m": -13.427,
    "area_km2": 2902.2,
    "volume_km3": 2.3199,
-   "n_obs": 4,
+   "n_obs": 2,
    "n_cells": 11609,
    "map": "extent_maps/2025-09-14.png"
   },
@@ -114,7 +114,7 @@
    "level_m": -13.494,
    "area_km2": 2801.5,
    "volume_km3": 2.1287,
-   "n_obs": 4,
+   "n_obs": 2,
    "n_cells": 11206,
    "map": "extent_maps/2025-10-05.png"
   },
@@ -129,10 +129,10 @@
   },
   {
    "date": "2025-10-26",
-   "level_m": -13.683,
+   "level_m": -13.682,
    "area_km2": 2480.8,
-   "volume_km3": 1.6316,
-   "n_obs": 3,
+   "volume_km3": 1.6332,
+   "n_obs": 2,
    "n_cells": 9923,
    "map": "extent_maps/2025-10-26.png"
   },
@@ -186,7 +186,7 @@
    "level_m": -14.362,
    "area_km2": 611.8,
    "volume_km3": 0.2448,
-   "n_obs": 2,
+   "n_obs": 1,
    "n_cells": 2447,
    "map": "extent_maps/2026-01-17.png"
   },
@@ -195,7 +195,7 @@
    "level_m": -14.301,
    "area_km2": 639.5,
    "volume_km3": 0.2829,
-   "n_obs": 4,
+   "n_obs": 2,
    "n_cells": 2558,
    "map": "extent_maps/2026-02-07.png"
   },
@@ -204,7 +204,7 @@
    "level_m": -14.098,
    "area_km2": 757.5,
    "volume_km3": 0.4252,
-   "n_obs": 4,
+   "n_obs": 2,
    "n_cells": 3030,
    "map": "extent_maps/2026-02-08.png"
   },
@@ -213,7 +213,7 @@
    "level_m": -13.687,
    "area_km2": 2475.0,
    "volume_km3": 1.6221,
-   "n_obs": 4,
+   "n_obs": 2,
    "n_cells": 9900,
    "map": "extent_maps/2026-02-28.png"
   },
@@ -222,7 +222,7 @@
    "level_m": -13.712,
    "area_km2": 2435.0,
    "volume_km3": 1.5607,
-   "n_obs": 4,
+   "n_obs": 2,
    "n_cells": 9740,
    "map": "extent_maps/2026-03-01.png"
   },
@@ -249,7 +249,7 @@
    "level_m": -13.235,
    "area_km2": 3201.5,
    "volume_km3": 2.9047,
-   "n_obs": 4,
+   "n_obs": 2,
    "n_cells": 12806,
    "map": "extent_maps/2026-04-10.png"
   },

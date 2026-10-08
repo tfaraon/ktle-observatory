@@ -59,6 +59,46 @@ def resolve_path(p):
     return p if p.is_absolute() else ROOT / p
 
 
+def swot_dir(cfg):
+    """Repertoire des granules.
+
+    KTLE_SWOT_DIR l'emporte sur config.yaml : sur un serveur ou dans un
+    runner GitHub, le chemin n'est pas celui du disque externe, et
+    config.yaml est versionne — le surcharger ferait un conflit a chaque
+    publication.
+    """
+    env = os.environ.get("KTLE_SWOT_DIR")
+    if env:
+        return resolve_path(env)
+    return resolve_path(cfg["paths"]["swot_data"])
+
+
+def state_file(name, fallback):
+    """Fichier d'etat d'une chaine (cache d'extraction, cache de surface).
+
+    KTLE_STATE_DIR les range ailleurs que dans data/. Sur une machine
+    jetable — runner GitHub, conteneur — ces caches sont la seule memoire
+    de la serie une fois les granules effaces : ils doivent etre
+    versionnes, pas confies a un cache expirable.
+    """
+    env = os.environ.get("KTLE_STATE_DIR")
+    if env:
+        return resolve_path(env) / name
+    return resolve_path(fallback)
+
+
+def download_dir(cfg):
+    """Repertoire de telechargement, meme surcharge que swot_dir.
+
+    Sur un runner, telechargement et lecture visent le meme dossier
+    temporaire : les granules sont lus puis jetes.
+    """
+    env = os.environ.get("KTLE_SWOT_DIR")
+    if env:
+        return resolve_path(env)
+    return resolve_path(cfg["download"]["target_dir"])
+
+
 # ------------------------------------------------------------------
 # Fichiers locaux
 # ------------------------------------------------------------------
@@ -88,6 +128,115 @@ def granule_datetime(name):
     """Date d'acquisition extraite du nom de fichier, ou None."""
     m = GRANULE_DATE_RE.search(os.path.basename(name))
     return datetime.strptime(m.group(1), "%Y%m%dT%H%M%S") if m else None
+
+
+VERSION_SUFFIX_RE = re.compile(r"_P[A-Z]{2}\d_\d{2}\.nc$")
+
+
+def acquisition_key(name):
+    """Identite d'une acquisition, version de traitement exclue.
+
+    Un meme survol est rediffuse a chaque version du produit, sous un
+    nom qui ne differe que par le code de traitement : PGC0, PIC0, PIC2
+    (version C), PID0 (version D). Tuile, passe et horodatages de debut
+    et de fin, eux, sont identiques. Sans ce regroupement, une archive
+    retelechargee en version D et un cache garde depuis la version C
+    melangeraient deux mesures du meme survol dans la serie.
+    """
+    return VERSION_SUFFIX_RE.sub("", os.path.basename(name))
+
+
+def version_rank(name):
+    """Ordre des versions de traitement : PGC0 < PIC0 < PIC2 < PID0.
+
+    L'ordre alphabetique du code suit sa chronologie, ce qui evite une
+    table a maintenir ; une version ulterieure la prolongerait.
+    """
+    m = VERSION_SUFFIX_RE.search(os.path.basename(name))
+    return m.group(0) if m else ""
+
+
+def select_records(known, on_disk):
+    """Un enregistrement par acquisition, le meilleur disponible.
+
+    Ecarte les AppleDouble (« ._ », jamais un granule : le cache en
+    contient d'anciens, anterieurs au filtre de list_nc_files) et les
+    entrees sans WSE (granule hors du site ou illisible). Entre deux
+    versions d'un meme survol, garde celle presente sur le disque, sinon
+    la plus recente : la serie reste homogene meme si le cache a connu
+    plusieurs versions du produit.
+    """
+    best = {}
+    for name, rec in known.items():
+        if name.startswith("._") or not rec or rec.get("wse") is None:
+            continue
+        key = acquisition_key(name)
+        current = best.get(key)
+        if current is None:
+            best[key] = name
+            continue
+        # Priorite au fichier present, puis a la version la plus recente
+        here, there = name in on_disk, current in on_disk
+        if here != there:
+            if here:
+                best[key] = name
+        elif version_rank(name) > version_rank(current):
+            best[key] = name
+    return [(n, known[n]) for n in sorted(best.values())]
+
+
+def duplicate_basenames(files):
+    """Granules presents sous plusieurs chemins.
+
+    Un nom de granule SWOT porte toute son identite (passe, tuile,
+    dates, version) : le meme nom dans deux sous-repertoires est le meme
+    granule. Compte deux fois, il ajoute une fausse observation a la
+    serie et deplace les bornes du filtre IQR.
+    """
+    seen, dupes = set(), {}
+    for path in files:
+        b = os.path.basename(path)
+        if b in seen:
+            dupes.setdefault(b, []).append(path)
+        seen.add(b)
+    return dupes
+
+
+def known_basenames(cache):
+    """Granules deja extraits, d'apres le cache.
+
+    Sur une machine qui jette ses granules apres lecture, le repertoire
+    est vide alors que la serie en compte des centaines : c'est le cache
+    qui dit ce qui est connu. Sans cela, la recherche repartirait de
+    start_date et retelechargerait l'archive entiere a chaque passage.
+    """
+    names = set()
+    for entry in (cache.get("sites") or {}).values():
+        names.update(n for n in (entry.get("files") or {})
+                     if not n.startswith("._"))
+    return names
+
+
+def prune_cache(cache, on_disk):
+    """Allege le cache sans perdre de memoire utile.
+
+    Retire les AppleDouble, et les enregistrements d'une version de
+    traitement remplacee par une autre quand le granule n'est plus sur
+    le disque. Garde tout ce qui est present sur le disque, meme sans
+    WSE : ces entrees evitent de relire a chaque passage un granule hors
+    emprise ou illisible.
+
+    Retourne le nombre d'entrees retirees.
+    """
+    removed = 0
+    for entry in (cache.get("sites") or {}).values():
+        known = entry.get("files") or {}
+        keep = {n for n, _ in select_records(known, on_disk)}
+        keep |= {n for n in known if n in on_disk and not n.startswith("._")}
+        for name in [n for n in known if n not in keep]:
+            del known[name]
+            removed += 1
+    return removed
 
 
 def newest_granule_datetime(files):
@@ -187,16 +336,24 @@ def download_new_granules(cfg):
 
     dl = cfg["download"]
     collections = get_collections(dl)
-    target = resolve_path(dl["target_dir"])
+    target = download_dir(cfg)
     target.mkdir(parents=True, exist_ok=True)
-    swot_dir = resolve_path(cfg["paths"]["swot_data"])
+    archive = swot_dir(cfg)
 
-    all_local = list_nc_files(str(swot_dir)) if swot_dir.exists() else []
-    all_local += list_nc_files(str(target)) if target != swot_dir else []
+    all_local = list_nc_files(str(archive)) if archive.exists() else []
+    all_local += list_nc_files(str(target)) if target != archive else []
     local_basenames = {os.path.basename(f) for f in all_local}
 
+    # Granules deja extraits mais absents du disque : connus, donc ni
+    # retelecharges, ni ignores pour fixer la fenetre de recherche.
+    cached = known_basenames(load_cache(state_file(
+        "extraction_cache.json",
+        cfg["paths"].get("cache", "data/extraction_cache.json"))))
+    n_cached_only = len(cached - local_basenames)
+    local_basenames |= cached
+
     since = compute_since_date(
-        all_local,
+        sorted(local_basenames),
         dl.get("lookback_days", 45),
         dl.get("start_date")
         or cfg.get("extraction", {}).get("date_min")
@@ -204,8 +361,11 @@ def download_new_granules(cfg):
     )
     now = datetime.now(timezone.utc)
     temporal = (since.strftime("%Y-%m-%d"), now.strftime("%Y-%m-%d 23:59:59"))
+    if n_cached_only:
+        print(f"{len(local_basenames)} granules connus, dont {n_cached_only} "
+              "lus puis effacés (cache d'extraction)")
     print(f"Recherche des granules depuis le {temporal[0]} "
-          f"(dernier granule local - {dl.get('lookback_days', 45)} j)")
+          f"(dernier granule connu - {dl.get('lookback_days', 45)} j)")
 
     _earthdata_login(earthaccess)
 
@@ -335,7 +495,7 @@ def apply_post_filters(df, filter_bound, filter_outliers):
 # Extraction incrementale (worker _process_file de la toolbox)
 # ------------------------------------------------------------------
 
-def extract_sites_incremental(cfg, rebuild=False):
+def extract_sites_incremental(cfg, rebuild=False, prune=False):
     """Ne traite que les fichiers absents du cache (ou modifies),
     puis reassemble et filtre chaque serie complete.
 
@@ -345,12 +505,21 @@ def extract_sites_incremental(cfg, rebuild=False):
     import pandas as pd
 
     ex = cfg["extraction"]
-    swot_dir = resolve_path(cfg["paths"]["swot_data"])
-    if not swot_dir.exists():
-        raise ValueError(f"Directory '{swot_dir}' does not exist.")
+    archive = swot_dir(cfg)
+    if not archive.exists():
+        raise ValueError(f"Directory '{archive}' does not exist.")
 
-    files = list_nc_files(str(swot_dir), ex.get("filter_resolution"))
-    cache_path = resolve_path(cfg["paths"].get("cache", "data/extraction_cache.json"))
+    files = list_nc_files(str(archive), ex.get("filter_resolution"))
+    dupes = duplicate_basenames(files)
+    if dupes:
+        print(f"Attention : {len(dupes)} granule(s) présents sous plusieurs "
+              "chemins, comptés une seule fois.")
+        for name in sorted(dupes)[:5]:
+            print(f"  {name}")
+        print("  python tools/diagnose_wse.py les localise tous.")
+    cache_path = state_file(
+        "extraction_cache.json",
+        cfg["paths"].get("cache", "data/extraction_cache.json"))
     cache = {} if rebuild else load_cache(cache_path)
     cache.setdefault("sites", {})
 
@@ -377,15 +546,19 @@ def extract_sites_incremental(cfg, rebuild=False):
             entry = {"fingerprint": fp, "files": {}}
         known = entry["files"]
 
-        todo = []
+        todo, queued = [], set()
         for path in files:
             b = os.path.basename(path)
+            if b in queued:
+                continue          # meme granule sous un autre chemin
             rec = known.get(b)
             if rec is None or rec.get("size") != os.path.getsize(path):
                 todo.append(path)
+                queued.add(b)
 
+        n_known = len(set(known) | {os.path.basename(p) for p in files})
         print(f"\n=== {site['name']} ({site['lon']}, {site['lat']}) — "
-              f"{len(files)} granules, {len(todo)} a traiter ===")
+              f"{n_known} granules connus, {len(todo)} a traiter ===")
 
         if todo:
             new_files_union.update(os.path.basename(p) for p in todo)
@@ -419,17 +592,19 @@ def extract_sites_incremental(cfg, rebuild=False):
 
         cache["sites"][key] = entry
 
-        # Reassemblage de la serie complete depuis le cache
-        # (uniquement les fichiers actuellement presents sur disque)
+        # Reassemblage de la serie complete depuis le cache, y compris
+        # les granules absents du disque : sur une machine qui les jette
+        # apres lecture, s'en tenir au disque reduirait la serie aux
+        # granules du jour. Pour qu'un granule retire de l'archive
+        # disparaisse de la serie, relancer avec --rebuild-cache.
+        on_disk = {os.path.basename(p): p for p in files}
         rows = []
-        for path in files:
-            rec = known.get(os.path.basename(path))
-            if rec and rec.get("wse") is not None:
-                rows.append({
-                    "date": datetime.strptime(rec["date"], CACHE_DATE_FMT),
-                    "wse": rec["wse"], "filename": path,
-                    "pass": "Unknown", "resolution": "Unknown", "tile": "Unknown",
-                })
+        for name, rec in select_records(known, on_disk):
+            rows.append({
+                "date": datetime.strptime(rec["date"], CACHE_DATE_FMT),
+                "wse": rec["wse"], "filename": on_disk.get(name, name),
+                "pass": "Unknown", "resolution": "Unknown", "tile": "Unknown",
+            })
         df = pd.DataFrame(rows, columns=["date", "wse", "filename",
                                          "pass", "resolution", "tile"])
         df = apply_post_filters(df, ex.get("filter_bound", False),
@@ -441,11 +616,18 @@ def extract_sites_incremental(cfg, rebuild=False):
         )
         sites_out.append(build_site_entry(site, records))
 
+    if prune:
+        removed = prune_cache(cache, {os.path.basename(p) for p in files})
+        print(f"\nCache allégé : {removed} entrée(s) retirée(s).")
+
     save_cache(cache_path, cache)
 
-    newest = newest_granule_datetime(files)
+    # Compte et date de reference : tout ce que le cache connait, pas
+    # seulement ce qui reste sur le disque.
+    all_known = known_basenames(cache) | {os.path.basename(p) for p in files}
+    newest = newest_granule_datetime(sorted(all_known))
     source = {
-        "n_granules": len(files),
+        "n_granules": len(all_known),
         "last_granule_date": newest.strftime(CACHE_DATE_FMT) if newest else None,
         "new_this_run": len(new_files_union),
     }
@@ -462,13 +644,13 @@ def extract_sites(cfg):
     from SWOT_toolbox import SWOT_tools as stools
 
     ex = cfg["extraction"]
-    swot_dir = str(resolve_path(cfg["paths"]["swot_data"]))
+    archive = str(swot_dir(cfg))
 
     sites_out = []
     for site in cfg["sites"]:
         print(f"\n=== {site['name']} ({site['lon']}, {site['lat']}) ===")
         df = stools.extract_wse_timeseries_parallel(
-            directory_path=swot_dir,
+            directory_path=archive,
             lon=site["lon"],
             lat=site["lat"],
             buffer_size=ex.get("buffer_size", 0),
@@ -618,6 +800,9 @@ def main():
                         help="Ignore le cache et retraite tous les fichiers")
     parser.add_argument("--no-cache", action="store_true",
                         help="Utilise extract_wse_timeseries_parallel d'origine")
+    parser.add_argument("--prune-cache", action="store_true",
+                        help="Allège le cache : AppleDouble et versions "
+                             "de traitement remplacées")
     args = parser.parse_args()
 
     cfg = load_config(args.config)
@@ -631,7 +816,7 @@ def main():
 
     if args.no_cache:
         sites_out = extract_sites(cfg)
-        files = list_nc_files(str(resolve_path(cfg["paths"]["swot_data"])),
+        files = list_nc_files(str(swot_dir(cfg)),
                               cfg["extraction"].get("filter_resolution"))
         newest = newest_granule_datetime(files)
         source = {
@@ -640,7 +825,8 @@ def main():
             "new_this_run": (downloaded or {}).get("downloaded", 0),
         }
     else:
-        sites_out, source = extract_sites_incremental(cfg, rebuild=args.rebuild_cache)
+        sites_out, source = extract_sites_incremental(
+            cfg, rebuild=args.rebuild_cache, prune=args.prune_cache)
 
     if downloaded is not None:
         source["downloaded"] = downloaded["downloaded"]

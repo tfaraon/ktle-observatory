@@ -39,8 +39,14 @@ Ce qui differe, et pourquoi :
     ~15 % rapportes par l'article avec la fusion Sentinel-3.
 
 Usage :
-    python pipeline/lake_area.py            # -> data/lake_area.json
-    python pipeline/lake_area.py --limit 5  # essai rapide
+    python pipeline/lake_area.py                  # -> data/lake_area.json
+    python pipeline/lake_area.py --limit 5        # essai rapide
+    python pipeline/lake_area.py --rebuild-cache  # retraite tout
+
+Les journees deja calculees sont relues dans data/area_cache.json : seuls
+les jours dont la liste de granules a change sont retraites. Un granule
+peut donc etre efface apres son premier passage, ce qui permet de faire
+tourner la chaine la ou l'archive complete n'a pas sa place.
 """
 
 import argparse
@@ -564,15 +570,71 @@ def relative_volume_error(depth_error, area_error):
     return math.sqrt(depth_error ** 2 + area_error ** 2)
 
 
-def build(cfg, limit=None, out_path=OUT_FILE):
+def load_area_cache(path):
+    """Cache des journees deja calculees, ou cache vide si illisible."""
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            cache = json.load(f)
+    except (OSError, ValueError):
+        return {}
+    return cache if isinstance(cache, dict) else {}
+
+
+def cache_signature(acfg, boundary_cells, map_bounds, map_res):
+    """Ce qui, en changeant, invalide tout le cache.
+
+    Un reglage de filtre ou une emprise differente change la surface de
+    chaque journee : reutiliser d'anciennes entrees melangerait deux
+    methodes dans une meme serie.
+    """
+    return {
+        "parameters": {k: acfg[k] for k in sorted(acfg)
+                       if k in ("water_frac_range", "max_qual", "median_size",
+                                "resolution", "min_coverage", "boundary")},
+        "boundary_cells": boundary_cells,
+        "map_bounds": list(map_bounds) if map_bounds else None,
+        "map_resolution_m": map_res,
+    }
+
+
+def reusable(rec, names, map_dir):
+    """Vrai si l'entree du cache vaut encore pour cette journee.
+
+    Le PNG est verifie : s'il a ete supprime (nettoyage de site/data,
+    nouveau clone), la journee doit etre recalculee pour le reecrire.
+    """
+    if not isinstance(rec, dict) or rec.get("granules") != names:
+        return False
+    entry = rec.get("entry")
+    if entry is None:            # journee sans eau detectee : rien a refaire
+        return True
+    if not isinstance(entry, dict):
+        return False
+    png = entry.get("map")
+    if png and not (map_dir.parent / png).exists():
+        return False
+    return True
+
+
+def build(cfg, limit=None, out_path=OUT_FILE, rebuild=False,
+          cache_path=None):
     import scenarios as _  # noqa: F401  (verifie l'arborescence du projet)
-    from update_swot import list_nc_files, resolve_path
+    from update_swot import list_nc_files, state_file
+    from update_swot import swot_dir as granule_dir
 
     acfg = dict(DEFAULTS, **(cfg.get("area") or {}))
-    swot_dir = resolve_path(cfg["paths"]["swot_data"])
+    cache_path = Path(cache_path or state_file("area_cache.json", CACHE_FILE))
+    swot_dir = granule_dir(cfg)
     resolution = acfg.get("resolution")
     files = list_nc_files(str(swot_dir), resolution)
-    if not files:
+    if (not files and not rebuild and not limit
+            and load_area_cache(cache_path).get("days")):
+        # Repertoire vide mais cache rempli : c'est le fonctionnement
+        # normal d'un hebergement sans archive, ou les granules sont
+        # telecharges, lus, puis effaces.
+        print(f"Aucun granule présent : série reconstruite depuis "
+              f"{cache_path.name}.")
+    elif not files:
         # Distinguer les trois causes : sans cela, « aucun granule »
         # ne dit pas s'il faut monter un disque, corriger un chemin ou
         # relacher le filtre de resolution.
@@ -611,6 +673,39 @@ def build(cfg, limit=None, out_path=OUT_FILE):
     map_shape = grid_shape(map_bounds, map_res) if map_bounds else None
     want_mask = map_bounds is not None      # requis aussi pour la surface
     maps = {}          # date -> grilles cumulees
+    map_dir = out_path.parent / "area_maps"
+
+    # --- Cache par journee -----------------------------------------
+    # Une journee est figee des que tous ses granules sont connus : la
+    # surface se calcule sur la grille fusionnee du jour, pas granule
+    # par granule, donc c'est la journee qui est l'unite reutilisable.
+    # Sans cela, chaque passage relit toute l'archive, et l'archive doit
+    # rester montee en permanence.
+    signature = cache_signature(acfg, boundary_cells, map_bounds, map_res)
+    # Avec --limit, la vue est volontairement partielle : ni relue ni
+    # ecrite, pour qu'un essai rapide ne remplace pas la vraie serie.
+    cache = {} if (rebuild or limit) else load_area_cache(cache_path)
+    if cache.get("signature") != signature:
+        if cache and not rebuild:
+            print("Paramètres changés depuis le cache : recalcul complet.")
+        cache = {"signature": signature, "days": {}}
+    cached_days = cache.get("days") or {}
+
+    files_by_day = {}
+    for path in files:
+        when = granule_datetime(path)
+        if when is not None:
+            files_by_day.setdefault(when.strftime("%Y-%m-%d"), []).append(path)
+
+    todo, reused, day_names = [], {}, {}
+    for day, paths in files_by_day.items():
+        names = sorted(os.path.basename(p) for p in paths)
+        day_names[day] = names
+        rec = cached_days.get(day)
+        if reusable(rec, names, map_dir):
+            reused[day] = rec["entry"]
+        else:
+            todo.extend(paths)
 
     by_date = {}
     failures = []
@@ -618,12 +713,14 @@ def build(cfg, limit=None, out_path=OUT_FILE):
     workers = acfg.get("workers")
     if workers is None:
         workers = max(1, (os.cpu_count() or 2) - 1)
-    workers = max(1, min(int(workers), len(files)))
+    workers = max(1, min(int(workers), max(len(todo), 1)))
 
     def results():
         """Granules traites, en parallele au-dela d'un worker."""
+        if not todo:
+            return
         if workers == 1:
-            for path in files:
+            for path in todo:
                 yield _process_one_local(path)
             return
         from concurrent.futures import ProcessPoolExecutor
@@ -631,7 +728,7 @@ def build(cfg, limit=None, out_path=OUT_FILE):
         with ProcessPoolExecutor(
                 max_workers=workers, initializer=_init_worker,
                 initargs=(boundary, acfg, zone, south, want_mask)) as pool:
-            for out in pool.map(_process_one, files, chunksize=4):
+            for out in pool.map(_process_one, todo, chunksize=4):
                 yield out
 
     def _process_one_local(path):
@@ -641,7 +738,13 @@ def build(cfg, limit=None, out_path=OUT_FILE):
         except Exception as e:
             return path, None, f"{type(e).__name__}: {e}"[:100]
 
-    print(f"Traitement de {len(files)} granules sur {workers} processus…")
+    if reused:
+        print(f"{len(reused)} journée(s) reprises du cache "
+              f"({len(files) - len(todo)} granules non relus).")
+    if todo:
+        print(f"Traitement de {len(todo)} granules sur {workers} processus…")
+    else:
+        print("Aucun granule nouveau : série reconstruite depuis le cache.")
     for n, (path, res, err) in enumerate(results()):
         when = granule_datetime(path)
         if when is None:
@@ -661,12 +764,11 @@ def build(cfg, limit=None, out_path=OUT_FILE):
             # Le repertoire de telechargement peut contenir des granules
             # d'autres zones : ils sont ecartes par l'emprise du lac.
             outside += 1
-        if (n + 1) % 20 == 0 or n + 1 == len(files):
-            print(f"  {n + 1}/{len(files)} granules")
+        if (n + 1) % 20 == 0 or n + 1 == len(todo):
+            print(f"  {n + 1}/{len(todo)} granules")
 
-    map_dir = out_path.parent / "area_maps"
     n_overlap = 0
-    series = []
+    fresh = {}
     for day in sorted(by_date):
         entry = combine_scenes(by_date[day], boundary_cells,
                                acfg.get("min_coverage", 0.15))
@@ -685,7 +787,34 @@ def build(cfg, limit=None, out_path=OUT_FILE):
                     n_overlap += 1
             if write_mask_png(maps[day], map_dir / f"{day}.png"):
                 entry["map"] = f"area_maps/{day}.png"
-        series.append(entry)
+        fresh[day] = entry
+
+    # Les journees traitees sans eau retenue sont memorisees a None :
+    # sans cela, un granule hors de l'emprise serait relu a chaque
+    # passage.
+    days_out = {d: r for d, r in cached_days.items() if isinstance(r, dict)}
+    for day, names in day_names.items():
+        if day in fresh:
+            days_out[day] = {"granules": names, "entry": fresh[day]}
+        elif day in reused:
+            days_out[day] = {"granules": names, "entry": reused[day]}
+        else:
+            days_out[day] = {"granules": names, "entry": None}
+    days_out = {d: days_out[d] for d in sorted(days_out)}
+    cache["days"] = days_out
+    if not limit:
+        try:
+            cache_path.parent.mkdir(parents=True, exist_ok=True)
+            with open(cache_path, "w", encoding="utf-8") as f:
+                json.dump(cache, f, ensure_ascii=False)
+        except OSError as e:
+            print(f"Cache non écrit ({e}) : le prochain passage relira tout.")
+
+    # La serie vient du cache, non des granules presents : une journee
+    # dont les granules ont ete effaces (runner jetable, archive
+    # demontee) reste dans la serie.
+    series = [r["entry"] for r in days_out.values() if r.get("entry")]
+    n_granules = sum(len(r.get("granules") or []) for r in days_out.values())
 
     payload = {
         "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -709,7 +838,7 @@ def build(cfg, limit=None, out_path=OUT_FILE):
         "parameters": {k: acfg[k] for k in
                        ("water_frac_range", "max_qual", "median_size",
                         "resolution", "min_coverage") if k in acfg},
-        "n_granules": len(files),
+        "n_granules": n_granules,
         "map_bounds": ([[map_bounds[0], map_bounds[2]],
                         [map_bounds[1], map_bounds[3]]]
                        if map_bounds else None),
@@ -747,13 +876,13 @@ def diagnose(cfg, date, out_dir=None):
     a la grille lon/lat.
     """
     from PIL import Image
-    from update_swot import list_nc_files, resolve_path
+    from update_swot import list_nc_files, swot_dir as granule_dir
 
     acfg = dict(DEFAULTS, **(cfg.get("area") or {}))
     out_dir = Path(out_dir or (ROOT / "data" / "diagnose"))
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    all_files = list_nc_files(str(resolve_path(cfg["paths"]["swot_data"])),
+    all_files = list_nc_files(str(granule_dir(cfg)),
                               acfg.get("resolution"))
     files = [f for f in all_files
              if (granule_datetime(f) or datetime(1900, 1, 1))
@@ -822,6 +951,9 @@ def main():
     parser.add_argument("--diagnose", metavar="YYYY-MM-DD", default=None,
                         help="Écrit les masques d'une date sans "
                              "ré-échantillonnage, pour situer un artefact")
+    parser.add_argument("--rebuild-cache", action="store_true",
+                        help="Ignore data/area_cache.json et retraite "
+                             "toutes les journées")
     args = parser.parse_args()
 
     with open(args.config, "r", encoding="utf-8") as f:
@@ -831,7 +963,7 @@ def main():
         return
     if args.workers is not None:
         cfg.setdefault("area", {})["workers"] = args.workers
-    build(cfg, limit=args.limit)
+    build(cfg, limit=args.limit, rebuild=args.rebuild_cache)
 
 
 if __name__ == "__main__":

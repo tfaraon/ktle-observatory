@@ -124,11 +124,104 @@ with tempfile.TemporaryDirectory() as td:
     assert sites3[0]["latest"]["date"].startswith("2025-07-14")
     assert sites3[0]["stats"]["n"] == 5
 
+    # ── Granules effaces : la serie survit ──────────────────
+    # C'est le cas d'un hebergement sans archive : le granule est
+    # telecharge, lu, puis jete. S'en tenir au disque reduirait la serie
+    # aux granules du jour, et le site perdrait son historique.
+    saved = {n: (gdir / n).read_bytes() for n in list(VALUES)}
+    for f in gdir.glob("*.nc"):
+        f.unlink()
+    calls.clear()
+    sites4, source4 = update_swot.extract_sites_incremental(cfg)
+    assert len(calls) == 0, "aucun granule a relire"
+    assert sites4[0]["series"] == sites3[0]["series"], \
+        "serie identique sans aucun granule sur le disque"
+    assert source4["n_granules"] == 7, source4
+    assert source4["last_granule_date"].startswith("2025-07-14")
+
+    # Le cache sert aussi de memoire pour la fenetre de recherche :
+    # sans lui, elle repartirait de start_date et retelechargerait tout.
+    cache = update_swot.load_cache(tmp / "cache.json")
+    names = update_swot.known_basenames(cache)
+    assert len(names) == 7 and NEW_FILE in names, sorted(names)
+    assert update_swot.compute_since_date(sorted(names), 45, "2025-01-01") \
+        == datetime(2025, 7, 14, 3, 15) - timedelta(days=45)
+    # Et un granule connu n'est pas propose au telechargement
+    assert update_swot.filter_new_granules(
+        [type("G", (), {"data_links": lambda self: ["https://x/" + NEW_FILE]})()],
+        names) == []
+
+    for n, data in saved.items():
+        (gdir / n).write_bytes(data)
+    (gdir / NEW_FILE).write_bytes(b"x" * 16)
+
     # ── Changement de parametre : cache invalide ─────────────
     calls.clear()
     cfg_b3 = make_cfg(tmp, buffer_size=3)
     update_swot.extract_sites_incremental(cfg_b3)
     assert len(calls) == 7, "empreinte differente -> retraitement complet"
+
+    # ── Doublons : meme granule sous deux chemins ───────────
+    # L'ancienne methode les comptait deux fois, ce qui ajoutait de
+    # fausses observations et deplacait les bornes du filtre IQR.
+    sub = gdir / "copie"
+    sub.mkdir()
+    dup = sorted(VALUES)[0]
+    (sub / dup).write_bytes((gdir / dup).read_bytes())
+    files_dup = update_swot.list_nc_files(str(gdir))
+    dupes = update_swot.duplicate_basenames(files_dup)
+    assert list(dupes) == [dup], dupes
+    calls.clear()
+    sites5, _ = update_swot.extract_sites_incremental(cfg)
+    assert len(sites5[0]["series"]) == len(sites4[0]["series"]), \
+        "un granule dupliqué ne doit pas ajouter d'observation"
+    assert update_swot.duplicate_basenames(
+        [str(gdir / n) for n in VALUES]) == {}
+    (sub / dup).unlink()
+    sub.rmdir()
+
+    # ── Versions de traitement et AppleDouble ───────────────
+    # Cas reel : l'archive a ete retelechargee en version D, le cache
+    # garde les enregistrements des versions C et G des memes survols,
+    # et des AppleDouble anterieurs au filtre de list_nc_files. Sans
+    # regroupement par acquisition, la serie melangerait deux mesures du
+    # meme survol.
+    stem = ("SWOT_L2_HR_Raster_100m_UTM53J_N_x_x_x_044_435_052F"
+            "_20260118T221716_20260118T221737")
+    other = ("SWOT_L2_HR_Raster_100m_UTM53J_N_x_x_x_044_435_053F"
+             "_20260118T221736_20260118T221757_PID0_01.nc")
+    vd, vc, vg = (f"{stem}_PID0_01.nc", f"{stem}_PIC2_01.nc",
+                  f"{stem}_PGC0_01.nc")
+    assert update_swot.acquisition_key(vd) == update_swot.acquisition_key(vc) \
+        == update_swot.acquisition_key(vg)
+    assert update_swot.acquisition_key(vd) != update_swot.acquisition_key(other)
+    assert update_swot.version_rank(vg) < update_swot.version_rank(vc) \
+        < update_swot.version_rank(vd), "ordre chronologique des versions"
+
+    mixed = {n: {"wse": -13.0, "date": "2026-01-18T22:17:16", "size": 1}
+             for n in (vd, vc, vg, "._" + vc)}
+    mixed[other] = {"wse": -12.5, "date": "2026-01-18T22:17:36", "size": 1}
+    mixed["hors_emprise.nc"] = {"wse": None, "date": None, "size": 1}
+
+    # Version D sur le disque : c'est elle qui est retenue
+    sel = update_swot.select_records(mixed, {vd: "/x/" + vd, other: "/x/" + other})
+    assert [n for n, _ in sel] == sorted([vd, other]), sel
+    # Disque vide (granules jetes apres lecture) : version la plus recente
+    sel2 = update_swot.select_records(mixed, {})
+    assert [n for n, _ in sel2] == sorted([vd, other]), sel2
+    # Si seule la version C est connue, elle est gardee : pas de perte
+    only_c = {vc: mixed[vc]}
+    assert [n for n, _ in update_swot.select_records(only_c, {})] == [vc]
+
+    # --prune-cache retire ce que la selection n'utilise jamais, et
+    # garde les entrees sans WSE encore sur le disque, pour ne pas les
+    # relire a chaque passage.
+    cache_mixed = {"sites": {"s": {"files": dict(mixed)}}}
+    removed = update_swot.prune_cache(
+        cache_mixed, {vd, other, "hors_emprise.nc"})
+    assert removed == 3, removed          # ._, PIC2, PGC0
+    kept = cache_mixed["sites"]["s"]["files"]
+    assert set(kept) == {vd, other, "hors_emprise.nc"}, sorted(kept)
 
     # ── compute_since_date ───────────────────────────────────
     files = [str(gdir / n) for n in VALUES]

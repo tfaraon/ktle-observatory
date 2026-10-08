@@ -153,6 +153,9 @@ can be applied to the WSE at each site with `datum_offset`.
 # Download new granules and update the time series
 python pipeline/update_swot.py --download
 
+# Reprocess every day, ignoring state/area_cache.json
+python pipeline/lake_area.py --rebuild-cache
+
 # Rebuild the time series from files already on disk
 python pipeline/update_swot.py
 
@@ -320,6 +323,51 @@ To move to a custom domain later: set it in the repository's Settings, Pages,
 Custom domain (the site is published by a GitHub Actions workflow, so no
 `CNAME` file is needed), add the DNS record (a CNAME to `tfaraon.github.io`
 for a subdomain), then change `SITE_URL` in `deploy/local.env`.
+
+### Hosting it away from this computer
+
+The site itself already lives on GitHub Pages; what still needs this computer
+is the SWOT half of the refresh. Both SWOT chains are now incremental and keep
+their memory in `state/` — levels per granule, water area **per day**, since
+the area is computed on the merged grid of the day. A granule can therefore be
+downloaded, read and thrown away, which is what
+`.github/workflows/swot.yml` does: it fetches the new granules into the
+runner's temporary directory, computes, publishes, and the runner disappears
+with the files. `deploy/HEBERGEMENT.md` compares that route with a small
+always-on server and with mirroring the archive to object storage, and lists
+what has to be committed first (`state/`, and `data/bathymetry.npz` for the
+water extent). `KTLE_SWOT_DIR` and `KTLE_STATE_DIR` override the paths without
+touching the versioned `config.yaml`.
+
+Both chains now rebuild their series from their cache rather than from the
+granules present, so a granule may be read and deleted. The consequence is that
+removing a granule from the archive no longer removes it from the series:
+`--rebuild-cache` does that. Because a lost cache produces a successful run on
+a handful of granules rather than an error, `tools/check_series.py` compares
+each published series with the committed one and refuses to publish a shorter
+one. Both `deploy/publish.sh` and the workflow call it; `ALLOW_SHORTER=1`
+overrides it when a series is meant to shrink.
+
+When it does fire, `python tools/diagnose_wse.py` says why, without opening a
+single granule. It reads the cache and the file listing and separates the
+causes: the same granule present under two paths, which the old disk-based
+assembly counted twice; AppleDouble `._` entries left in the cache from before
+`list_nc_files` filtered them; the same overflight held under two processing
+versions; granules deleted from the archive; and the IQR filter, which groups
+on `pass`/`resolution`/`tile` — all `Unknown` for raster granules, so it acts
+on the whole series at once and shifts its bounds whenever points are added.
+
+Reading the series from the cache made two of those dangerous, so the assembly
+now works per acquisition rather than per filename. A granule is reissued under
+a new name at each product version (`PGC0`, `PIC0`, `PIC2`, `PID0`) with tile,
+pass and timestamps unchanged, so an archive re-downloaded in version D next to
+a cache kept from version C would otherwise contribute the same overflight
+twice. `acquisition_key` strips the version suffix, and `select_records` keeps
+one record per overflight: the one on disk, else the most recent version. It
+also drops `._` entries. Duplicate paths are reported in the update log and read
+once, and `python pipeline/update_swot.py --prune-cache` removes from the cache
+what the selection can no longer use, which matters once the cache is committed
+in `state/`.
 
 ### Self-hosted server that updates itself
 
@@ -774,6 +822,9 @@ files are created as needed.
 ```bash
 python tests/test_pipeline_wiring.py     # connection with SWOT_toolbox
 python tests/test_incremental.py         # incremental extraction and cache
+python tests/test_area_cache.py          # water area cached per day, granules disposable
+python tests/test_workflows.py           # GitHub workflows agree with the code
+python tests/test_check_series.py        # no published series ever shortens
 python tests/test_weather.py             # BOM parsing and rolling archive
 python tests/test_scenarios.py           # filename parsing and matching
 python tests/test_scenario_field.py      # NetCDF fields and map layers

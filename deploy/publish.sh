@@ -106,6 +106,18 @@ trap 'rm -f "$RESOLVER"' EXIT
 git config --get merge.keepnew.driver >/dev/null 2>&1 || \
   git config merge.keepnew.driver 'cp -f %B %A'
 
+# Garde-fou : une serie plus courte que celle deja publiee signale un
+# cache incremental ignore, pas une donnee qui aurait disparu. Le calcul
+# reussit dans les deux cas, d'ou ce controle avant tout commit.
+if [ "${ALLOW_SHORTER:-0}" != "1" ]; then
+  if ! python3 tools/check_series.py site/data/swot_wse.json \
+        site/data/lake_area.json site/data/water_extent.json; then
+    echo
+    echo "Pour publier malgré tout : ALLOW_SHORTER=1 ./update.sh"
+    exit 1
+  fi
+fi
+
 git add -A
 if git diff --cached --quiet; then
   echo "Rien à publier : le dépôt est déjà à jour."

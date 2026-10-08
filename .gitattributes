@@ -16,4 +16,9 @@ site/data/rainfall.json    merge=keepnew
 site/data/rivers.json      merge=keepnew
 # Attention : la macro « binary » desactive la fusion et annulerait
 # merge=keepnew ; on pose donc ses effets utiles un par un.
-site/data/rain_maps/*.png  -diff -text merge=keepnew
+site/data/rain_maps/*.png    -diff -text merge=keepnew
+site/data/area_maps/*.png    -diff -text merge=keepnew
+site/data/extent_maps/*.png  -diff -text merge=keepnew
+# Memoire des chaines incrementales : meme logique, le fichier qui vient
+# d'etre ecrit remplace l'autre.
+state/*.json  merge=keepnew
