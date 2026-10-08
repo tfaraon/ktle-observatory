@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-10-08T00:22:48Z",
+ "fetched_at": "2026-10-08T05:14:43Z",
  "demo": false,
  "stale": false,
  "errors": [],
@@ -2486,12 +2486,7 @@
     "rank": "species",
     "group": "Insecta"
    },
-   "photo": {
-    "square": "https://inaturalist-open-data.s3.amazonaws.com/photos/445225672/square.jpg",
-    "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/445225672/medium.jpg",
-    "license": "CC-BY-NC",
-    "attribution": "(c) zhongying / janetli, some rights reserved (CC BY-NC), uploaded by zhongying / janetli"
-   }
+   "photo": null
   },
   {
    "count": 5,
