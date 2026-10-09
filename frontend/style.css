@@ -1785,6 +1785,23 @@ nav.tabs, .subbar { max-width: calc(var(--page) - 56px); padding-left: 0; paddin
   background: repeating-linear-gradient(135deg, var(--grid), var(--grid) 12px, transparent 12px, transparent 24px);
   font-family: var(--font-display); color: var(--dune);
 }
+/* Plusieurs vues d'un même sujet. Deux colonnes au plus : à trois, les
+   photographies deviennent trop petites pour qu'on y distingue quoi que
+   ce soit, et le troisième panneau prend toute la largeur. */
+.fig-panels { display: grid; gap: 10px; grid-template-columns: 1fr 1fr; }
+.fig-panels[data-n="3"] .fig-panel:first-child { grid-column: 1 / -1; }
+.fig-panel { display: flex; flex-direction: column; gap: 6px; }
+.fig-panel img { height: 100%; object-fit: cover; }
+.fig-panel-cap {
+  font-family: var(--font-read); font-style: italic; font-size: 0.85rem;
+  line-height: 1.45; color: var(--dune);
+}
+.fig-panel-cap b { font-style: normal; }
+@media (max-width: 620px) {
+  .fig-panels { grid-template-columns: 1fr; }
+  .fig-panels[data-n="3"] .fig-panel:first-child { grid-column: auto; }
+}
+
 .fig-box span { font-weight: 600; font-size: 0.95rem; }
 .fig-box code { font-size: 0.8rem; background: #FFFFFF; padding: 3px 8px; border-radius: var(--radius); }
 

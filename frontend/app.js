@@ -2038,6 +2038,14 @@
       .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
   }
 
+  // Texte brut d'une légende, pour l'attribut alt : les légendes
+  // contiennent des <i> (noms d'espèces) et des entités HTML.
+  function stripTags(htmlText) {
+    const box = document.createElement("div");
+    box.innerHTML = String(htmlText || "");
+    return box.textContent.trim();
+  }
+
   async function loadEbird() {
     const sources = state.staticMode ? ["data/ebird.json"]
       : ["/api/ebird", "data/ebird.json"];
@@ -2951,15 +2959,37 @@
         const slug = el.dataset.fig;
         const f = figs[slug] || {};
         const caption = el.querySelector("figcaption");
-        const text = caption ? caption.innerHTML : "";
-        if (f.file) {
+        // La légende écrite dans la page sert de défaut ; figures.json
+        // peut la remplacer, ce qui permet d'ajuster un texte à l'image
+        // reçue sans relancer le constructeur de la page.
+        const text = f.caption ? esc(f.caption) : (caption ? caption.innerHTML : "");
+        const panels = Array.isArray(f.images)
+          ? f.images.filter((p) => p && p.file)
+          : (f.file ? [{ file: f.file, caption: "" }] : []);
+        if (panels.length) {
           const credit = f.credit
             ? `<span class="fig-credit">${f.url
                 ? `<a href="${esc(f.url)}" target="_blank" rel="noopener">${esc(f.credit)}</a>`
                 : esc(f.credit)}${f.date ? `, ${esc(fmtLongDate(f.date))}` : ""}</span>`
             : "";
-          el.innerHTML = `<img src="img/${esc(f.file)}" alt="${esc(el.textContent.trim())}" loading="lazy">`
-            + `<figcaption>${text}${credit}</figcaption>`;
+          const lead = stripTags(text) || slug;
+          if (panels.length === 1) {
+            el.innerHTML = `<img src="img/${esc(panels[0].file)}" alt="${esc(lead)}" loading="lazy">`
+              + `<figcaption>${text}${credit}</figcaption>`;
+          } else {
+            // Plusieurs vues d'un même sujet : panneaux lettrés, selon
+            // l'usage des figures d'article, chacun avec sa légende.
+            const body = panels.map((p, i) => {
+              const letter = String.fromCharCode(97 + i);
+              const own = p.caption ? esc(p.caption) : "";
+              return `<div class="fig-panel"><img src="img/${esc(p.file)}"`
+                + ` alt="${esc(lead)} (${letter})" loading="lazy">`
+                + `<span class="fig-panel-cap"><b>(${letter})</b>${own ? " " + own : ""}</span>`
+                + "</div>";
+            }).join("");
+            el.innerHTML = `<div class="fig-panels" data-n="${panels.length}">${body}</div>`
+              + `<figcaption>${text}${credit}</figcaption>`;
+          }
         } else if (!state.showPlaceholders) {
           // Cadres masqués : la page se lit sans trou, en attendant les images
           el.hidden = true;
@@ -2999,10 +3029,14 @@
       const img = e.target.closest("main img");
       if (img && (img.closest(".leaflet-container") || img.closest(".map-bar"))) return;
       if (!img) return;
+      // Dans une figure à panneaux, la légende utile est celle du
+      // panneau cliqué, pas celle de la figure entière.
+      const panel = img.closest(".fig-panel");
       const fig = img.closest("figure");
-      const cap = fig && fig.querySelector("figcaption")
-        ? fig.querySelector("figcaption").textContent.trim()
-        : (img.alt || img.title || "");
+      const own = panel && panel.querySelector(".fig-panel-cap");
+      const whole = fig && fig.querySelector("figcaption");
+      const cap = own ? own.textContent.trim()
+        : (whole ? whole.textContent.trim() : (img.alt || img.title || ""));
       openLightbox(img.dataset.full || img.src, cap);
     });
   }

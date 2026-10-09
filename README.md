@@ -209,6 +209,31 @@ no place online), and records it in the manifest with its credit. Set
 `"show_placeholders": false` in `figures.json` to hide empty frames from
 visitors while you work through them.
 
+Several views of one subject fit in a single slot, up to three. The first goes
+in as usual, the others with `--add`, and the page then lays them out as
+lettered panels, each with its own caption:
+
+```bash
+python tools/add_figure.py mound-spring blanche-cup-pool.jpg \
+    --credit "Photograph: Thomas Faraon" \
+    --caption "The pool at the summit of the mound" \
+    --figure-caption "Blanche Cup, one of the mound springs on the arc that
+                      runs from Lake Callabonna to Dalhousie."
+python tools/add_figure.py mound-spring blanche-cup-tail.jpg --add \
+    --caption "The carbonate tail below the vent"
+```
+
+`--figure-caption` writes a `caption` into the manifest that replaces the one
+written in the page, so a caption can be matched to the image that actually
+arrived without editing a builder or rebuilding anything. Captions per panel go
+in `--caption`; either every panel has one or none does, which
+`tests/test_figures.py` enforces, since one silent panel among captioned ones
+reads as an omission. The credit belongs to the slot, so `--add` inherits it.
+Three panels are the limit: beyond that the photographs are too small to show
+anything, and with three the first spans the full width. Clicking a panel
+enlarges it with that panel's caption, not the figure's.
+`tests/test_figure_panels.py` checks all of this in a headless browser.
+
 `tools/fetch_figures.py` fetches MODIS views from NASA GIBS for the six
 satellite slots, at dates chosen to illustrate the text, and records the scene
 date and credit in the manifest. The remaining slots wait for photographs or
@@ -825,6 +850,7 @@ python tests/test_incremental.py         # incremental extraction and cache
 python tests/test_area_cache.py          # water area cached per day, granules disposable
 python tests/test_workflows.py           # GitHub workflows agree with the code
 python tests/test_check_series.py        # no published series ever shortens
+python tests/test_figure_panels.py       # multi-view figures, in a real browser
 python tests/test_weather.py             # BOM parsing and rolling archive
 python tests/test_scenarios.py           # filename parsing and matching
 python tests/test_scenario_field.py      # NetCDF fields and map layers

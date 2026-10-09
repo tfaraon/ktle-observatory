@@ -51,19 +51,34 @@ def manifest():
     return json.loads(MANIFEST.read_text(encoding="utf-8"))
 
 
+def views(entry):
+    """Images d'un emplacement : « images » (plusieurs vues) ou « file ».
+
+    Meme lecture que tools/add_figure.py, redite ici pour que
+    l'inventaire n'impose pas d'importer l'installateur, qui depend de
+    Pillow.
+    """
+    if isinstance(entry.get("images"), list):
+        return [p["file"] for p in entry["images"]
+                if isinstance(p, dict) and p.get("file")]
+    return [entry["file"]] if entry.get("file") else []
+
+
 def main():
     figs = manifest()["figures"]
     slots = scan()
     ready = 0
     for slug, info in slots.items():
         entry = figs.get(slug, {})
-        if entry.get("file") and (FRONTEND / "img" / entry["file"]).exists():
-            state, detail = "image", entry.get("credit", "")
+        have = [f for f in views(entry) if (FRONTEND / "img" / f).exists()]
+        if have:
+            state = "image" if len(have) == 1 else f"{len(have)} vues"
+            detail = entry.get("credit", "")
             ready += 1
         else:
             state, detail = "à fournir", entry.get("note", "")
         print(f"{slug:<28} {state:<10} {info['page']:<20} {detail[:44]}")
-    print(f"\n{ready} image(s) sur {len(slots)} emplacements.")
+    print(f"\n{ready} emplacement(s) illustré(s) sur {len(slots)}.")
     unused = sorted(set(figs) - set(slots))
     if unused:
         print("Déclarés mais inutilisés :", ", ".join(unused))

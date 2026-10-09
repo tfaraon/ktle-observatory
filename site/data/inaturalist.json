@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-10-09T00:36:24Z",
+ "fetched_at": "2026-10-09T03:21:01Z",
  "demo": false,
  "stale": false,
  "errors": [],
@@ -14,7 +14,7 @@
  },
  "attribution": "Observations and photos from iNaturalist, each photo under the licence chosen by its observer.",
  "totals": {
-  "observations": 2660,
+  "observations": 2661,
   "species": 583,
   "observers": 305
  },
@@ -43,6 +43,31 @@
     "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/747340967/medium.jpg",
     "license": "CC-BY-NC",
     "attribution": "(c) w1984, some rights reserved (CC BY-NC)"
+   }
+  },
+  {
+   "id": 406920753,
+   "url": "https://www.inaturalist.org/observations/406920753",
+   "observed_on": "2026-10-04",
+   "quality": "needs_id",
+   "taxon": {
+    "name": "Aves",
+    "common": "Birds",
+    "rank": "class",
+    "group": "Aves"
+   },
+   "guess": null,
+   "observer": "tlaw",
+   "obscured": false,
+   "coords": [
+    -29.5211,
+    137.2991
+   ],
+   "photo": {
+    "square": "https://inaturalist-open-data.s3.amazonaws.com/photos/747700511/square.jpg",
+    "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/747700511/medium.jpg",
+    "license": "CC-BY-NC",
+    "attribution": "(c) tlaw, some rights reserved (CC BY-NC)"
    }
   },
   {
@@ -591,31 +616,6 @@
    "photo": {
     "square": "https://inaturalist-open-data.s3.amazonaws.com/photos/740263936/square.jpg",
     "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/740263936/medium.jpg",
-    "license": "CC-BY-NC",
-    "attribution": "(c) leilani32645, some rights reserved (CC BY-NC)"
-   }
-  },
-  {
-   "id": 403196629,
-   "url": "https://www.inaturalist.org/observations/403196629",
-   "observed_on": "2026-09-25",
-   "quality": "research",
-   "taxon": {
-    "name": "Latrodectus hasselti",
-    "common": "Redback Spider",
-    "rank": "species",
-    "group": "Arachnida"
-   },
-   "guess": "Redback Spider",
-   "observer": "leilani32645",
-   "obscured": false,
-   "coords": [
-    -29.6489,
-    138.0613
-   ],
-   "photo": {
-    "square": "https://inaturalist-open-data.s3.amazonaws.com/photos/740263359/square.jpg",
-    "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/740263359/medium.jpg",
     "license": "CC-BY-NC",
     "attribution": "(c) leilani32645, some rights reserved (CC BY-NC)"
    }
@@ -1483,7 +1483,7 @@
     "square": "https://inaturalist-open-data.s3.amazonaws.com/photos/47460/square.jpg",
     "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/47460/medium.jpg",
     "license": "CC-BY-NC",
-    "attribution": "(c) Jean, certains droits réservés (CC BY-NC)"
+    "attribution": "(c) Jean, some rights reserved (CC BY-NC)"
    }
   },
   {
@@ -2723,7 +2723,7 @@
     "square": "https://inaturalist-open-data.s3.amazonaws.com/photos/35440896/square.jpeg",
     "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/35440896/medium.jpeg",
     "license": "CC-BY-NC",
-    "attribution": "(c) wingspanner, osa oikeuksista pidätetään (CC BY-NC), lähettänyt wingspanner"
+    "attribution": "(c) wingspanner, some rights reserved (CC BY-NC), uploaded by wingspanner"
    }
   },
   {

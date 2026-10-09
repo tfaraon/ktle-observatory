@@ -38,8 +38,10 @@
       "note": "La Channel Country à sec : téléchargée par tools/fetch_figures.py"
     },
     "mound-spring": {
-      "credit": "",
-      "note": "Photograph of a mound spring, to be supplied."
+      "credit": "Photograph:Alanis Olesch-Byrne",
+      "file": "figures/mound-spring.jpg",
+      "caption": "Blanche Cup, one of the mound springs on the arc that runs from Lake Callabonna to Dalhousie.",
+      "panel_caption": "The pool at the top of Blanche Cup."
     },
     "gibber-plain": {
       "credit": "",
@@ -59,7 +61,9 @@
       "note": "Carte de l'extension du lac Dieri, à dessiner"
     },
     "goyder-channel": {
-      "note": "Photographie ou carte du Goyder Channel"
+      "file": "figures/goyder-channel.jpg",
+      "panel_caption": "Satellite view of the Goyder Channel, linking the southern and northern lakes.",
+      "credit": "Photograph:Copernicus Sentinel-2 L2A True Color"
     },
     "marree-track": {
       "note": "Photographie de la piste de Birdsville près de Marree"

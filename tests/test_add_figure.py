@@ -7,7 +7,9 @@ Une photographie de telephone porte la position GPS et l'heure de prise
 de vue : les publier serait indiscret. Ce test verifie que l'image
 ecrite n'en garde rien, qu'elle est ramenee a une largeur raisonnable,
 que le manifeste la declare avec son credit et perd sa note d'attente,
-et qu'un emplacement inconnu est refuse.
+et qu'un emplacement inconnu est refuse. Verifie aussi qu'un meme
+emplacement accepte jusqu'a trois vues du meme sujet, chacune avec sa
+legende, sans renommer la premiere ni perdre le credit.
 
 Execution :  python tests/test_add_figure.py
 """
@@ -66,6 +68,62 @@ with tempfile.TemporaryDirectory() as td:
     im2, _ = af.add("lake-eyre-dragon", small, "Photograph: Thomas Faraon")
     assert im2.size == (800, 600), im2.size
 
+    # ── Trois vues d'un même sujet dans un seul emplacement ──
+    # Cas de Blanche Cup : trois photographies du même mound spring, qui
+    # doivent tenir dans l'emplacement « mound-spring » en panneaux
+    # lettrés, chacune avec sa légende.
+    views = []
+    for i in range(3):
+        v = td / f"blanche-{i}.jpg"
+        Image.new("RGB", (2400, 1600), (100 + 10 * i, 120, 110)).save(v, exif=exif)
+        views.append(v)
+
+    af.add("mound-spring", views[0], "Photograph: Thomas Faraon",
+           caption="The pool at the summit of the mound",
+           figure_caption="Blanche Cup, one of the mound springs on the arc "
+                          "that runs from Lake Callabonna to Dalhousie.")
+    entry = fs.manifest()["figures"]["mound-spring"]
+    # Une seule vue : forme simple conservée, pas de liste
+    assert entry["file"] == "figures/mound-spring.jpg", entry
+    assert "images" not in entry
+    assert entry["caption"].startswith("Blanche Cup")
+
+    af.add("mound-spring", views[1], None, caption="The carbonate tail below "
+           "the vent", append=True)
+    af.add("mound-spring", views[2], None, caption="Reeds around the outflow",
+           append=True)
+    entry = fs.manifest()["figures"]["mound-spring"]
+    panels = af.panel_files(entry)
+    assert [p["file"] for p in panels] == ["figures/mound-spring.jpg",
+                                           "figures/mound-spring-2.jpg",
+                                           "figures/mound-spring-3.jpg"], panels
+    assert [p["caption"] for p in panels][1] == "The carbonate tail below the vent"
+    assert "file" not in entry, "« file » et « images » ne coexistent pas"
+    # La première image garde son nom : les liens déjà publiés restent bons
+    for p in panels:
+        f = work / "img" / p["file"]
+        assert f.exists(), p
+        assert not Image.open(f).getexif(), f"métadonnées restantes dans {p['file']}"
+    # Le crédit de l'emplacement survit à un ajout sans --credit
+    assert entry["credit"] == "Photograph: Thomas Faraon"
+    # La légende de la figure n'est pas écrasée par un ajout
+    assert entry["caption"].startswith("Blanche Cup")
+
+    # Au-delà de trois, l'ajout est refusé plutôt que de produire une
+    # grille illisible
+    try:
+        af.add("mound-spring", views[0], None, caption="x", append=True)
+        raise AssertionError("un quatrième panneau doit être refusé")
+    except SystemExit as e:
+        assert "maximum" in str(e), e
+
+    # --add sur un emplacement vide : refusé, avec la marche à suivre
+    try:
+        af.add("salt-crust", views[0], "Photograph: Thomas Faraon", append=True)
+        raise AssertionError("--add sur un emplacement vide doit être refusé")
+    except SystemExit as e:
+        assert "sans --add" in str(e), e
+
     # Emplacement inconnu : refusé, avec la liste des emplacements connus
     try:
         af.add("inconnu", src, "x")
@@ -74,4 +132,5 @@ with tempfile.TemporaryDirectory() as td:
         assert SLUG in str(e)
 
 print("OK — image redimensionnée, métadonnées et position GPS retirées, manifeste complété "
-      "avec le crédit, petites images intactes, emplacement inconnu refusé.")
+      "avec le crédit, petites images intactes, trois vues légendées dans un seul "
+      "emplacement, quatrième refusée, emplacement inconnu refusé.")
