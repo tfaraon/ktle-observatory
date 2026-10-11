@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-10-10T23:47:53Z",
+ "fetched_at": "2026-10-11T23:56:19Z",
  "demo": false,
  "stale": false,
  "errors": [],
@@ -15,7 +15,7 @@
  "attribution": "Observations and photos from iNaturalist, each photo under the licence chosen by its observer.",
  "totals": {
   "observations": 2661,
-  "species": 584,
+  "species": 585,
   "observers": 305
  },
  "top_species": 12,
@@ -39,8 +39,8 @@
     136.7754
    ],
    "photo": {
-    "square": "https://inaturalist-open-data.s3.amazonaws.com/photos/747340967/square.jpg",
-    "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/747340967/medium.jpg",
+    "square": "https://inaturalist-open-data.s3.amazonaws.com/photos/748721992/square.jpg",
+    "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/748721992/medium.jpg",
     "license": "CC-BY-NC",
     "attribution": "(c) w1984, some rights reserved (CC BY-NC)"
    }
