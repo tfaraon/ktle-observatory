@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-10-13T02:13:14Z",
+ "fetched_at": "2026-10-13T23:50:38Z",
  "demo": false,
  "stale": false,
  "errors": [],
@@ -15,7 +15,7 @@
  "attribution": "Observations and photos from iNaturalist, each photo under the licence chosen by its observer.",
  "totals": {
   "observations": 2662,
-  "species": 585,
+  "species": 586,
   "observers": 306
  },
  "top_species": 12,
@@ -4098,7 +4098,7 @@
     "square": "https://inaturalist-open-data.s3.amazonaws.com/photos/138476016/square.jpg",
     "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/138476016/medium.jpg",
     "license": "CC-BY-NC",
-    "attribution": "(c) Yingyod Lapwong،  بعض الحقوق محفوظة (CC BY-NC), uploaded by Yingyod Lapwong"
+    "attribution": "(c) Yingyod Lapwong, some rights reserved (CC BY-NC), uploaded by Yingyod Lapwong"
    }
   },
   {
@@ -4590,7 +4590,7 @@
     "square": "https://inaturalist-open-data.s3.amazonaws.com/photos/335897180/square.jpg",
     "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/335897180/medium.jpg",
     "license": "CC-BY-NC",
-    "attribution": "(c) Bart Wursten, some rights reserved (CC BY-NC), uploaded by Bart Wursten"
+    "attribution": "(c) Bart Wursten, alguns direitos reservados (CC BY-NC), carregado por Bart Wursten"
    }
   },
   {
