@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-10-16T22:59:28Z",
+ "fetched_at": "2026-10-17T22:36:59Z",
  "demo": false,
  "stale": false,
  "errors": [],
@@ -184,7 +184,7 @@
    "id": 408643026,
    "url": "https://www.inaturalist.org/observations/408643026",
    "observed_on": "2026-10-16",
-   "quality": "needs_id",
+   "quality": "research",
    "taxon": {
     "name": "Calocephalus badmanii",
     "common": null,
@@ -406,7 +406,7 @@
     "rank": "class",
     "group": "Aves"
    },
-   "guess": null,
+   "guess": "Birds",
    "observer": "tlaw",
    "obscured": false,
    "coords": [
@@ -4408,10 +4408,10 @@
     "group": "Aves"
    },
    "photo": {
-    "square": "https://inaturalist-open-data.s3.amazonaws.com/photos/1927693/square.jpg",
-    "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/1927693/medium.jpg",
+    "square": "https://inaturalist-open-data.s3.amazonaws.com/photos/461663650/square.jpeg",
+    "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/461663650/medium.jpeg",
     "license": "CC-BY-NC",
-    "attribution": "(c) Paul Cools, some rights reserved (CC BY-NC), uploaded by Paul Cools"
+    "attribution": "(c) Daniel Eugenio Pérez Garrido, some rights reserved (CC BY-NC), uploaded by Daniel Eugenio Pérez Garrido"
    }
   },
   {
