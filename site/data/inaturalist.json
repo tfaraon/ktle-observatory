@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-10-17T22:36:59Z",
+ "fetched_at": "2026-10-18T22:34:21Z",
  "demo": false,
  "stale": false,
  "errors": [],
@@ -124,7 +124,7 @@
    "id": 408642719,
    "url": "https://www.inaturalist.org/observations/408642719",
    "observed_on": "2026-10-16",
-   "quality": "needs_id",
+   "quality": "research",
    "taxon": {
     "name": "Nitraria billardierei",
     "common": "nitre bush",
@@ -4319,6 +4319,18 @@
   },
   {
    "count": 2,
+   "taxon_id": 33193,
+   "url": "https://www.inaturalist.org/taxa/33193",
+   "taxon": {
+    "name": "Diplodactylus tessellatus",
+    "common": "Tesselated Gecko",
+    "rank": "species",
+    "group": "Reptilia"
+   },
+   "photo": null
+  },
+  {
+   "count": 2,
    "taxon_id": 34626,
    "url": "https://www.inaturalist.org/taxa/34626",
    "taxon": {
@@ -5438,23 +5450,6 @@
     "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/59678158/medium.jpg",
     "license": "CC-BY-NC",
     "attribution": "(c) Dougal Townsend, some rights reserved (CC BY-NC), uploaded by Dougal Townsend"
-   }
-  },
-  {
-   "count": 2,
-   "taxon_id": 1020297,
-   "url": "https://www.inaturalist.org/taxa/1020297",
-   "taxon": {
-    "name": "Aristida contorta",
-    "common": "bunched kerosene grass",
-    "rank": "species",
-    "group": "Plantae"
-   },
-   "photo": {
-    "square": "https://inaturalist-open-data.s3.amazonaws.com/photos/227840664/square.jpeg",
-    "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/227840664/medium.jpeg",
-    "license": "CC-BY",
-    "attribution": "(c) Thomas Mesaglio, some rights reserved (CC BY), uploaded by Thomas Mesaglio"
    }
   }
  ]
