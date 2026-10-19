@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-10-18T22:34:21Z",
+ "fetched_at": "2026-10-19T23:54:47Z",
  "demo": false,
  "stale": false,
  "errors": [],
@@ -3232,7 +3232,7 @@
     "square": "https://inaturalist-open-data.s3.amazonaws.com/photos/350708162/square.jpg",
     "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/350708162/medium.jpg",
     "license": "CC-BY-NC",
-    "attribution": "(c) Nicole Brooker, some rights reserved (CC BY-NC), uploaded by Nicole Brooker"
+    "attribution": "(c) Nicole Brooker, bazı hakları saklıdır (CC BY-NC), yükleyen: Nicole Brooker"
    }
   },
   {
@@ -4234,7 +4234,7 @@
     "square": "https://inaturalist-open-data.s3.amazonaws.com/photos/42490066/square.jpg",
     "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/42490066/medium.jpg",
     "license": "CC-BY-NC",
-    "attribution": "(c) Frédéric Desmoulins, some rights reserved (CC BY-NC), uploaded by Frédéric Desmoulins"
+    "attribution": "(c) Frédéric Desmoulins, bazı hakları saklıdır (CC BY-NC), yükleyen: Frédéric Desmoulins"
    }
   },
   {
@@ -4760,7 +4760,7 @@
     "square": "https://inaturalist-open-data.s3.amazonaws.com/photos/75667113/square.jpeg",
     "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/75667113/medium.jpeg",
     "license": "CC-BY",
-    "attribution": "(c) Russell Best, some rights reserved (CC BY), uploaded by Russell Best"
+    "attribution": "(c) Russell Best, certains droits réservés (CC BY), publiées par Russell Best"
    }
   },
   {
