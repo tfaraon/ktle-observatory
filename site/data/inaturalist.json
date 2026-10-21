@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-10-20T23:22:13Z",
+ "fetched_at": "2026-10-21T23:35:29Z",
  "demo": false,
  "stale": false,
  "errors": [],
@@ -14,12 +14,37 @@
  },
  "attribution": "Observations and photos from iNaturalist, each photo under the licence chosen by its observer.",
  "totals": {
-  "observations": 2727,
-  "species": 588,
-  "observers": 309
+  "observations": 2728,
+  "species": 589,
+  "observers": 310
  },
  "top_species": 12,
  "recent": [
+  {
+   "id": 409869147,
+   "url": "https://www.inaturalist.org/observations/409869147",
+   "observed_on": "2026-10-21",
+   "quality": "needs_id",
+   "taxon": {
+    "name": "Lucasium stenodactylus",
+    "common": "Western Sandplain Gecko",
+    "rank": "species",
+    "group": "Reptilia"
+   },
+   "guess": null,
+   "observer": "rhiberry",
+   "obscured": false,
+   "coords": [
+    -28.1346,
+    137.6919
+   ],
+   "photo": {
+    "square": "https://inaturalist-open-data.s3.amazonaws.com/photos/753703312/square.jpg",
+    "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/753703312/medium.jpg",
+    "license": "CC-BY-NC",
+    "attribution": "(c) rhiberry, some rights reserved (CC BY-NC)"
+   }
+  },
   {
    "id": 408642551,
    "url": "https://www.inaturalist.org/observations/408642551",
@@ -519,31 +544,6 @@
     "license": "CC-BY-NC",
     "attribution": "(c) Monina Gilbey, some rights reserved (CC BY-NC)"
    }
-  },
-  {
-   "id": 404917824,
-   "url": "https://www.inaturalist.org/observations/404917824",
-   "observed_on": "2026-10-01",
-   "quality": "research",
-   "taxon": {
-    "name": "Glareola isabella",
-    "common": "Australian Pratincole",
-    "rank": "species",
-    "group": "Aves"
-   },
-   "guess": "Australian Pratincole",
-   "observer": "mgilbey",
-   "obscured": false,
-   "coords": [
-    -29.6569,
-    138.0724
-   ],
-   "photo": {
-    "square": "https://inaturalist-open-data.s3.amazonaws.com/photos/743672796/square.jpg",
-    "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/743672796/medium.jpg",
-    "license": "CC-BY-NC",
-    "attribution": "(c) Monina Gilbey, some rights reserved (CC BY-NC)"
-   }
   }
  ],
  "species": [
@@ -959,7 +959,7 @@
     "square": "https://inaturalist-open-data.s3.amazonaws.com/photos/266780710/square.jpg",
     "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/266780710/medium.jpg",
     "license": "CC-BY-NC-SA",
-    "attribution": "(c) Sam Gordon, bazı hakları saklıdır (CC BY-NC-SA), yükleyen: Sam Gordon"
+    "attribution": "(c) Sam Gordon, some rights reserved (CC BY-NC-SA), uploaded by Sam Gordon"
    }
   },
   {
@@ -2755,7 +2755,7 @@
     "square": "https://inaturalist-open-data.s3.amazonaws.com/photos/29852321/square.jpg",
     "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/29852321/medium.jpg",
     "license": "CC-BY-NC",
-    "attribution": "(c) David McCorquodale, bazı hakları saklıdır (CC BY-NC), yükleyen: David McCorquodale"
+    "attribution": "(c) David McCorquodale, some rights reserved (CC BY-NC), uploaded by David McCorquodale"
    }
   },
   {
