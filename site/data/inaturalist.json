@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-10-21T23:35:29Z",
+ "fetched_at": "2026-10-22T23:33:18Z",
  "demo": false,
  "stale": false,
  "errors": [],
@@ -871,10 +871,10 @@
     "group": "Aves"
    },
    "photo": {
-    "square": "https://inaturalist-open-data.s3.amazonaws.com/photos/547540505/square.jpg",
-    "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/547540505/medium.jpg",
-    "license": "CC-BY-NC",
-    "attribution": "(c) Paul Cools, some rights reserved (CC BY-NC), uploaded by Paul Cools"
+    "square": "https://inaturalist-open-data.s3.amazonaws.com/photos/158802479/square.jpg",
+    "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/158802479/medium.jpg",
+    "license": "CC0",
+    "attribution": "no rights reserved, uploaded by Joshua S. Martin"
    }
   },
   {
