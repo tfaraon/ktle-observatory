@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-10-23T23:26:54Z",
+ "fetched_at": "2026-10-24T22:42:41Z",
  "demo": false,
  "stale": false,
  "errors": [],
@@ -99,7 +99,7 @@
    "id": 408642551,
    "url": "https://www.inaturalist.org/observations/408642551",
    "observed_on": "2026-10-16",
-   "quality": "needs_id",
+   "quality": "research",
    "taxon": {
     "name": "Acacia stenophylla",
     "common": "shoestring acacia",
@@ -354,7 +354,7 @@
    "id": 408643101,
    "url": "https://www.inaturalist.org/observations/408643101",
    "observed_on": "2026-10-16",
-   "quality": "needs_id",
+   "quality": "research",
    "taxon": {
     "name": "Nitraria billardierei",
     "common": "nitre bush",
@@ -1818,7 +1818,7 @@
     "square": "https://inaturalist-open-data.s3.amazonaws.com/photos/13799381/square.jpg",
     "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/13799381/medium.jpg",
     "license": "CC-BY-NC",
-    "attribution": "(c) Nik Borrow, bazı hakları saklıdır (CC BY-NC)"
+    "attribution": "(c) Nik Borrow, some rights reserved (CC BY-NC)"
    }
   },
   {
