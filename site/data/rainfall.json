@@ -1,8 +1,10 @@
 {
- "fetched_at": "2026-10-23T00:42:35Z",
+ "fetched_at": "2026-10-24T00:45:54Z",
  "demo": false,
  "stale": false,
- "errors": [],
+ "errors": [
+  "2026-10-23: HTTPError"
+ ],
  "source": "SILO, Queensland Government",
  "licence": "CC BY 4.0",
  "source_url": "https://www.longpaddock.qld.gov.au/silo/",
@@ -319,12 +321,6 @@
    "mean_mm": 0.07,
    "max_mm": 2.9,
    "png": "rain_maps/20260924.png"
-  },
-  {
-   "date": "2026-09-23",
-   "mean_mm": 0.0,
-   "max_mm": 0.2,
-   "png": "rain_maps/20260923.png"
   }
  ],
  "sum7": {
@@ -336,18 +332,14 @@
   "png": "rain_maps/sum7.png"
  },
  "sum30": {
-  "from": "2026-09-23",
+  "from": "2026-09-24",
   "to": "2026-10-22",
-  "n_days": 30,
+  "n_days": 29,
   "mean_mm": 31.21,
   "max_mm": 200.5,
   "png": "rain_maps/sum30.png"
  },
  "series": [
-  [
-   "2026-09-23",
-   0.0
-  ],
   [
    "2026-09-24",
    0.07
