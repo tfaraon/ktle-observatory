@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-10-25T22:46:58Z",
+ "fetched_at": "2026-10-27T00:03:08Z",
  "demo": false,
  "stale": false,
  "errors": [],
@@ -14,7 +14,7 @@
  },
  "attribution": "Observations and photos from iNaturalist, each photo under the licence chosen by its observer.",
  "totals": {
-  "observations": 2736,
+  "observations": 2740,
   "species": 590,
   "observers": 312
  },
@@ -566,6 +566,18 @@
   },
   {
    "count": 38,
+   "taxon_id": 14110,
+   "url": "https://www.inaturalist.org/taxa/14110",
+   "taxon": {
+    "name": "Taeniopygia guttata",
+    "common": "Zebra Finch",
+    "rank": "species",
+    "group": "Aves"
+   },
+   "photo": null
+  },
+  {
+   "count": 38,
    "taxon_id": 481614,
    "url": "https://www.inaturalist.org/taxa/481614",
    "taxon": {
@@ -580,18 +592,6 @@
     "license": "CC-BY",
     "attribution": "(c) Eamonn Culhane, some rights reserved (CC BY), uploaded by Eamonn Culhane"
    }
-  },
-  {
-   "count": 37,
-   "taxon_id": 14110,
-   "url": "https://www.inaturalist.org/taxa/14110",
-   "taxon": {
-    "name": "Taeniopygia guttata",
-    "common": "Zebra Finch",
-    "rank": "species",
-    "group": "Aves"
-   },
-   "photo": null
   },
   {
    "count": 35,
@@ -947,6 +947,23 @@
   },
   {
    "count": 17,
+   "taxon_id": 4681,
+   "url": "https://www.inaturalist.org/taxa/4681",
+   "taxon": {
+    "name": "Falco cenchroides",
+    "common": "Nankeen Kestrel",
+    "rank": "species",
+    "group": "Aves"
+   },
+   "photo": {
+    "square": "https://inaturalist-open-data.s3.amazonaws.com/photos/332277464/square.jpg",
+    "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/332277464/medium.jpg",
+    "license": "CC-BY-NC",
+    "attribution": "(c) Charles Dove, some rights reserved (CC BY-NC), uploaded by Charles Dove"
+   }
+  },
+  {
+   "count": 17,
    "taxon_id": 370319,
    "url": "https://www.inaturalist.org/taxa/370319",
    "taxon": {
@@ -977,23 +994,6 @@
     "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/164668615/medium.jpg",
     "license": "CC-BY-NC",
     "attribution": "(c) Nik Borrow, some rights reserved (CC BY-NC)"
-   }
-  },
-  {
-   "count": 16,
-   "taxon_id": 4681,
-   "url": "https://www.inaturalist.org/taxa/4681",
-   "taxon": {
-    "name": "Falco cenchroides",
-    "common": "Nankeen Kestrel",
-    "rank": "species",
-    "group": "Aves"
-   },
-   "photo": {
-    "square": "https://inaturalist-open-data.s3.amazonaws.com/photos/332277464/square.jpg",
-    "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/332277464/medium.jpg",
-    "license": "CC-BY-NC",
-    "attribution": "(c) Charles Dove, some rights reserved (CC BY-NC), uploaded by Charles Dove"
    }
   },
   {
@@ -1413,6 +1413,23 @@
   },
   {
    "count": 10,
+   "taxon_id": 8078,
+   "url": "https://www.inaturalist.org/taxa/8078",
+   "taxon": {
+    "name": "Artamus leucorynchus",
+    "common": "White-breasted Woodswallow",
+    "rank": "species",
+    "group": "Aves"
+   },
+   "photo": {
+    "square": "https://inaturalist-open-data.s3.amazonaws.com/photos/187809631/square.jpeg",
+    "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/187809631/medium.jpeg",
+    "license": "CC-BY-NC",
+    "attribution": "(c) juju98, some rights reserved (CC BY-NC), uploaded by juju98"
+   }
+  },
+  {
+   "count": 10,
    "taxon_id": 79058,
    "url": "https://www.inaturalist.org/taxa/79058",
    "taxon": {
@@ -1458,20 +1475,20 @@
    "photo": null
   },
   {
-   "count": 9,
-   "taxon_id": 8078,
-   "url": "https://www.inaturalist.org/taxa/8078",
+   "count": 10,
+   "taxon_id": 508976,
+   "url": "https://www.inaturalist.org/taxa/508976",
    "taxon": {
-    "name": "Artamus leucorynchus",
-    "common": "White-breasted Woodswallow",
+    "name": "Ptilotula penicillata",
+    "common": "White-plumed Honeyeater",
     "rank": "species",
     "group": "Aves"
    },
    "photo": {
-    "square": "https://inaturalist-open-data.s3.amazonaws.com/photos/187809631/square.jpeg",
-    "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/187809631/medium.jpeg",
-    "license": "CC-BY-NC",
-    "attribution": "(c) juju98, some rights reserved (CC BY-NC), uploaded by juju98"
+    "square": "https://inaturalist-open-data.s3.amazonaws.com/photos/450560617/square.jpg",
+    "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/450560617/medium.jpg",
+    "license": "CC-BY-SA",
+    "attribution": "(c) JJ Harrison, some rights reserved (CC BY-SA)"
    }
   },
   {
@@ -1569,23 +1586,6 @@
     "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/175542553/medium.jpg",
     "license": "CC-BY",
     "attribution": "(c) Kym Nicolson, some rights reserved (CC BY), uploaded by Kym Nicolson"
-   }
-  },
-  {
-   "count": 9,
-   "taxon_id": 508976,
-   "url": "https://www.inaturalist.org/taxa/508976",
-   "taxon": {
-    "name": "Ptilotula penicillata",
-    "common": "White-plumed Honeyeater",
-    "rank": "species",
-    "group": "Aves"
-   },
-   "photo": {
-    "square": "https://inaturalist-open-data.s3.amazonaws.com/photos/450560617/square.jpg",
-    "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/450560617/medium.jpg",
-    "license": "CC-BY-SA",
-    "attribution": "(c) JJ Harrison, some rights reserved (CC BY-SA)"
    }
   },
   {
