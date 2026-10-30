@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-10-29T00:21:29Z",
+ "fetched_at": "2026-10-30T00:16:22Z",
  "demo": false,
  "stale": false,
  "errors": [],
@@ -738,7 +738,7 @@
     "square": "https://inaturalist-open-data.s3.amazonaws.com/photos/256049502/square.jpg",
     "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/256049502/medium.jpg",
     "license": "CC-BY-NC",
-    "attribution": "(c) Tom Hunt, bazı hakları saklıdır (CC BY-NC), yükleyen: Tom Hunt"
+    "attribution": "(c) Tom Hunt, some rights reserved (CC BY-NC), uploaded by Tom Hunt"
    }
   },
   {
