@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-11-01T23:50:57Z",
+ "fetched_at": "2026-11-02T09:27:41Z",
  "demo": false,
  "stale": false,
  "errors": [],
@@ -15,7 +15,7 @@
  "attribution": "Observations and photos from iNaturalist, each photo under the licence chosen by its observer.",
  "totals": {
   "observations": 2740,
-  "species": 590,
+  "species": 591,
   "observers": 312
  },
  "top_species": 12,
