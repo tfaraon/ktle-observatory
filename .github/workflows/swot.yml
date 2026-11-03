@@ -41,14 +41,24 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 90
     env:
-      # Les granules vivent et meurent avec le runner.
-      KTLE_SWOT_DIR: ${{ runner.temp }}/swot
-      # La memoire des chaines, elle, est versionnee.
+      # La memoire des chaines est versionnee.
+      # KTLE_SWOT_DIR est pose par la premiere etape, et non ici : le
+      # contexte « runner » n'existe pas encore au niveau du job, et un
+      # ${{ runner.temp }} a cet endroit rend le fichier invalide. GitHub
+      # n'en cree alors aucune execution et affiche le workflow par son
+      # chemin au lieu de son nom.
       KTLE_STATE_DIR: state
       EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
       EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
     steps:
       - uses: actions/checkout@v5
+
+      - name: Point the chains at a scratch directory
+        run: |
+          # RUNNER_TEMP est une variable d'environnement, disponible dans
+          # toute etape, la ou le contexte « runner » ne l'est pas au
+          # niveau du job. Les granules y vivent et meurent avec le runner.
+          echo "KTLE_SWOT_DIR=$RUNNER_TEMP/swot" >> "$GITHUB_ENV"
 
       - name: Check the committed state
         run: |

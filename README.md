@@ -223,9 +223,33 @@ python tools/add_figure.py mound-spring blanche-cup-tail.jpg --add \
     --caption "The carbonate tail below the vent"
 ```
 
+Keep the originals outside the repository. The installed copy is rewritten
+without metadata, but the original still carries its GPS position and capture
+time, and `publish.sh` stages everything with `git add -A`, so an original left
+in the working tree would go to a public repository untouched. `update.sh` now
+ignores an `img/` folder at the repository root for that reason, the leading
+slash leaving `frontend/img/` versioned, and `add_figure.py` says so when the
+file it is given lies inside the repository.
+
 `--figure-caption` writes a `caption` into the manifest that replaces the one
 written in the page, so a caption can be matched to the image that actually
-arrived without editing a builder or rebuilding anything. Captions per panel go
+arrived without editing a builder or rebuilding anything. To change a caption
+later, without touching the image, `tools/set_caption.py` edits the same keys:
+
+```bash
+python tools/set_caption.py                      # every figure and its captions
+python tools/set_caption.py mound-spring         # one figure
+python tools/set_caption.py mound-spring --figure "Blanche Cup, …"
+python tools/set_caption.py mound-spring --panel b "The carbonate tail …"
+python tools/set_caption.py mound-spring --reset  # back to the page's caption
+```
+
+Editing `frontend/figures.json` by hand does the same thing; the script exists
+to keep the JSON valid and to refuse, before publication rather than in a test
+afterwards, a figure caption under eight words or a caption containing an em
+dash. The caption written in the page, in the builder's `{fig:slug|…}` marker,
+stays the default for any slot without an override, and changing it there means
+rebuilding that page. Captions per panel go
 in `--caption`; either every panel has one or none does, which
 `tests/test_figures.py` enforces, since one silent panel among captioned ones
 reads as an omission. The credit belongs to the slot, so `--add` inherits it.
@@ -363,6 +387,19 @@ always-on server and with mirroring the archive to object storage, and lists
 what has to be committed first (`state/`, and `data/bathymetry.npz` for the
 water extent). `KTLE_SWOT_DIR` and `KTLE_STATE_DIR` override the paths without
 touching the versioned `config.yaml`.
+
+Two failures worth knowing about, because both were silent. A `${{ runner.temp }}`
+in a job-level `env:` makes a workflow file invalid: the `runner` context does not
+exist at that point, GitHub creates no run at all, and the only visible sign is the
+workflow listed by its path rather than its name in the Actions sidebar. And a push
+made with the repository's `GITHUB_TOKEN` never triggers another workflow, which is
+GitHub's loop protection, so the data chains committing as `github-actions[bot]` were
+landing data in the repository while `Deploy site`, which listened only for `push`,
+never fired and the published site stayed at the last human push. `pages.yml` now
+also triggers on `workflow_run` of the five data chains, and
+`tests/test_workflows.py` checks both: that no job-level `env` uses a context
+unavailable there, and that every chain which pushes is named in the `workflow_run`
+list.
 
 Both chains now rebuild their series from their cache rather than from the
 granules present, so a granule may be read and deleted. The consequence is that
@@ -851,6 +888,7 @@ python tests/test_area_cache.py          # water area cached per day, granules d
 python tests/test_workflows.py           # GitHub workflows agree with the code
 python tests/test_check_series.py        # no published series ever shortens
 python tests/test_figure_panels.py       # multi-view figures, in a real browser
+python tests/test_set_caption.py         # editing a caption already in place
 python tests/test_weather.py             # BOM parsing and rolling archive
 python tests/test_scenarios.py           # filename parsing and matching
 python tests/test_scenario_field.py      # NetCDF fields and map layers

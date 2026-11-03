@@ -44,9 +44,17 @@ fi
 SITE_URL="${SITE_URL:-https://tfaraon.github.io/ktle-observatory/}"
 SITE_URL="${SITE_URL%/}/"
 
-# Fichiers locaux jamais versionnes
+# Fichiers locaux jamais versionnes.
+#
+# « /img/ » protege un cas precis : les photographies d'origine deposees
+# dans un dossier img/ a la racine du depot. tools/add_figure.py en
+# ecrit une copie sans metadonnees dans frontend/img/, mais l'original
+# garde sa position GPS et son heure de prise de vue, et le « git add -A »
+# de la publication les enverrait tels quels sur un depot public. La
+# barre oblique initiale ne vise que la racine : frontend/img/ reste
+# versionne.
 touch .gitignore
-for pattern in "deploy/local.env" "logs/" "data/rain_cache/"; do
+for pattern in "deploy/local.env" "logs/" "data/rain_cache/" "/img/"; do
   grep -qxF "$pattern" .gitignore || echo "$pattern" >> .gitignore
 done
 

@@ -79,9 +79,13 @@ env = job["env"]
 # ecrirait dans data/ et telechargerait dans le depot.
 code = (ROOT / "pipeline" / "update_swot.py").read_text(encoding="utf-8")
 for var in ("KTLE_SWOT_DIR", "KTLE_STATE_DIR"):
-    assert var in env, f"swot.yml : {var} absent"
+    assert var in text, f"swot.yml : {var} absent"
     assert f'environ.get("{var}")' in code, f"{var} n'est lu par aucun code"
-assert "runner.temp" in env["KTLE_SWOT_DIR"], \
+# KTLE_SWOT_DIR est pose dans une etape, via $GITHUB_ENV : au niveau du
+# job, le contexte « runner » n'existe pas encore.
+assert "KTLE_SWOT_DIR" not in env, \
+    "KTLE_SWOT_DIR au niveau du job : il lui faut le temporaire du runner"
+assert 'KTLE_SWOT_DIR=$RUNNER_TEMP' in text and '$GITHUB_ENV' in text, \
     "les granules doivent aller dans le temporaire du runner, pas dans le dépôt"
 assert env["KTLE_STATE_DIR"] == "state", env["KTLE_STATE_DIR"]
 for var in ("EARTHDATA_USERNAME", "EARTHDATA_PASSWORD"):
@@ -133,6 +137,47 @@ for name, text in texts.items():
 for folder in re.findall(r"site/data/(\w+_maps)", "\n".join(texts.values())):
     assert f"site/data/{folder}/*.png" in attrs, f"{folder} sans règle de fusion"
 assert "state/*.json" in attrs, "l'état versionné doit avoir une règle de fusion"
+
+# ── Contextes autorises dans « env » au niveau du job ────────
+# Le contexte « runner » n'existe pas encore quand GitHub evalue
+# jobs.<id>.env : un ${{ runner.temp }} a cet endroit rend le fichier
+# invalide, aucune execution n'est creee, et le seul symptome visible
+# est un workflow affiche par son chemin au lieu de son nom. Ce test a
+# ete ecrit apres que ce defaut a fige la chaine SWOT pendant un mois.
+FORBIDDEN_AT_JOB_LEVEL = ("runner.", "job.", "steps.", "env.")
+for name, flow in flows.items():
+    for job_id, job in (flow.get("jobs") or {}).items():
+        for key, value in (job.get("env") or {}).items():
+            for ctx in FORBIDDEN_AT_JOB_LEVEL:
+                assert "${{ " + ctx not in str(value), (
+                    f"{name} : {job_id}.env.{key} utilise le contexte "
+                    f"« {ctx.rstrip('.')} », indisponible au niveau du job ; "
+                    "posez-le dans une étape, via $GITHUB_ENV")
+
+# ── Publication apres une chaine de donnees ──────────────────
+# Une poussee faite avec le GITHUB_TOKEN ne declenche aucun autre
+# workflow : sans « workflow_run », le site publie reste celui de la
+# derniere poussee humaine, pendant que les chaines verdissent.
+pages = flows["pages.yml"]
+trig = triggers(pages)
+assert "workflow_run" in trig, \
+    "pages.yml doit se déclencher à la fin des chaînes de données"
+watched = set(trig["workflow_run"]["workflows"])
+pushers = {flow.get("name") for n, flow in flows.items()
+           if "git push" in texts[n] and n != "pages.yml"}
+assert pushers <= watched, (
+    "chaînes qui publient sans réveiller « Deploy site » : "
+    f"{sorted(pushers - watched)}")
+assert watched <= {f.get("name") for f in flows.values()}, (
+    f"« workflow_run » nomme un workflow inexistant : "
+    f"{sorted(watched - {f.get('name') for f in flows.values()})}")
+# Ne pas republier apres une chaine en echec
+job = pages["jobs"]["deploy"]
+assert "workflow_run.conclusion" in str(job.get("if", "")), \
+    "pages.yml publie même après une chaîne en échec"
+# Un deploiement en cours ne doit pas etre interrompu par le suivant
+assert pages["concurrency"]["cancel-in-progress"] is False, \
+    "une publication interrompue laisse le site dans l'état précédent"
 
 # ── Horaires : pas deux chaines a la meme minute ─────────────
 slots = [(c, n) for n, crons in scheduled.items() for c in crons

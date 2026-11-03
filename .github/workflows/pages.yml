@@ -12,10 +12,26 @@
 # generateurs de site (base_path), inutile pour un dossier statique.
 name: Deploy site
 
+# Pourquoi « workflow_run » et pas seulement « push » : une poussee faite
+# avec le GITHUB_TOKEN du depot ne declenche aucun autre workflow. C'est
+# une protection de GitHub contre les boucles, et elle est silencieuse.
+# Les chaines de donnees commitent sous github-actions[bot], donc leurs
+# poussees n'allumaient jamais ce workflow : la donnee arrivait dans le
+# depot, le site publie restait celui de la derniere poussee humaine.
+# « workflow_run » se declenche a la fin d'un autre workflow, quel que
+# soit le compte qui a pousse, et resout exactement ce cas.
 on:
   push:
     branches: [main]
     paths: ["site/**"]
+  workflow_run:
+    workflows:
+      - "Refresh BOM weather"
+      - "Refresh catchment rain and rivers"
+      - "Refresh eBird observations"
+      - "Refresh iNaturalist observations"
+      - "Refresh SWOT levels and lake area"
+    types: [completed]
   workflow_dispatch:
 
 permissions:
@@ -25,10 +41,18 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: true
+  # Une publication en cours va jusqu'au bout : plusieurs chaines
+  # finissent a quelques minutes d'intervalle, et interrompre un
+  # deploiement a mi-course laisserait le site dans l'etat precedent.
+  cancel-in-progress: false
 
 jobs:
   deploy:
+    # Rien a publier si la chaine qui vient de finir a echoue : on
+    # garderait le site tel quel plutot que de republier a l'identique.
+    if: >-
+      github.event_name != 'workflow_run' ||
+      github.event.workflow_run.conclusion == 'success'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

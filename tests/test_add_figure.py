@@ -124,6 +124,21 @@ with tempfile.TemporaryDirectory() as td:
     except SystemExit as e:
         assert "sans --add" in str(e), e
 
+    # ── Original déposé dans le dépôt : averti ──────────────
+    # La copie publiée est nettoyée, mais l'original garde sa position
+    # GPS et le « git add -A » de la publication l'enverrait tel quel.
+    assert af.inside_repo(src) is None, "une source hors dépôt n'alerte pas"
+    inside = af.ROOT / "img" / "figures" / "IMG_0001.JPG"
+    note = af.inside_repo(inside)
+    assert note and "GPS" in note and "img/figures/IMG_0001.JPG" in note, note
+    assert "git rm -r --cached" in note
+    # Les images déjà installées, elles, n'ont rien à signaler
+    assert af.inside_repo(af.ROOT / "frontend" / "img" / "figures" / "x.jpg") is None
+
+    # update.sh doit ignorer ce dossier, sinon l'avertissement reste seul
+    ignore = (af.ROOT / "update.sh").read_text(encoding="utf-8")
+    assert '"/img/"' in ignore, "update.sh n'ignore pas /img/ à la racine"
+
     # Emplacement inconnu : refusé, avec la liste des emplacements connus
     try:
         af.add("inconnu", src, "x")
@@ -133,4 +148,5 @@ with tempfile.TemporaryDirectory() as td:
 
 print("OK — image redimensionnée, métadonnées et position GPS retirées, manifeste complété "
       "avec le crédit, petites images intactes, trois vues légendées dans un seul "
-      "emplacement, quatrième refusée, emplacement inconnu refusé.")
+      "emplacement, quatrième refusée, original laissé dans le dépôt signalé, "
+      "emplacement inconnu refusé.")

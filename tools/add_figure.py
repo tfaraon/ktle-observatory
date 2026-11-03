@@ -60,6 +60,32 @@ def panel_files(entry):
     return []
 
 
+def inside_repo(source):
+    """Avertissement si l'original est depose dans le depot.
+
+    L'image installee est reecrite sans metadonnees, mais l'original
+    garde sa position GPS et son heure de prise de vue. Depose dans le
+    depot, il part sur un depot public au prochain « git add -A » de la
+    publication, et le soin pris a nettoyer la copie n'y change rien.
+    Retourne le message a afficher, ou None.
+    """
+    try:
+        rel = Path(source).resolve().relative_to(ROOT)
+    except ValueError:
+        return None
+    if rel.parts[:2] == ("frontend", "img"):
+        return None
+    return (f"Attention : l'original est dans le dépôt ({rel}).\n"
+            "  La copie publiée est nettoyée, mais CE fichier garde sa "
+            "position GPS\n"
+            "  et son heure de prise de vue. update.sh ignore désormais "
+            "un dossier\n"
+            "  « /img/ » à la racine ; ailleurs, gardez les originaux "
+            "hors du dépôt.\n"
+            "  Déjà versionné ? « git ls-files img/ » le dit, "
+            "« git rm -r --cached img » le retire.")
+
+
 def target_name(slug, index):
     """Nom de fichier d'un panneau : le premier garde le nom nu, pour
     ne pas renommer les images deja publiees."""
@@ -164,6 +190,9 @@ def main():
     im, dest = add(args.slug, args.source, credit, args.licence, args.url,
                    caption=args.caption, figure_caption=args.figure_caption,
                    append=args.add)
+    note = inside_repo(args.source)
+    if note:
+        print(note)
     entry = fs.manifest()["figures"][args.slug]
     n = len(panel_files(entry))
     print(f"{args.slug} : {im.width}x{im.height} écrit dans {dest}, "
