@@ -50,3 +50,4 @@ data/diagnose/
 deploy/local.env
 logs/
 data/rain_cache/
+/img/
