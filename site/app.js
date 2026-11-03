@@ -31,14 +31,8 @@
     methodsLoaded: false,
     loadedPages: {},
     ebird: null,
-    birdsLayer: null,
-    lastTab: { lake: "lake-overview", basin: "catchment", water: "methods",
-               nature: "natural-history", people: "country" },
-    figures: null, showPlaceholders: true, wxMap: null,
-    rain: null, rivers: null, rainMap: null, flowMap: null, rainOverlay: null, flowStations: null, rrView: "sum7",
-    birdsMap: null,
-    inat: null,
-    inatMap: null,
+    birdLayer: null,
+    lastTab: { science: "modelling" },
     catchmentMap: null,
     weather: null, area: null, extent: null,
     rosePeriod: "h24",
@@ -781,7 +775,7 @@
     // définitive : c'est là que Plotly peut mesurer juste.
     requestAnimationFrame(() => {
       grid.querySelectorAll(".rose-plot").forEach((el) => {
-        if (el.data) Plotly.Plots.resize(el);
+        if (el.data && el.getClientRects().length) Plotly.Plots.resize(el);
       });
     });
 
@@ -1062,13 +1056,6 @@
 
   // ── Delft3D scenario ─────────────────────────────────────
 
-  // L'index des scénarios peut avoir été généré par une version ancienne,
-  // dont les libellés étaient en français : on impose ceux du site.
-  const PARAM_LABELS = {
-    wind_speed: "Wind speed", wind_dir: "Wind direction",
-    wlvl: "Water level", salinity: "Salinity",
-  };
-
   function fmtParam(key, v, units) {
     if (v === null || v === undefined) return "—";
     const u = units[key] ? " " + units[key] : "";
@@ -1083,7 +1070,7 @@
       : `offset ${d > 0 ? "+" : ""}${d.toFixed(key === "wind_dir" ? 0 : 2)}`
         + (units[key] ? " " + units[key] : "");
     return `<div class="match-item${out ? " out" : ""}">
-      <span class="match-label">${PARAM_LABELS[key] || labels[key] || key}</span>
+      <span class="match-label">${labels[key] || key}</span>
       <span class="match-values">
         <span class="match-obs">${fmtParam(key, target[key], units)}</span>
         <span class="match-arrow">→</span>
@@ -1813,27 +1800,16 @@
   // méthodes et les publications. Chaque onglet appartient à une partie.
   const SECTION_OF = {
     home: "home",
-    "lake-overview": "lake",
-    floods: "lake",
-    catchment: "basin",
-    "rain-to-lake": "basin",
-    "river-flow": "basin",
-    methods: "water",
-    modelling: "water",
-    rainfall: "water",
-    weather: "water",
-    publications: "water",
-    "natural-history": "nature",
-    "fauna-flora": "nature",
-    birds: "nature",
-    inaturalist: "nature",
-    country: "people",
-    culture: "people",
-    stories: "people",
-    data: "people",
+    "natural-history": "natural-history",
+    catchment: "catchment",
+    culture: "culture",
+    stories: "culture",
+    observatory: "observatory",
+    birds: "natural-history",
+    modelling: "science",
+    methods: "science",
+    publications: "science",
   };
-  // Anciennes adresses, pour que les liens déjà partagés continuent de marcher
-  const ALIASES = { observatory: "modelling", "rain-rivers": "river-flow", lake: "lake-overview" };
   // Contenus injectés à la première ouverture, et préfixes des ancres
   // qu'ils portent : sections et références de chaque page.
   // Un « const » global n'est pas une propriété de window : window[nom]
@@ -1842,31 +1818,11 @@
   const LAZY_PAGES = {
     "natural-history": {
       html: () => (typeof NATURAL_HISTORY_HTML === "string" ? NATURAL_HISTORY_HTML : null),
-      anchors: /^(nh|nhref)-/,
-    },
-    "lake-overview": {
-      html: () => (typeof LAKE_HTML === "string" ? LAKE_HTML : null),
-      anchors: /^(nh-lake|lk|lkref)-/,
-    },
-    country: {
-      html: () => (typeof COUNTRY_HTML === "string" ? COUNTRY_HTML : null),
-      anchors: /^(nh-country|cp|cpref)-/,
+      anchors: /^(nh|ref)-/,
     },
     culture: {
       html: () => (typeof ABORIGINAL_CULTURE_HTML === "string" ? ABORIGINAL_CULTURE_HTML : null),
       anchors: /^(ac|acref)-/,
-    },
-    "fauna-flora": {
-      html: () => (typeof FAUNA_FLORA_HTML === "string" ? FAUNA_FLORA_HTML : null),
-      anchors: /^(ff|ffref)-/,
-    },
-    floods: {
-      html: () => (typeof FLOODS_HTML === "string" ? FLOODS_HTML : null),
-      anchors: /^(fl|flref)-/,
-    },
-    "rain-to-lake": {
-      html: () => (typeof RAIN_TO_LAKE_HTML === "string" ? RAIN_TO_LAKE_HTML : null),
-      anchors: /^(rl|rlref)-/,
     },
     catchment: {
       html: () => (typeof CATCHMENT_HTML === "string" ? CATCHMENT_HTML : null),
@@ -1900,12 +1856,9 @@
     });
     state.loadedPages[name] = true;
     if (name === "catchment") initCatchmentMap();
-    fillFigures($("tab-" + name));
-    if (name === "fauna-flora") renderGroupBlocks();
   }
 
   function showTab(name, anchor) {
-    name = ALIASES[name] || name;
     if (!SECTION_OF[name]) name = "home";
     const section = SECTION_OF[name];
     state.lastTab[section] = name;
@@ -1923,8 +1876,10 @@
       b.classList.toggle("active", on);
       b.setAttribute("aria-selected", on ? "true" : "false");
     });
+    const dashboardView = ["observatory", "modelling", "birds"].includes(name);
+    $("tab-observatory").dataset.view = name;
     document.querySelectorAll(".tab-panel").forEach((p) => {
-      p.hidden = p.id !== "tab-" + name;
+      p.hidden = p.id !== "tab-" + (dashboardView ? "observatory" : name);
     });
 
     if (name === "methods" && !state.methodsLoaded) {
@@ -1939,11 +1894,18 @@
 
     // Leaflet et Plotly calculent leurs dimensions au moment du rendu :
     // masqués, ils mesurent zéro et restent figés au retour.
-    requestAnimationFrame(() => {
-      if (name === "modelling" && state.map) state.map.invalidateSize();
-      const panel = $("tab-" + name);
-      if (panel) panel.querySelectorAll(".js-plotly-plot").forEach((el) => Plotly.Plots.resize(el));
-    });
+    if (dashboardView) {
+      requestAnimationFrame(() => {
+        if (state.map) state.map.invalidateSize();
+        ["chart", "area-chart", "weather-history"].forEach((id) => {
+          const el = $(id);
+          if (el && el.data && el.getClientRects().length) Plotly.Plots.resize(el);
+        });
+        document.querySelectorAll(".rose-plot").forEach((el) => {
+          if (el.data && el.getClientRects().length) Plotly.Plots.resize(el);
+        });
+      });
+    }
 
     try { history.replaceState(null, "", "#" + (anchor || name)); } catch (_) { /* ignore */ }
     if (anchor) {
@@ -1957,42 +1919,6 @@
     if (name === "catchment" && state.catchmentMap) {
       requestAnimationFrame(() => state.catchmentMap.invalidateSize());
     }
-    if (name === "rain-to-lake") requestAnimationFrame(renderTravel);
-    if (name === "methods") requestAnimationFrame(methodsContents);
-    if (name === "weather") {
-      requestAnimationFrame(() => {
-        initWeatherMap();
-        if (state.wxMap) state.wxMap.invalidateSize();
-      });
-    }
-    if (name === "data") {
-      const el = $("cite-date");
-      if (el) el.textContent = fmtLongDate(new Date().toISOString().slice(0, 10));
-    }
-    if (name === "rainfall") {
-      requestAnimationFrame(() => {
-        initRainMap();
-        if (state.rainMap) state.rainMap.invalidateSize();
-      });
-    }
-    if (name === "river-flow") {
-      requestAnimationFrame(() => {
-        initFlowMap();
-        if (state.flowMap) state.flowMap.invalidateSize();
-      });
-    }
-    if (name === "inaturalist") {
-      requestAnimationFrame(() => {
-        initInatMap();
-        if (state.inatMap) state.inatMap.invalidateSize();
-      });
-    }
-    if (name === "birds") {
-      requestAnimationFrame(() => {
-        initBirdsMap();
-        if (state.birdsMap) state.birdsMap.invalidateSize();
-      });
-    }
   }
 
   // Adresses reconnues : le nom d'un onglet (#natural-history, #culture,
@@ -2001,8 +1927,7 @@
   function route(hash) {
     const h = (hash || "").replace("#", "");
     if (!h) return false;
-    const t = ALIASES[h] || h;
-    if (SECTION_OF[t]) { showTab(t); return true; }
+    if (SECTION_OF[h]) { showTab(h); return true; }
     for (const [name, spec] of Object.entries(LAZY_PAGES)) {
       if (spec.anchors.test(h)) { showTab(name, h); return true; }
     }
@@ -2038,14 +1963,6 @@
       .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
   }
 
-  // Texte brut d'une légende, pour l'attribut alt : les légendes
-  // contiennent des <i> (noms d'espèces) et des entités HTML.
-  function stripTags(htmlText) {
-    const box = document.createElement("div");
-    box.innerHTML = String(htmlText || "");
-    return box.textContent.trim();
-  }
-
   async function loadEbird() {
     const sources = state.staticMode ? ["data/ebird.json"]
       : ["/api/ebird", "data/ebird.json"];
@@ -2060,9 +1977,7 @@
 
   function renderBirds(data) {
     const card = $("birds-card");
-    const ok = card && data && Array.isArray(data.species) && typeof EBird !== "undefined";
-    if ($("birds-empty")) $("birds-empty").hidden = Boolean(ok);
-    if (!ok) {
+    if (!card || !data || !Array.isArray(data.species) || typeof EBird === "undefined") {
       if (card) card.hidden = true;
       return;
     }
@@ -2072,17 +1987,11 @@
     $("birds-updated").textContent = data.fetched_at
       ? "fetched " + data.fetched_at.replace("T", " ").replace("Z", " UTC") : "";
 
-    const where = data.area ? "around the lake, from William Creek to Marree,"
-      : `within ${esc(data.dist_km)} km of ${(data.points || []).length} points on the lake`;
     const notes = [
-      `The most recent sighting of each species ${where} over the last `
+      `The most recent sighting of each species within ${esc(data.dist_km)} km of `
+      + `${(data.points || []).length} points on the lake over the last `
       + `${esc(data.back_days)} days: a list of species reported, not a count of birds.`,
     ];
-    const nHot = (data.hotspots || []).length;
-    if (nHot) {
-      notes.push(`${spell(nHot)} eBird hotspot${nHot > 1 ? "s lie" : " lies"} in this area; those visited `
-        + "in the period are filled on the map.");
-    }
     if (sum.nPrivate) {
       notes.push(sum.nPrivate === 1
         ? "One sighting from a private location is listed without its location."
@@ -2115,72 +2024,48 @@
         + `<td>${esc(EBird.formatDate(sp.obsDt))}<span class="sci">${ageText}</span></td>`
         + `<td>${esc(EBird.formatCount(sp.howMany))}</td><td>${where}</td></tr>`;
     });
-    const hot = EBird.hotspotList(data);
-    $("birds-hotspots").innerHTML = hot.map((h) =>
-      `<tr><td><a href="${esc(h.url)}" target="_blank" rel="noopener">${esc(h.name)}</a></td>`
-      + `<td>${esc(EBird.formatDate(h.latest))}</td>`
-      + `<td>${h.active ? h.recent.length : ""}${h.waterbirds ? `<span class="rr-date">${h.waterbirds} waterbird${h.waterbirds > 1 ? "s" : ""}</span>` : ""}</td>`
-      + `<td>${esc(h.allTime)}</td></tr>`).join("");
-    $("birds-hotspot-block").hidden = !hot.length;
     $("birds-body").innerHTML = rows.join("")
       || '<tr><td colspan="4">No sightings reported in this period.</td></tr>';
 
-    initBirdsMap();
+    $("birds-seg").hidden = !EBird.locationGroups(data.species).length;
   }
 
-  // Bird sightings have their own map on the Bird sightings tab. Positions
-  // are those eBird publishes; private locations carry none and are not
-  // mapped.
-  function initBirdsMap() {
-    const el = $("birds-map");
-    if (!el || typeof L === "undefined" || el.offsetParent === null) return;
-    if (!state.birdsMap) {
-      state.birdsMap = L.map(el, { scrollWheelZoom: false }).setView([-28.6, 137.3], 7);
-      L.tileLayer("https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png", {
-        maxZoom: 13,
-        attribution: "&copy; OpenTopoMap (CC-BY-SA), &copy; OpenStreetMap contributors, "
-          + 'bird records &copy; <a href="https://ebird.org">eBird.org</a>',
-      }).addTo(state.birdsMap);
+  const BIRD_ATTRIBUTION = 'Bird records &copy; <a href="https://ebird.org">eBird.org</a>';
+
+  function toggleBirdLayer(on) {
+    const btn = $("birds-toggle");
+    if (state.birdLayer) {
+      state.map.removeLayer(state.birdLayer);
+      state.map.attributionControl.removeAttribution(BIRD_ATTRIBUTION);
+      state.birdLayer = null;
     }
-    if (state.birdsLayer) state.birdsMap.removeLayer(state.birdsLayer);
-    state.birdsLayer = null;
-    if (!state.ebird || typeof EBird === "undefined") return;
+    if (btn) {
+      btn.classList.toggle("active", Boolean(on));
+      btn.setAttribute("aria-pressed", on ? "true" : "false");
+    }
+    if (!on || !state.ebird || !state.map) return;
+
     const layer = L.layerGroup();
-    const back = esc(state.ebird.back_days || 30);
-    // Every hotspot in the area: filled if visited in the period, hollow otherwise
-    EBird.hotspotList(state.ebird).forEach((h) => {
-      const list = h.recent.slice(0, 10).map((r) => esc(r.comName)).join(", ")
-        + (h.recent.length > 10 ? `, and ${h.recent.length - 10} more` : "");
-      const body = h.active
-        ? `${h.recent.length} species in the last ${back} days<br><small>${list}</small>`
-        : `Last visited ${esc(EBird.formatDate(h.latest)) || "some time ago"}`;
-      L.circleMarker([h.lat, h.lng], {
-        radius: h.active ? Math.min(6 + h.recent.length / 2, 15) : 6,
-        color: "#134450", weight: 1.8,
-        fillColor: h.active ? "#1F6470" : "#FFFFFF", fillOpacity: h.active ? 0.6 : 0.9,
-      }).bindPopup(`<b>${esc(h.name)}</b><br>${body}<br><small>${esc(h.allTime)} species `
-        + `recorded all time. <a href="${esc(h.url)}" target="_blank" rel="noopener">Open on `
-        + "eBird</a></small>").addTo(layer);
-    });
-    // Public sightings away from hotspots, as small dots
-    EBird.otherLocations(state.ebird).forEach((g) => {
-      const list = g.species.slice(0, 8).map((sp) => esc(sp.comName)).join(", ");
+    EBird.locationGroups(state.ebird.species).forEach((g) => {
+      const list = g.species.slice(0, 8).map((sp) => esc(sp.comName)).join(", ")
+        + (g.species.length > 8 ? `, and ${g.species.length - 8} more` : "");
       L.circleMarker([g.lat, g.lng], {
-        radius: 4, color: "#134450", weight: 1, fillColor: "#134450", fillOpacity: 0.5,
-      }).bindPopup(`<b>${esc(g.name)}</b><br>${g.species.length} species, latest `
-        + `${esc(EBird.formatDate(g.last))}<br><small>${list}</small>`
+        radius: Math.min(5 + g.species.length, 14),
+        color: "#134450", weight: 1.5, fillColor: "#1E5F6B", fillOpacity: 0.55,
+      }).bindPopup(`<b>${esc(g.name)}</b><br>${g.species.length} species, `
+        + `latest ${esc(EBird.formatDate(g.last))}<br><small>${list}</small>`
         + '<br><small>Source: <a href="https://ebird.org" target="_blank" '
         + 'rel="noopener">eBird.org</a></small>').addTo(layer);
     });
-    if (state.ebird.area && !state.birdsFitted) {
-      const [w, sth, e, n] = state.ebird.area;
-      state.birdsMap.fitBounds([[sth, w], [n, e]]);
-      state.birdsFitted = true;
-    }
-    layer.addTo(state.birdsMap);
-    state.birdsLayer = layer;
+    layer.addTo(state.map);
+    state.map.attributionControl.addAttribution(BIRD_ATTRIBUTION);
+    state.birdLayer = layer;
   }
 
+  function wireBirds() {
+    const btn = $("birds-toggle");
+    if (btn) btn.addEventListener("click", () => toggleBirdLayer(!state.birdLayer));
+  }
 
   // ── Home: the lake now ───────────────────────────────────
   //
@@ -2188,11 +2073,9 @@
   // observatory. Sentences appear only for what the data support.
 
   const GIBS_WMS = "https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi";
-  // The home page shows the lake as a map sheet, wide enough to take in
-  // the rivers' lower reaches. Plate carrée: at 28.7° S a degree of
-  // longitude is 0.877 of a degree of latitude, and 1600 by 995 pixels
-  // keeps that ratio over 4.4° by 2.4° so shapes stay true.
-  const HERO = { bbox: [135.1, -29.9, 139.5, -27.5], w: 1600, h: 995 };
+  // Plate carrée: at 28.7° S, a degree of longitude is 0.877 of a degree of
+  // latitude, so 1.7° by 2.3° is drawn at 760 by 1170 pixels to keep shapes true.
+  const HERO_BBOX = "136.55,-29.85,138.25,-27.55";
 
   function isoDaysAgo(n) {
     const d = new Date(Date.now() - n * 86400000);
@@ -2203,7 +2086,7 @@
     const q = new URLSearchParams({
       SERVICE: "WMS", REQUEST: "GetMap", VERSION: "1.1.1",
       LAYERS: "MODIS_Terra_CorrectedReflectance_Bands721", STYLES: "",
-      SRS: "EPSG:4326", BBOX: HERO.bbox.join(","), WIDTH: String(HERO.w), HEIGHT: String(HERO.h),
+      SRS: "EPSG:4326", BBOX: HERO_BBOX, WIDTH: "760", HEIGHT: "1170",
       FORMAT: "image/jpeg", TIME: day,
     });
     return `${GIBS_WMS}?${q}`;
@@ -2224,9 +2107,7 @@
         fallback.hidden = true;
         caption.textContent = `MODIS Terra, ${fmtLongDate(day)}, shortwave infrared composite `
           + "(bands 7, 2, 1): water appears dark and the salt crust pale. "
-          + "Graticule, places and SWOT sites are drawn at their coordinates. "
           + "Image from NASA EOSDIS GIBS.";
-        drawHeroOverlay();
       };
       img.onerror = () => {
         back += 1;
@@ -2304,91 +2185,6 @@
       ? lines.map((l) => `<p>${l}</p>`).join("")
       : "<p>No observations are available yet. The observatory explains how to add them.</p>";
     drawHeroGauge(site);
-    drawHeroOverlay();
-  }
-
-  // The map sheet: everything is placed from coordinates, so labels,
-  // graticule and scale stay true to the image.
-  const MAP_LABELS = [
-    { text: "Lake Eyre North", lon: 137.30, lat: -28.32, kind: "water" },
-    { text: "Lake Eyre South", lon: 137.33, lat: -29.36, kind: "water" },
-    { text: "Marree", lon: 138.064, lat: -29.648, kind: "town" },
-    { text: "William Creek", lon: 136.340, lat: -28.909, kind: "town" },
-  ];
-
-  function drawHeroOverlay() {
-    const svg = $("hero-overlay");
-    if (!svg || $("hero-image").hidden) return;
-    const [x0, y0, x1, y1] = HERO.bbox;
-    const W = HERO.w, H = HERO.h;
-    const px = (lon) => (lon - x0) / (x1 - x0) * W;
-    const py = (lat) => (y1 - lat) / (y1 - y0) * H;
-    const deg = (v, pos, neg) => {
-      const a = Math.abs(v), d = Math.floor(a + 1e-9), m = Math.round((a - d) * 60);
-      return `${d}\u00b0${m ? String(m).padStart(2, "0") + "\u2032" : ""}${v < 0 ? neg : pos}`;
-    };
-    let g = "";
-    // Graticule: ticks every half degree on the neatline, labels every degree
-    for (let lon = Math.ceil(x0 * 2) / 2; lon <= x1; lon += 0.5) {
-      const x = px(lon);
-      g += `<line class="o-tick" x1="${x}" x2="${x}" y1="0" y2="12"/>`
-        + `<line class="o-tick" x1="${x}" x2="${x}" y1="${H - 12}" y2="${H}"/>`;
-      if (Math.abs(lon - Math.round(lon)) < 1e-9) {
-        g += `<text class="o-grid" x="${x}" y="30" text-anchor="middle">${deg(lon, "E", "W")}</text>`;
-      }
-    }
-    for (let lat = Math.ceil(y0 * 2) / 2; lat <= y1; lat += 0.5) {
-      const y = py(lat);
-      g += `<line class="o-tick" x1="0" x2="12" y1="${y}" y2="${y}"/>`
-        + `<line class="o-tick" x1="${W - 12}" x2="${W}" y1="${y}" y2="${y}"/>`;
-      if (Math.abs(lat - Math.round(lat)) < 1e-9) {
-        g += `<text class="o-grid" x="18" y="${y + 5}">${deg(lat, "N", "S")}</text>`;
-      }
-    }
-    MAP_LABELS.forEach((l) => {
-      const x = px(l.lon), y = py(l.lat);
-      g += l.kind === "water"
-        ? `<text class="o-water" x="${x}" y="${y}" text-anchor="middle">${esc(l.text)}</text>`
-        : `<circle class="o-town" cx="${x}" cy="${y}" r="4"/>`
-          + `<text class="o-place" x="${x + 9}" y="${y + 5}">${esc(l.text)}</text>`;
-    });
-    // SWOT sites, with the reference site's latest level
-    const ref = referenceSite();
-    ((state.data && state.data.sites) || []).forEach((site) => {
-      if (typeof site.lon !== "number") return;
-      const x = px(site.lon), y = py(site.lat);
-      g += `<circle class="o-site" cx="${x}" cy="${y}" r="7"/>`;
-      if (ref && site.name === ref.name && site.latest) {
-        // Above the marker, starting from it: William Creek sits at almost
-        // the same latitude to the west, Madigan Gulf to the east.
-        g += `<line class="o-leader" x1="${x}" x2="${x}" y1="${y - 9}" y2="${y - 22}"/>`
-          + `<text class="o-site-label" x="${x - 6}" y="${y - 50}">`
-          + `${esc(site.name)} ${minus(site.latest.wse, 2)}\u00a0m</text>`
-          + `<text class="o-site-date" x="${x - 6}" y="${y - 28}">`
-          + `SWOT, ${esc(fmtLongDate(site.latest.date))}</text>`;
-      } else {
-        g += `<text class="o-place" x="${x + 12}" y="${y + 5}">${esc(site.name)}</text>`;
-      }
-    });
-    // Scale bar: 50 km at the latitude of the sheet's centre
-    const kmPerPx = (x1 - x0) * 111.32 * Math.cos(((y0 + y1) / 2) * Math.PI / 180) / W;
-    const bar = 50 / kmPerPx, bx = 36, by = H - 40;
-    g += `<rect class="o-scale-bg" x="${bx - 12}" y="${by - 30}" width="${bar + 60}" height="46"/>`
-      + `<line class="o-scale" x1="${bx}" x2="${bx + bar}" y1="${by}" y2="${by}"/>`
-      + `<line class="o-scale" x1="${bx}" x2="${bx}" y1="${by - 7}" y2="${by + 7}"/>`
-      + `<line class="o-scale" x1="${bx + bar}" x2="${bx + bar}" y1="${by - 7}" y2="${by + 7}"/>`
-      + `<text class="o-scale-label" x="${bx}" y="${by - 12}">0</text>`
-      + `<text class="o-scale-label" x="${bx + bar}" y="${by - 12}" text-anchor="middle">50 km</text>`;
-    svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
-    svg.innerHTML = g;
-    svg.toggleAttribute("hidden", false);
-    // When the sheet is wider than the screen, open it centred on the lake
-    const frame = svg.closest(".plate-frame");
-    if (frame && frame.scrollWidth > frame.clientWidth + 4 && !frame.dataset.centred) {
-      const shown = frame.scrollWidth * px(137.3) / W;
-      frame.scrollLeft = Math.max(0, shown - frame.clientWidth / 2);
-      frame.dataset.centred = "1";
-    }
   }
 
   // Vertical gauge: the SWOT record at the reference site, from its lowest
@@ -2397,12 +2193,7 @@
   function drawHeroGauge(site) {
     const svg = $("hero-gauge");
     if (!svg) return;
-    if (!site || !site.stats || !(site.stats.max > site.stats.min)) { svg.toggleAttribute("hidden", true); return; }
-    // Redraw only when the measurement changes: the home page re-renders as
-    // each dataset arrives, and redrawing would replay the rising waterline.
-    const sig = `${site.name}|${site.latest.date}|${site.latest.wse}|${site.stats.min}|${site.stats.max}`;
-    if (svg.dataset.sig === sig) return;
-    svg.dataset.sig = sig;
+    if (!site || !site.stats || !(site.stats.max > site.stats.min)) { svg.hidden = true; return; }
     const W = 96, H = 520, top = 34, bottom = H - 34, x = 30;
     const { min, max } = site.stats;
     const y = (v) => bottom - (v - min) / (max - min) * (bottom - top);
@@ -2423,7 +2214,7 @@
       + `<g class="g-line" style="--rise:${bottom - y(now)}px">`
       + `<line x1="${x - 18}" x2="${W - 4}" y1="${y(now)}" y2="${y(now)}"/>`
       + `<text x="${W - 4}" y="${y(now) - 7}" text-anchor="end">${minus(now, 2)}</text></g>`;
-    svg.toggleAttribute("hidden", false);
+    svg.hidden = false;
   }
 
   // ── Catchment map ─────────────────────────────────────────
@@ -2463,633 +2254,6 @@
     state.catchmentMap = map;
   }
 
-
-  // ── iNaturalist ──────────────────────────────────────────
-  //
-  // data/inaturalist.json is fetched daily by pipeline/fetch_inaturalist.py.
-  // Photos in it are already limited to those their observers licensed;
-  // each is shown with the attribution iNaturalist provides.
-
-  async function loadInat() {
-    const sources = state.staticMode ? ["data/inaturalist.json"]
-      : ["/api/inaturalist", "data/inaturalist.json"];
-    for (const url of sources) {
-      try {
-        const res = await fetch(url, { cache: "no-store" });
-        if (res.ok) return await res.json();
-      } catch (_) { /* next source */ }
-    }
-    return null;
-  }
-
-  function inatName(o) {
-    const n = INat.names(o);
-    const first = n.primaryIsScientific ? `<i>${esc(n.primary)}</i>` : esc(n.primary);
-    return { first, sci: n.scientific ? `<i>${esc(n.scientific)}</i>` : "" };
-  }
-
-  function renderInat(data) {
-    const ok = data && Array.isArray(data.recent) && typeof INat !== "undefined";
-    $("inat-empty").hidden = Boolean(ok);
-    if (!ok) return;
-    const sum = INat.summary(data);
-    const where = data.project ? "in the Kati Thanda\u2013Lake Eyre project" : "around the lake";
-    $("inat-now").innerHTML = sum.observations
-      ? `So far, ${sum.observations.toLocaleString("en-AU")} observation${sum.observations === 1 ? "" : "s"} `
-        + `of ${sum.species.toLocaleString("en-AU")} species have been shared by `
-        + `${sum.observers.toLocaleString("en-AU")} observer${sum.observers === 1 ? "" : "s"} ${where}.`
-        + (data.demo ? " These are demonstration data." : "")
-      : "No observation has been shared here yet. Yours could be the first.";
-    const links = data.links || {};
-    if (links.explore) $("inat-explore").href = links.explore;
-    if (links.project) {
-      $("inat-project").href = links.project;
-      $("inat-join").hidden = false;
-    }
-
-    $("inat-gallery").innerHTML = data.recent.map((o) => {
-      const nm = inatName(o);
-      const pic = o.photo
-        ? `<img src="${esc(o.photo.medium)}" alt="${esc(INat.names(o).primary)}" loading="lazy">`
-        : `<span class="inat-nophoto">${esc(INat.groupLabel(o.taxon && o.taxon.group))}</span>`;
-      const meta = [INat.formatDate(o.observed_on), o.observer ? esc(o.observer) : "",
-                    INat.qualityLabel(o.quality), o.obscured ? "location blurred" : ""]
-        .filter(Boolean).join(", ");
-      return `<figure class="inat-obs"><a href="${esc(o.url)}" target="_blank" rel="noopener">${pic}</a>`
-        + `<figcaption><a class="inat-name" href="${esc(o.url)}" target="_blank" rel="noopener">`
-        + `${nm.first}</a>${nm.sci ? `<span class="inat-sci">${nm.sci}</span>` : ""}`
-        + `<span class="inat-meta">${meta}</span>`
-        + (o.photo ? `<span class="inat-credit">${esc(o.photo.attribution)}</span>` : "")
-        + "</figcaption></figure>";
-    }).join("") || "<p>No recent observations.</p>";
-
-    $("inat-species").innerHTML = (data.species || []).slice(0, data.top_species || 12).map((sp) => {
-      const nm = inatName(sp);
-      const pic = sp.photo
-        ? `<img src="${esc(sp.photo.square)}" data-full="${esc(sp.photo.medium || sp.photo.square)}" `
-          + `alt="${esc(INat.names(sp).primary || "")}" loading="lazy" title="${esc(sp.photo.attribution)}">`
-        : '<span class="inat-thumb-empty"></span>';
-      const name = sp.url
-        ? `<a class="inat-sp-name" href="${esc(sp.url)}" target="_blank" rel="noopener">${nm.first}</a>`
-        : `<span class="inat-sp-name">${nm.first}</span>`;
-      return `<li>${pic}<span class="inat-sp">${name}${nm.sci ? `<span class="inat-sci">${nm.sci}</span>` : ""}`
-        + `<span class="inat-meta">${sp.count} observation${sp.count === 1 ? "" : "s"}</span></span></li>`;
-    }).join("");
-    initInatMap();
-  }
-
-  function initInatMap() {
-    const el = $("inat-map");
-    if (!el || typeof L === "undefined" || el.offsetParent === null) return;
-    if (!state.inatMap) {
-      state.inatMap = L.map(el, { scrollWheelZoom: false }).setView([-28.7, 137.4], 8);
-      L.tileLayer("https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png", {
-        maxZoom: 15,
-        attribution: "&copy; OpenTopoMap (CC-BY-SA), &copy; OpenStreetMap contributors",
-      }).addTo(state.inatMap);
-    }
-    if (!state.inat) return;
-    if (!state.inatTiles && state.inat.filter) {
-      state.inatTiles = L.tileLayer(
-        `https://api.inaturalist.org/v1/points/{z}/{x}/{y}.png?${state.inat.filter}`, {
-          maxZoom: 15, opacity: 0.9,
-          attribution: 'observations &copy; <a href="https://www.inaturalist.org">iNaturalist</a> contributors',
-        }).addTo(state.inatMap);
-    }
-    if (state.inatLayer) state.inatMap.removeLayer(state.inatLayer);
-    const layer = L.layerGroup();
-    INat.mappable(state.inat.recent).forEach((o) => {
-      const nm = inatName(o);
-      L.circleMarker(o.coords, {
-        radius: 7, color: "#134450", weight: 2, fillColor: "#FFFFFF", fillOpacity: 0.6,
-      }).bindPopup(`<b>${nm.first}</b>${nm.sci ? `<br>${nm.sci}` : ""}<br>`
-        + `${esc(INat.formatDate(o.observed_on))}<br>`
-        + `<a href="${esc(o.url)}" target="_blank" rel="noopener">Open on iNaturalist</a>`).addTo(layer);
-    });
-    layer.addTo(state.inatMap);
-    state.inatLayer = layer;
-  }
-
-  // ── Plants and animals: live observations by group ───────
-  //
-  // Each group section of the page carries an empty .obs-block, filled here
-  // from iNaturalist (every group) and eBird (birds). Called when the page
-  // is first opened and again as each dataset arrives, in any order.
-
-  const OBS_SHOWN = 12;
-
-  function renderGroupBlocks() {
-    const blocks = document.querySelectorAll("#tab-fauna-flora .obs-block");
-    if (!blocks.length || typeof INat === "undefined") return;
-    const inat = state.inat || {};
-    const ebird = state.ebird || {};
-    blocks.forEach((el) => {
-      const groups = (el.dataset.groups || "").split(",").filter(Boolean);
-      const useEbird = el.dataset.ebird === "true";
-      const list = INat.groupSpecies(inat.species, ebird.species, groups, useEbird);
-      const nInat = list.filter((x) => x.inat > 0).length;
-      const nEbird = list.filter((x) => x.ebird).length;
-      const explore = inat.links && inat.links.explore
-        ? `${inat.links.explore}&iconic_taxa=${encodeURIComponent(groups.join(","))}` : null;
-
-      let head;
-      if (!state.inat && !(useEbird && state.ebird)) {
-        head = "Observations shared around the lake will appear here.";
-      } else if (!list.length) {
-        head = `None has been shared on iNaturalist around the lake yet. `
-          + `<a href="#inaturalist">Share the first observation</a>.`;
-      } else {
-        const days = esc(ebird.back_days || 30);
-        const sp = (n) => `${n === 1 ? "species" : "species"}`;
-        if (nInat && useEbird && nEbird) {
-          head = `${spell(nInat)} ${sp(nInat)} ${nInat === 1 ? "has" : "have"} been observed around the lake `
-            + `on iNaturalist, and ${spell(nEbird, true)} ${nEbird === 1 ? "was" : "were"} reported on eBird `
-            + `in the last ${days} days.`;
-        } else if (nInat) {
-          head = `${spell(nInat)} ${sp(nInat)} ${nInat === 1 ? "has" : "have"} been observed around the lake `
-            + "on iNaturalist.";
-        } else {
-          head = `${spell(nEbird)} ${sp(nEbird)} ${nEbird === 1 ? "was" : "were"} reported around the lake `
-            + `on eBird in the last ${days} days; none has yet been shared on iNaturalist.`;
-        }
-      }
-
-      const items = list.slice(0, OBS_SHOWN).map((x) => {
-        const pic = x.photo
-          ? `<img src="${esc(x.photo.square)}" data-full="${esc(x.photo.medium || x.photo.square)}" `
-            + `alt="${esc(x.name)}" loading="lazy" title="${esc(x.photo.attribution)}">`
-          : '<span class="obs-thumb-empty"></span>';
-        const nm = x.nameIsScientific ? `<i>${esc(x.name)}</i>` : esc(x.name);
-        const name = x.url ? `<a href="${esc(x.url)}" target="_blank" rel="noopener">${nm}</a>` : nm;
-        const meta = [];
-        if (x.inat) meta.push(`${x.inat} iNaturalist observation${x.inat === 1 ? "" : "s"}`);
-        if (x.ebird) meta.push(`on eBird ${esc(EBird.formatDate(x.ebird.date))}`);
-        return `<li>${pic}<span><span class="obs-name">${name}</span>`
-          + (x.scientific ? `<span class="obs-sci">${esc(x.scientific)}</span>` : "")
-          + `<span class="obs-meta">${meta.join(", ")}</span></span></li>`;
-      }).join("");
-
-      const more = [];
-      if (list.length > OBS_SHOWN) more.push(`${list.length - OBS_SHOWN} more species not shown.`);
-      if (explore && nInat) {
-        more.push(`<a href="${esc(explore)}" target="_blank" rel="noopener">All these observations on iNaturalist</a>`);
-      }
-      if (useEbird) more.push('<a href="#birds">Recent sightings and how to submit yours</a>');
-
-      el.innerHTML = `<p class="obs-head">${head}</p>`
-        + (items ? `<ul class="obs-list">${items}</ul>` : "")
-        + (more.length ? `<p class="obs-more">${more.join(" ")}</p>` : "")
-        + (list.some((x) => x.photo)
-          ? '<p class="obs-credit">Thumbnails from iNaturalist under their observers&rsquo; licences; '
-            + "hover a photo for its credit.</p>" : "");
-    });
-  }
-
-  // ── Catchment: rain and rivers ───────────────────────────
-  //
-  // data/rainfall.json (SILO) and data/rivers.json (Water Data Online) are
-  // written daily by the pipeline; nothing is fetched from the browser.
-
-  async function loadJson(apiPath, file) {
-    const sources = state.staticMode ? [`data/${file}`] : [apiPath, `data/${file}`];
-    for (const url of sources) {
-      try {
-        const res = await fetch(url, { cache: "no-store" });
-        if (res.ok) return await res.json();
-      } catch (_) { /* next source */ }
-    }
-    return null;
-  }
-
-  function rainImageUrl(png) {
-    return (state.staticMode ? "data/" : "/data/") + png;
-  }
-
-  function currentRain() {
-    const r = state.rain;
-    if (!r) return null;
-    if (state.rrView === "daily") {
-      const days = (r.days || []).slice().reverse();          // oldest first
-      const i = Math.min(Math.max(0, Number($("rain-day").value) || 0), days.length - 1);
-      const d = days[i];
-      return d ? { png: d.png, text: `${fmtLongDate(d.date)}: ${Catchment.fmtNumber(d.mean_mm)} mm on average over the basin, up to ${Catchment.fmtNumber(d.max_mm)} mm` } : null;
-    }
-    const t = r[state.rrView];
-    return t ? { png: t.png, text: `${fmtLongDate(t.from)} to ${fmtLongDate(t.to)}: ${Catchment.fmtNumber(t.mean_mm)} mm on average over the basin, up to ${Catchment.fmtNumber(t.max_mm)} mm` } : null;
-  }
-
-  function showRain() {
-    const cur = currentRain();
-    $("rain-period").textContent = cur ? cur.text : "";
-    if (!state.rainMap || !state.rain || !cur) return;
-    if (state.rainOverlay) state.rainMap.removeLayer(state.rainOverlay);
-    state.rainOverlay = L.imageOverlay(rainImageUrl(cur.png), state.rain.bounds, {
-      opacity: 0.85,
-      attribution: 'Rainfall &copy; <a href="https://www.longpaddock.qld.gov.au/silo/">SILO</a> (CC BY 4.0)',
-    }).addTo(state.rainMap);
-  }
-
-  function baseCatchmentMap(el) {
-    const map = L.map(el, { scrollWheelZoom: false }).setView([-25.5, 139.0], 5);
-    L.tileLayer("https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png", {
-      maxZoom: 12,
-      attribution: "&copy; OpenTopoMap (CC-BY-SA), &copy; OpenStreetMap contributors",
-    }).addTo(map);
-    return map;
-  }
-
-  // The basin outline comes with the rainfall data; both maps draw it
-  function drawOutline(map) {
-    const o = state.rain && state.rain.outline;
-    if (!o || map._ktleOutline) return;
-    map._ktleOutline = L.polygon(o.coords, {
-      color: "#134450", weight: 1.2, fill: false, dashArray: o.kind === "official" ? null : "4 4",
-    }).addTo(map);
-  }
-
-  function showHydrograph(st) {
-    const q = st.discharge && st.discharge.values && st.discharge.values.length ? st.discharge : null;
-    const series = q || st.level;
-    const el = $("flow-hydro");
-    if (!series || !series.values || !series.values.length) {
-      el.innerHTML = `<p class="rr-note">${esc(st.name)}: no values in the past year.</p>`;
-      return;
-    }
-    const unit = Catchment.unitLabel(series.unit);
-    Plotly.newPlot(el, [{
-      x: series.values.map((v) => v[0]), y: series.values.map((v) => v[1]),
-      type: "scatter", mode: "lines", line: { color: "#1F6470", width: 1.8 },
-      hovertemplate: `%{x}<br>%{y} ${unit}<extra></extra>`,
-    }], {
-      title: { text: `${esc(st.name)}: daily mean ${q ? "flow" : "level"}`, font: { size: 14 } },
-      margin: { l: 56, r: 16, t: 40, b: 40 }, height: 300,
-      yaxis: { title: unit, rangemode: "tozero" }, xaxis: { type: "date" },
-      paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
-    }, { displayModeBar: false, responsive: true });
-  }
-
-  function notesFor(d) {
-    return (d && d.demo ? "<p>These are demonstration data.</p>" : "")
-      + (d && d.stale ? "<p>These data could not be refreshed; the last valid set is shown.</p>" : "");
-  }
-
-  function renderRainfall() {
-    const rain = state.rain;
-    if (!$("rain-now")) return;
-    $("rain-empty").hidden = Boolean(rain);
-    $("rain-now").innerHTML = Catchment.summary(rain, null).map((l) => `<p>${esc(l)}</p>`).join("")
-      + notesFor(rain);
-    if (!rain) return;
-    $("rain-legend").innerHTML = Catchment.legend(rain.scale).map((x) =>
-      `<span><i style="background:${esc(x.colour)}"></i>${esc(x.label)}</span>`).join("");
-    if (rain.outline && rain.outline.kind === "official") {
-      $("rain-caption").textContent = $("rain-caption").textContent.replace(" The basin outline is approximate.", "");
-    }
-    const days = (rain.days || []).slice().reverse();
-    $("rain-day").max = String(Math.max(0, days.length - 1));
-    $("rain-day").value = String(Math.max(0, days.length - 1));
-    Plotly.newPlot($("rain-chart"), [{
-      x: days.map((d) => d.date), y: days.map((d) => d.mean_mm), type: "bar",
-      marker: { color: "#2A73B8" }, hovertemplate: "%{x}<br>%{y:.1f} mm<extra></extra>",
-    }], {
-      margin: { l: 56, r: 16, t: 10, b: 40 }, height: 240,
-      yaxis: { title: "mm, basin average", rangemode: "tozero" }, xaxis: { type: "date" },
-      paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
-    }, { displayModeBar: false, responsive: true });
-    initRainMap();
-  }
-
-  function renderRiverFlow() {
-    const rivers = state.rivers;
-    if (!$("flow-now")) return;
-    $("flow-empty").hidden = Boolean(rivers);
-    $("flow-now").innerHTML = Catchment.summary(null, rivers).map((l) => `<p>${esc(l)}</p>`).join("")
-      + notesFor(rivers);
-    const st = (rivers && rivers.stations) || [];
-    $("flow-stations").innerHTML = st.map((x, i) => {
-      const q = Catchment.latest(x, "discharge"), h = Catchment.latest(x, "level");
-      return `<tr data-i="${i}"><td><button type="button" class="rr-link" data-i="${i}">${esc(x.name)}</button></td>`
-        + `<td><i class="rr-dot" style="background:${Catchment.statusColour(x.status)}"></i>${Catchment.statusLabel(x.status)}</td>`
-        + `<td>${q ? `${Catchment.fmtNumber(q.value)} ${esc(q.unit)}<span class="rr-date">${esc(fmtLongDate(q.date))}</span>` : ""}</td>`
-        + `<td>${h ? `${Catchment.fmtNumber(h.value)} ${esc(h.unit)}<span class="rr-date">${esc(fmtLongDate(h.date))}</span>` : ""}</td></tr>`;
-    }).join("") || '<tr><td colspan="4">No gauges with recent data.</td></tr>';
-    const first = st.find((x) => x.status === "flowing") || st[0];
-    if (first) showHydrograph(first);
-    initFlowMap();
-  }
-
-  function initRainMap() {
-    const el = $("rain-map");
-    if (!el || typeof L === "undefined" || el.offsetParent === null) return;
-    if (!state.rainMap) state.rainMap = baseCatchmentMap(el);
-    drawOutline(state.rainMap);
-    showRain();
-  }
-
-  function initFlowMap() {
-    const el = $("flow-map");
-    if (!el || typeof L === "undefined" || el.offsetParent === null) return;
-    if (!state.flowMap) state.flowMap = baseCatchmentMap(el);
-    drawOutline(state.flowMap);
-    if (state.rivers && !state.flowStations) {
-      const layer = L.layerGroup();
-      state.rivers.stations.forEach((st) => {
-        const q = Catchment.latest(st, "discharge");
-        L.circleMarker([st.lat, st.lon], {
-          radius: 7, color: "#FFFFFF", weight: 2,
-          fillColor: Catchment.statusColour(st.status), fillOpacity: 0.95,
-        }).bindTooltip(`<b>${esc(st.name)}</b><br>${Catchment.statusLabel(st.status)}`
-          + (q ? `<br>${Catchment.fmtNumber(q.value)} ${esc(q.unit)} on ${esc(fmtLongDate(q.date))}` : ""))
-          .on("click", () => showHydrograph(st)).addTo(layer);
-      });
-      layer.addTo(state.flowMap);
-      state.flowStations = layer;
-    }
-  }
-
-  function wireRainRivers() {
-    document.querySelectorAll("[data-rain]").forEach((b) => b.addEventListener("click", () => {
-      state.rrView = b.dataset.rain;
-      document.querySelectorAll("[data-rain]").forEach((x) => x.classList.toggle("active", x === b));
-      $("rain-day").hidden = state.rrView !== "daily";
-      showRain();
-    }));
-    const day = $("rain-day");
-    if (day) day.addEventListener("input", showRain);
-    const body = $("flow-stations");
-    if (body) body.addEventListener("click", (e) => {
-      const b = e.target.closest(".rr-link");
-      if (b && state.rivers) showHydrograph(state.rivers.stations[Number(b.dataset.i)]);
-    });
-  }
-
-  // Data that do not depend on SWOT: weather, birds, community observations,
-  // rain and rivers. They load whether or not the lake data exist.
-  function loadIndependentData(withScenario) {
-    loadWeather().then(() => { if (withScenario) loadScenario(null); });
-    loadEbird().then((d) => { state.ebird = d; renderBirds(d); renderHome(); renderGroupBlocks(); });
-    loadInat().then((d) => { state.inat = d; renderInat(d); renderGroupBlocks(); });
-    Promise.all([loadJson("/api/rainfall", "rainfall.json"), loadJson("/api/rivers", "rivers.json")])
-      .then(([rain, rivers]) => {
-        state.rain = rain; state.rivers = rivers;
-        renderRainfall(); renderRiverFlow(); renderTravel();
-      });
-  }
-
-  // ── From rain to lake: how long the water takes ──────────
-  //
-  // Rain over the basin, flow at a gauge and the level of the lake are
-  // measured separately; this looks for the delay that lines them up. The
-  // calculation is first-order and says nothing until the series overlap
-  // enough, which the page states.
-
-  function levelSeries() {
-    const site = (state.data && state.data.sites && state.data.sites[state.site]) || null;
-    if (!site || !site.series) return [];
-    return site.series.map((p) => [String(p.t || p[0]).slice(0, 10), Number(p.wse !== undefined ? p.wse : p[1])])
-      .filter((p) => p[0] && Number.isFinite(p[1]));
-  }
-
-  function renderTravel() {
-    const box = $("travel-live");
-    if (!box || typeof Travel === "undefined") return;
-    const rain = (state.rain && state.rain.series) || [];
-    const gauges = ((state.rivers && state.rivers.stations) || [])
-      .filter((st) => st.discharge && (st.discharge.values || []).length > 30);
-    const level = levelSeries();
-
-    if (!rain.length && !gauges.length && !level.length) {
-      box.innerHTML = '<p class="rr-note">Rain, river and lake data have not been fetched yet.</p>';
-      return;
-    }
-
-    // La pluie ne fait une crue qu'accumulée : on compare des cumuls sur 7 jours
-    const rain7 = Travel.rolling(rain, 7);
-    const gauge = gauges.slice().sort((a, b) => (b.discharge.values.length - a.discharge.values.length))[0];
-    const lines = [];
-    let rainLag = null, lakeLag = null;
-    if (gauge) {
-      rainLag = Travel.bestLag(rain7, gauge.discharge.values, 120);
-      lines.push(Travel.sentence(`rain over the basin and the flow at ${esc(gauge.name)}`, rainLag));
-      if (level.length > 30) {
-        lakeLag = Travel.bestLag(gauge.discharge.values, Travel.dailyChange(level), 150);
-        lines.push(Travel.sentence(`that flow and the rise of the lake at ${esc(state.site || "Belt Bay")}`, lakeLag));
-      }
-    } else {
-      lines.push("No gauge has enough recent flow data to compare with the rain.");
-    }
-    if (rainLag && lakeLag) {
-      lines.push(`End to end, that is about ${Math.round((rainLag.lag + lakeLag.lag) / 7)} weeks `
-        + "between a wet week in the headwaters and the lake responding.");
-    }
-
-    box.innerHTML = `<div class="travel-lines">${lines.map((l) => `<p>${esc(l)}</p>`).join("")}</div>`
-      + '<div id="travel-chart" class="rr-chart"></div>'
-      + '<div id="travel-lagplot" class="rr-chart"></div>'
-      + '<p class="rr-note">Rainfall is a seven-day running total over the basin. A correlation lines '
-      + 'up two series in time; it does not prove that one caused the other.</p>';
-
-    const traces = [];
-    if (rain7.length) {
-      traces.push({ x: rain7.map((p) => p[0]), y: rain7.map((p) => p[1]), name: "Rain, 7 days (mm)",
-                    type: "scatter", mode: "lines", line: { color: "#2A73B8", width: 1.5 } });
-    }
-    if (gauge) {
-      traces.push({ x: gauge.discharge.values.map((p) => p[0]), y: gauge.discharge.values.map((p) => p[1]),
-                    name: `Flow, ${gauge.name}`, yaxis: "y2", type: "scatter", mode: "lines",
-                    line: { color: "#1F6470", width: 1.8 } });
-    }
-    if (level.length) {
-      traces.push({ x: level.map((p) => p[0]), y: level.map((p) => p[1]), name: "Lake level (m)",
-                    yaxis: "y3", type: "scatter", mode: "lines+markers",
-                    line: { color: "#C0476A", width: 1.6 }, marker: { size: 4 } });
-    }
-    if (traces.length) {
-      Plotly.newPlot($("travel-chart"), traces, {
-        margin: { l: 58, r: 58, t: 10, b: 40 }, height: 340, showlegend: true,
-        legend: { orientation: "h", y: 1.12 },
-        xaxis: { type: "date" },
-        yaxis: { title: "mm", rangemode: "tozero" },
-        yaxis2: { overlaying: "y", side: "right", rangemode: "tozero", showgrid: false },
-        yaxis3: { overlaying: "y", side: "right", position: 1, showgrid: false, visible: false },
-        paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
-      }, { displayModeBar: false, responsive: true });
-    }
-    if (rainLag) {
-      Plotly.newPlot($("travel-lagplot"), [{
-        x: rainLag.curve.map((p) => p.lag), y: rainLag.curve.map((p) => p.r),
-        type: "scatter", mode: "lines", line: { color: "#134450", width: 1.6 },
-      }], {
-        margin: { l: 58, r: 16, t: 24, b: 44 }, height: 220,
-        title: { text: "How well rain and flow line up, by delay", font: { size: 13 } },
-        xaxis: { title: "delay, days" }, yaxis: { title: "correlation" },
-        paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
-      }, { displayModeBar: false, responsive: true });
-    }
-  }
-
-  // ── Figures ──────────────────────────────────────────────
-  //
-  // Each page reserves slots with <figure data-fig="slug">. figures.json
-  // says which of them have an image; the rest stay as a frame naming the
-  // file that is expected, so a page is never silently incomplete. Figures
-  // from the books and articles cited here are under copyright and are not
-  // reproduced: these are satellite imagery, or photographs supplied for
-  // this site.
-
-  async function loadFigures() {
-    if (state.figures) return state.figures;
-    try {
-      const res = await fetch("figures.json", { cache: "no-store" });
-      const doc = res.ok ? await res.json() : {};
-      state.showPlaceholders = doc.show_placeholders !== false;
-      state.figures = doc.figures || {};
-    } catch (_) {
-      state.figures = {};
-    }
-    return state.figures;
-  }
-
-  function fillFigures(root) {
-    const slots = (root || document).querySelectorAll("figure.fig[data-fig]");
-    if (!slots.length) return;
-    loadFigures().then((figs) => {
-      slots.forEach((el) => {
-        if (el.dataset.filled) return;
-        const slug = el.dataset.fig;
-        const f = figs[slug] || {};
-        const caption = el.querySelector("figcaption");
-        // La légende écrite dans la page sert de défaut ; figures.json
-        // peut la remplacer, ce qui permet d'ajuster un texte à l'image
-        // reçue sans relancer le constructeur de la page.
-        const text = f.caption ? esc(f.caption) : (caption ? caption.innerHTML : "");
-        const panels = Array.isArray(f.images)
-          ? f.images.filter((p) => p && p.file)
-          : (f.file ? [{ file: f.file, caption: "" }] : []);
-        if (panels.length) {
-          const credit = f.credit
-            ? `<span class="fig-credit">${f.url
-                ? `<a href="${esc(f.url)}" target="_blank" rel="noopener">${esc(f.credit)}</a>`
-                : esc(f.credit)}${f.date ? `, ${esc(fmtLongDate(f.date))}` : ""}</span>`
-            : "";
-          const lead = stripTags(text) || slug;
-          if (panels.length === 1) {
-            el.innerHTML = `<img src="img/${esc(panels[0].file)}" alt="${esc(lead)}" loading="lazy">`
-              + `<figcaption>${text}${credit}</figcaption>`;
-          } else {
-            // Plusieurs vues d'un même sujet : panneaux lettrés, selon
-            // l'usage des figures d'article, chacun avec sa légende.
-            const body = panels.map((p, i) => {
-              const letter = String.fromCharCode(97 + i);
-              const own = p.caption ? esc(p.caption) : "";
-              return `<div class="fig-panel"><img src="img/${esc(p.file)}"`
-                + ` alt="${esc(lead)} (${letter})" loading="lazy">`
-                + `<span class="fig-panel-cap"><b>(${letter})</b>${own ? " " + own : ""}</span>`
-                + "</div>";
-            }).join("");
-            el.innerHTML = `<div class="fig-panels" data-n="${panels.length}">${body}</div>`
-              + `<figcaption>${text}${credit}</figcaption>`;
-          }
-        } else if (!state.showPlaceholders) {
-          // Cadres masqués : la page se lit sans trou, en attendant les images
-          el.hidden = true;
-        } else {
-          el.classList.add("fig-empty");
-          el.innerHTML = '<div class="fig-box"><span>Image to come</span>'
-            + `<code>img/figures/${esc(slug)}.jpg</code></div><figcaption>${text}</figcaption>`;
-        }
-        el.dataset.filled = "1";
-      });
-    });
-  }
-
-  // ── Enlarging images, Methods contents, weather map ──────
-  //
-  // Three small things the first readers asked for: figures are too small
-  // to read at the size they sit in the text; the Methods page lacked the
-  // contents box every other page of The lake has; and the weather page
-  // gave no idea where its three stations are.
-
-  function openLightbox(src, caption) {
-    const box = document.createElement("div");
-    box.className = "lightbox";
-    box.innerHTML = `<button type="button" class="lb-close" aria-label="Close">&times;</button>`
-      + `<img src="${esc(src)}" alt="${esc(caption || "")}">`
-      + (caption ? `<figcaption>${esc(caption)}</figcaption>` : "");
-    const close = () => box.remove();
-    box.addEventListener("click", close);
-    document.addEventListener("keydown", function esc2(e) {
-      if (e.key === "Escape") { close(); document.removeEventListener("keydown", esc2); }
-    });
-    document.body.appendChild(box);
-  }
-
-  function wireZoom() {
-    document.addEventListener("click", (e) => {
-      const img = e.target.closest("main img");
-      if (img && (img.closest(".leaflet-container") || img.closest(".map-bar"))) return;
-      if (!img) return;
-      // Dans une figure à panneaux, la légende utile est celle du
-      // panneau cliqué, pas celle de la figure entière.
-      const panel = img.closest(".fig-panel");
-      const fig = img.closest("figure");
-      const own = panel && panel.querySelector(".fig-panel-cap");
-      const whole = fig && fig.querySelector("figcaption");
-      const cap = own ? own.textContent.trim()
-        : (whole ? whole.textContent.trim() : (img.alt || img.title || ""));
-      openLightbox(img.dataset.full || img.src, cap);
-    });
-  }
-
-  // Sommaire de la page Methods, construit à partir de ses propres titres
-  function methodsContents() {
-    const panel = $("tab-methods");
-    if (!panel || panel.querySelector(".nh-toc")) return;
-    const heads = [...panel.querySelectorAll("h3")];
-    if (heads.length < 3) return;
-    const items = heads.map((h, i) => {
-      if (!h.id) h.id = "meth-" + (i + 1);
-      return `<li><a href="#${h.id}">${esc(h.textContent)}</a></li>`;
-    }).join("");
-    const aside = document.createElement("aside");
-    aside.className = "nh-toc";
-    aside.setAttribute("aria-label", "Contents");
-    aside.innerHTML = `<p class="nh-toc-title">Contents</p><ol>${items}</ol>`;
-    const body = panel.querySelector(".prose-body") || panel.firstElementChild;
-    body.parentNode.insertBefore(aside, body);
-  }
-
-  // Les trois stations BOM, situées par rapport au lac
-  function initWeatherMap() {
-    const el = $("wx-map");
-    if (!el || typeof L === "undefined" || el.offsetParent === null || state.wxMap) return;
-    const stations = ((state.weather && state.weather.stations) || [])
-      .filter((st) => Number.isFinite(st.lat) && Number.isFinite(st.lon));
-    if (!stations.length) return;
-    state.wxMap = L.map(el, { scrollWheelZoom: false }).setView([-28.6, 137.5], 6);
-    L.tileLayer("https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png", {
-      maxZoom: 12,
-      attribution: "&copy; OpenTopoMap (CC-BY-SA), &copy; OpenStreetMap contributors",
-    }).addTo(state.wxMap);
-    const pts = [];
-    stations.forEach((st) => {
-      const l = st.latest || {};
-      L.circleMarker([st.lat, st.lon], {
-        radius: 7, color: "#FFFFFF", weight: 2, fillColor: "#C9A66B", fillOpacity: 0.95,
-      }).bindTooltip(`<b>${esc(st.name)}</b>`
-        + (l.wind_dir ? `<br>${esc(l.wind_dir)} ${esc(l.wind_spd_kmh)} km/h` : ""))
-        .addTo(state.wxMap);
-      pts.push([st.lat, st.lon]);
-    });
-    (state.data && state.data.sites ? Object.values(state.data.sites) : []).forEach((site) => {
-      L.circleMarker([site.lat, site.lon], {
-        radius: 6, color: "#FFFFFF", weight: 2, fillColor: "#1F6470", fillOpacity: 0.9,
-      }).bindTooltip(`<b>${esc(site.name)}</b>`).addTo(state.wxMap);
-      pts.push([site.lat, site.lon]);
-    });
-    state.wxMap.fitBounds(pts, { padding: [24, 24] });
-  }
-
   async function init() {
     loadHeroImage();
     const { data, viaApi } = await loadData();
@@ -3097,7 +2261,6 @@
     if (!data || !data.sites) {
       $("empty-state").hidden = false;
       renderHome();
-      loadIndependentData(false);
       return;
     }
 
@@ -3177,15 +2340,15 @@
     wireTimeline();
     state.areaIdx = Math.max(0, areaDates().length - 1);
     drawAreaChart();
-    loadIndependentData(true);
+    loadWeather().then(() => loadScenario(null));
+    loadEbird().then((d) => { state.ebird = d; renderBirds(d); renderHome(); });
   }
 
   document.addEventListener("DOMContentLoaded", () => {
     // Les onglets fonctionnent même si les données manquent
     wireTabs();
     wireDownloads();
-    wireRainRivers();
-    wireZoom();
+    wireBirds();
     init();
   });
 })();
