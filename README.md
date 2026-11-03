@@ -368,10 +368,32 @@ Host github.com
   User git
 ```
 
-To move to a custom domain later: set it in the repository's Settings, Pages,
+### The site's public address
+
+The address is not decoration: it sits in the recommended citation on the Data
+and citation page, so a published reference dies with it. It is therefore
+declared once, as `site.url` in `config.yaml`, and copied from there into the
+five places that carry it (the two Open Graph tags and the citation line in
+`frontend/index.html`, the default in `update.sh`, and `deploy/local.env.example`).
+
+```bash
+python tools/set_site_url.py                              # what is written where
+python tools/set_site_url.py --set https://example.org/   # change it everywhere
+```
+
+`tests/test_site_url.py` then refuses any divergence between the five and
+`config.yaml`, and refuses an `http://` address.
+
+To point a domain at the site: set it in the repository's Settings, Pages,
 Custom domain (the site is published by a GitHub Actions workflow, so no
-`CNAME` file is needed), add the DNS record (a CNAME to `tfaraon.github.io`
-for a subdomain), then change `SITE_URL` in `deploy/local.env`.
+`CNAME` file is needed, though adding `site/CNAME` with the bare domain fixes
+the rare case where the setting is cleared by a deployment), add the DNS
+records, tick Enforce HTTPS once the certificate is issued, then run
+`tools/set_site_url.py --set` and change `SITE_URL` in `deploy/local.env`.
+Behind Cloudflare, leave the records unproxied (grey cloud): a proxied record
+blocks GitHub's certificate check, and the orange cloud with SSL mode
+"Flexible" produces a redirect loop. Proxying also caches `data/*`, which the
+hourly refresh then cannot get past.
 
 ### Hosting it away from this computer
 
@@ -887,6 +909,7 @@ python tests/test_incremental.py         # incremental extraction and cache
 python tests/test_area_cache.py          # water area cached per day, granules disposable
 python tests/test_workflows.py           # GitHub workflows agree with the code
 python tests/test_check_series.py        # no published series ever shortens
+python tests/test_site_url.py            # one address, five files, no drift
 python tests/test_figure_panels.py       # multi-view figures, in a real browser
 python tests/test_set_caption.py         # editing a caption already in place
 python tests/test_weather.py             # BOM parsing and rolling archive

@@ -41,7 +41,7 @@ done
 if [ -f deploy/local.env ]; then
   set -a; . deploy/local.env; set +a
 fi
-SITE_URL="${SITE_URL:-https://tfaraon.github.io/ktle-observatory/}"
+SITE_URL="${SITE_URL:-https://ktle-observatory.org/}"
 SITE_URL="${SITE_URL%/}/"
 
 # Fichiers locaux jamais versionnes.

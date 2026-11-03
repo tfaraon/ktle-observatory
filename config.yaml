@@ -9,6 +9,11 @@ server:
   # definir LKE_ALLOW_REFRESH=0 — sur un site accessible publiquement.
   allow_refresh: true
 
+# Adresse publique du site. Source unique : tools/set_site_url.py
+# la recopie dans index.html, update.sh et local.env.example.
+site:
+  url: "https://ktle-observatory.org/"
+
 lake:
   name: "Kati Thanda – Lake Eyre"
   center: { lat: -28.9, lon: 137.35 }
