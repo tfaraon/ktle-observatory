@@ -1,5 +1,5 @@
 {
-  "fetched_at": "2026-11-04T17:07:06Z",
+  "fetched_at": "2026-11-04T22:35:36Z",
   "demo": false,
   "stale": false,
   "history_hours": 168,
@@ -12,16 +12,16 @@
       "ok": true,
       "latest": {
         "src": "bom",
-        "utc": "20261104170000",
-        "air_temp": 17.3,
-        "rel_hum": 42.0,
-        "wind_dir": "S",
-        "wind_dir_deg": 180,
-        "wind_spd_kmh": 30.0,
-        "gust_kmh": 37.0,
+        "utc": "20261104223000",
+        "air_temp": 19.4,
+        "rel_hum": 32.0,
+        "wind_dir": "SE",
+        "wind_dir_deg": 135,
+        "wind_spd_kmh": 19.0,
+        "gust_kmh": 28.0,
         "rain_since_9am": 0.0,
-        "press_hpa": 1017.9,
-        "local_time": "20261105033000"
+        "press_hpa": 1022.1,
+        "local_time": "20261105090000"
       },
       "history": [
         {
@@ -3443,6 +3443,138 @@
           "gust_kmh": 37.0,
           "rain_since_9am": 0.0,
           "press_hpa": 1017.9
+        },
+        {
+          "src": "bom",
+          "utc": "20261104173000",
+          "air_temp": 17.0,
+          "rel_hum": 42.0,
+          "wind_dir": "S",
+          "wind_dir_deg": 180,
+          "wind_spd_kmh": 32.0,
+          "gust_kmh": 41.0,
+          "rain_since_9am": 0.0,
+          "press_hpa": 1017.8
+        },
+        {
+          "src": "bom",
+          "utc": "20261104180000",
+          "air_temp": 16.4,
+          "rel_hum": 43.0,
+          "wind_dir": "S",
+          "wind_dir_deg": 180,
+          "wind_spd_kmh": 26.0,
+          "gust_kmh": 32.0,
+          "rain_since_9am": 0.0,
+          "press_hpa": 1018.1
+        },
+        {
+          "src": "bom",
+          "utc": "20261104183000",
+          "air_temp": 16.0,
+          "rel_hum": 44.0,
+          "wind_dir": "S",
+          "wind_dir_deg": 180,
+          "wind_spd_kmh": 24.0,
+          "gust_kmh": 32.0,
+          "rain_since_9am": 0.0,
+          "press_hpa": 1018.4
+        },
+        {
+          "src": "bom",
+          "utc": "20261104190000",
+          "air_temp": 15.3,
+          "rel_hum": 46.0,
+          "wind_dir": "S",
+          "wind_dir_deg": 180,
+          "wind_spd_kmh": 24.0,
+          "gust_kmh": 32.0,
+          "rain_since_9am": 0.0,
+          "press_hpa": 1018.8
+        },
+        {
+          "src": "bom",
+          "utc": "20261104193000",
+          "air_temp": 14.4,
+          "rel_hum": 48.0,
+          "wind_dir": "SSE",
+          "wind_dir_deg": 157.5,
+          "wind_spd_kmh": 13.0,
+          "gust_kmh": 19.0,
+          "rain_since_9am": 0.0,
+          "press_hpa": 1019.6
+        },
+        {
+          "src": "bom",
+          "utc": "20261104200000",
+          "air_temp": 13.9,
+          "rel_hum": 49.0,
+          "wind_dir": "S",
+          "wind_dir_deg": 180,
+          "wind_spd_kmh": 17.0,
+          "gust_kmh": 20.0,
+          "rain_since_9am": 0.0,
+          "press_hpa": 1020.1
+        },
+        {
+          "src": "bom",
+          "utc": "20261104203000",
+          "air_temp": 14.3,
+          "rel_hum": 48.0,
+          "wind_dir": "SSE",
+          "wind_dir_deg": 157.5,
+          "wind_spd_kmh": 11.0,
+          "gust_kmh": 13.0,
+          "rain_since_9am": 0.0,
+          "press_hpa": 1020.8
+        },
+        {
+          "src": "bom",
+          "utc": "20261104210000",
+          "air_temp": 15.7,
+          "rel_hum": 45.0,
+          "wind_dir": "SSE",
+          "wind_dir_deg": 157.5,
+          "wind_spd_kmh": 19.0,
+          "gust_kmh": 20.0,
+          "rain_since_9am": 0.0,
+          "press_hpa": 1021.2
+        },
+        {
+          "src": "bom",
+          "utc": "20261104213000",
+          "air_temp": 16.9,
+          "rel_hum": 39.0,
+          "wind_dir": "SE",
+          "wind_dir_deg": 135,
+          "wind_spd_kmh": 24.0,
+          "gust_kmh": 30.0,
+          "rain_since_9am": 0.0,
+          "press_hpa": 1021.6
+        },
+        {
+          "src": "bom",
+          "utc": "20261104220000",
+          "air_temp": 18.1,
+          "rel_hum": 36.0,
+          "wind_dir": "SE",
+          "wind_dir_deg": 135,
+          "wind_spd_kmh": 22.0,
+          "gust_kmh": 28.0,
+          "rain_since_9am": 0.0,
+          "press_hpa": 1021.9
+        },
+        {
+          "src": "bom",
+          "utc": "20261104223000",
+          "air_temp": 19.4,
+          "rel_hum": 32.0,
+          "wind_dir": "SE",
+          "wind_dir_deg": 135,
+          "wind_spd_kmh": 19.0,
+          "gust_kmh": 28.0,
+          "rain_since_9am": 0.0,
+          "press_hpa": 1022.1
         }
       ]
     },
@@ -3453,16 +3585,16 @@
       "ok": true,
       "latest": {
         "src": "bom",
-        "utc": "20261104170000",
-        "air_temp": 22.1,
-        "rel_hum": 29.0,
-        "wind_dir": "SSE",
-        "wind_dir_deg": 157.5,
-        "wind_spd_kmh": 26.0,
-        "gust_kmh": 33.0,
+        "utc": "20261104223000",
+        "air_temp": 20.8,
+        "rel_hum": 42.0,
+        "wind_dir": "SE",
+        "wind_dir_deg": 135,
+        "wind_spd_kmh": 30.0,
+        "gust_kmh": 35.0,
         "rain_since_9am": 0.0,
-        "press_hpa": 1017.8,
-        "local_time": "20261105033000"
+        "press_hpa": 1021.8,
+        "local_time": "20261105090000"
       },
       "history": [
         {
@@ -6800,6 +6932,138 @@
           "gust_kmh": 33.0,
           "rain_since_9am": 0.0,
           "press_hpa": 1017.8
+        },
+        {
+          "src": "bom",
+          "utc": "20261104173000",
+          "air_temp": 21.6,
+          "rel_hum": 31.0,
+          "wind_dir": "SSE",
+          "wind_dir_deg": 157.5,
+          "wind_spd_kmh": 26.0,
+          "gust_kmh": 32.0,
+          "rain_since_9am": 0.0,
+          "press_hpa": 1017.9
+        },
+        {
+          "src": "bom",
+          "utc": "20261104180000",
+          "air_temp": 20.9,
+          "rel_hum": 32.0,
+          "wind_dir": "SSE",
+          "wind_dir_deg": 157.5,
+          "wind_spd_kmh": 22.0,
+          "gust_kmh": 26.0,
+          "rain_since_9am": 0.0,
+          "press_hpa": 1018.1
+        },
+        {
+          "src": "bom",
+          "utc": "20261104183000",
+          "air_temp": 20.4,
+          "rel_hum": 33.0,
+          "wind_dir": "SSE",
+          "wind_dir_deg": 157.5,
+          "wind_spd_kmh": 24.0,
+          "gust_kmh": 28.0,
+          "rain_since_9am": 0.0,
+          "press_hpa": 1018.4
+        },
+        {
+          "src": "bom",
+          "utc": "20261104190000",
+          "air_temp": 19.9,
+          "rel_hum": 34.0,
+          "wind_dir": "SSE",
+          "wind_dir_deg": 157.5,
+          "wind_spd_kmh": 24.0,
+          "gust_kmh": 32.0,
+          "rain_since_9am": 0.0,
+          "press_hpa": 1018.7
+        },
+        {
+          "src": "bom",
+          "utc": "20261104193000",
+          "air_temp": 19.4,
+          "rel_hum": 35.0,
+          "wind_dir": "SSE",
+          "wind_dir_deg": 157.5,
+          "wind_spd_kmh": 20.0,
+          "gust_kmh": 28.0,
+          "rain_since_9am": 0.0,
+          "press_hpa": 1019.3
+        },
+        {
+          "src": "bom",
+          "utc": "20261104200000",
+          "air_temp": 18.8,
+          "rel_hum": 37.0,
+          "wind_dir": "SSE",
+          "wind_dir_deg": 157.5,
+          "wind_spd_kmh": 19.0,
+          "gust_kmh": 22.0,
+          "rain_since_9am": 0.0,
+          "press_hpa": 1020.1
+        },
+        {
+          "src": "bom",
+          "utc": "20261104203000",
+          "air_temp": 18.8,
+          "rel_hum": 48.0,
+          "wind_dir": "SE",
+          "wind_dir_deg": 135,
+          "wind_spd_kmh": 20.0,
+          "gust_kmh": 32.0,
+          "rain_since_9am": 0.0,
+          "press_hpa": 1020.7
+        },
+        {
+          "src": "bom",
+          "utc": "20261104210000",
+          "air_temp": 19.1,
+          "rel_hum": 46.0,
+          "wind_dir": "SE",
+          "wind_dir_deg": 135,
+          "wind_spd_kmh": 32.0,
+          "gust_kmh": 41.0,
+          "rain_since_9am": 0.0,
+          "press_hpa": 1021.0
+        },
+        {
+          "src": "bom",
+          "utc": "20261104213000",
+          "air_temp": 19.7,
+          "rel_hum": 43.0,
+          "wind_dir": "SE",
+          "wind_dir_deg": 135,
+          "wind_spd_kmh": 35.0,
+          "gust_kmh": 46.0,
+          "rain_since_9am": 0.0,
+          "press_hpa": 1021.3
+        },
+        {
+          "src": "bom",
+          "utc": "20261104220000",
+          "air_temp": 20.3,
+          "rel_hum": 43.0,
+          "wind_dir": "SE",
+          "wind_dir_deg": 135,
+          "wind_spd_kmh": 26.0,
+          "gust_kmh": 35.0,
+          "rain_since_9am": 0.0,
+          "press_hpa": 1021.5
+        },
+        {
+          "src": "bom",
+          "utc": "20261104223000",
+          "air_temp": 20.8,
+          "rel_hum": 42.0,
+          "wind_dir": "SE",
+          "wind_dir_deg": 135,
+          "wind_spd_kmh": 30.0,
+          "gust_kmh": 35.0,
+          "rain_since_9am": 0.0,
+          "press_hpa": 1021.8
         }
       ]
     },
@@ -6810,16 +7074,16 @@
       "ok": true,
       "latest": {
         "src": "bom",
-        "utc": "20261104170000",
-        "air_temp": 22.4,
-        "rel_hum": 31.0,
+        "utc": "20261104223000",
+        "air_temp": 21.2,
+        "rel_hum": 33.0,
         "wind_dir": "SSE",
         "wind_dir_deg": 157.5,
-        "wind_spd_kmh": 30.0,
+        "wind_spd_kmh": 32.0,
         "gust_kmh": 44.0,
         "rain_since_9am": 0.0,
-        "press_hpa": 1015.5,
-        "local_time": "20261105033000"
+        "press_hpa": 1020.1,
+        "local_time": "20261105090000"
       },
       "history": [
         {
@@ -10337,6 +10601,138 @@
           "gust_kmh": 44.0,
           "rain_since_9am": 0.0,
           "press_hpa": 1015.5
+        },
+        {
+          "src": "bom",
+          "utc": "20261104173000",
+          "air_temp": 21.6,
+          "rel_hum": 32.0,
+          "wind_dir": "SSE",
+          "wind_dir_deg": 157.5,
+          "wind_spd_kmh": 24.0,
+          "gust_kmh": 35.0,
+          "rain_since_9am": 0.0,
+          "press_hpa": 1015.7
+        },
+        {
+          "src": "bom",
+          "utc": "20261104180000",
+          "air_temp": 21.2,
+          "rel_hum": 32.0,
+          "wind_dir": "SSE",
+          "wind_dir_deg": 157.5,
+          "wind_spd_kmh": 24.0,
+          "gust_kmh": 32.0,
+          "rain_since_9am": 0.0,
+          "press_hpa": 1016.1
+        },
+        {
+          "src": "bom",
+          "utc": "20261104183000",
+          "air_temp": 20.7,
+          "rel_hum": 33.0,
+          "wind_dir": "SSE",
+          "wind_dir_deg": 157.5,
+          "wind_spd_kmh": 26.0,
+          "gust_kmh": 35.0,
+          "rain_since_9am": 0.0,
+          "press_hpa": 1016.5
+        },
+        {
+          "src": "bom",
+          "utc": "20261104190000",
+          "air_temp": 20.2,
+          "rel_hum": 33.0,
+          "wind_dir": "SSE",
+          "wind_dir_deg": 157.5,
+          "wind_spd_kmh": 24.0,
+          "gust_kmh": 32.0,
+          "rain_since_9am": 0.0,
+          "press_hpa": 1017.1
+        },
+        {
+          "src": "bom",
+          "utc": "20261104193000",
+          "air_temp": 19.6,
+          "rel_hum": 35.0,
+          "wind_dir": "SSE",
+          "wind_dir_deg": 157.5,
+          "wind_spd_kmh": 24.0,
+          "gust_kmh": 32.0,
+          "rain_since_9am": 0.0,
+          "press_hpa": 1017.4
+        },
+        {
+          "src": "bom",
+          "utc": "20261104200000",
+          "air_temp": 19.1,
+          "rel_hum": 36.0,
+          "wind_dir": "SSE",
+          "wind_dir_deg": 157.5,
+          "wind_spd_kmh": 19.0,
+          "gust_kmh": 28.0,
+          "rain_since_9am": 0.0,
+          "press_hpa": 1018.2
+        },
+        {
+          "src": "bom",
+          "utc": "20261104203000",
+          "air_temp": 19.4,
+          "rel_hum": 37.0,
+          "wind_dir": "SSE",
+          "wind_dir_deg": 157.5,
+          "wind_spd_kmh": 24.0,
+          "gust_kmh": 33.0,
+          "rain_since_9am": 0.0,
+          "press_hpa": 1018.6
+        },
+        {
+          "src": "bom",
+          "utc": "20261104210000",
+          "air_temp": 19.8,
+          "rel_hum": 37.0,
+          "wind_dir": "SSE",
+          "wind_dir_deg": 157.5,
+          "wind_spd_kmh": 26.0,
+          "gust_kmh": 41.0,
+          "rain_since_9am": 0.0,
+          "press_hpa": 1019.1
+        },
+        {
+          "src": "bom",
+          "utc": "20261104213000",
+          "air_temp": 19.8,
+          "rel_hum": 37.0,
+          "wind_dir": "SSE",
+          "wind_dir_deg": 157.5,
+          "wind_spd_kmh": 32.0,
+          "gust_kmh": 43.0,
+          "rain_since_9am": 0.0,
+          "press_hpa": 1019.4
+        },
+        {
+          "src": "bom",
+          "utc": "20261104220000",
+          "air_temp": 20.6,
+          "rel_hum": 35.0,
+          "wind_dir": "SE",
+          "wind_dir_deg": 135,
+          "wind_spd_kmh": 30.0,
+          "gust_kmh": 41.0,
+          "rain_since_9am": 0.0,
+          "press_hpa": 1019.7
+        },
+        {
+          "src": "bom",
+          "utc": "20261104223000",
+          "air_temp": 21.2,
+          "rel_hum": 33.0,
+          "wind_dir": "SSE",
+          "wind_dir_deg": 157.5,
+          "wind_spd_kmh": 32.0,
+          "gust_kmh": 44.0,
+          "rain_since_9am": 0.0,
+          "press_hpa": 1020.1
         }
       ]
     }
