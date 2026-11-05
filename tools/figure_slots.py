@@ -64,7 +64,60 @@ def views(entry):
     return [entry["file"]] if entry.get("file") else []
 
 
+def adopt(write=True):
+    """Declare dans le manifeste les images deja presentes sur le disque.
+
+    Le manifeste et les images vivent separement : les fichiers sont dans
+    frontend/img/figures/, leur declaration dans frontend/figures.json.
+    Une restauration, une fusion malheureuse ou une archive deballee
+    par-dessus peuvent donc effacer les declarations en laissant les
+    images, et la page affiche alors un cadre « Image to come » devant
+    une image qui existe. Cette fonction repare ce cas sans rien
+    retelecharger : elle adopte tout fichier dont le nom correspond a un
+    emplacement connu.
+    """
+    import json
+
+    data = manifest()
+    figs = data["figures"]
+    slots = scan()
+    folder = FRONTEND / "img" / "figures"
+    adopted = []
+    for path in sorted(folder.glob("*.jpg")) if folder.exists() else []:
+        slug = path.stem
+        if slug not in slots or slug not in figs:
+            continue
+        entry = figs[slug]
+        if views(entry):
+            continue
+        entry["file"] = f"figures/{path.name}"
+        entry.pop("note", None)
+        adopted.append(slug)
+    if adopted and write:
+        MANIFEST.write_text(
+            json.dumps(data, indent=2, ensure_ascii=False) + "\n",
+            encoding="utf-8")
+    return adopted
+
+
 def main():
+    import sys
+    if "--adopt" in sys.argv:
+        got = adopt()
+        if got:
+            print(f"{len(got)} image(s) adoptée(s) : {', '.join(got)}")
+            # Un credit vide fait echouer tests/test_figures.py, ce qui
+            # est voulu : personne ne doit publier une image sans dire
+            # d'ou elle vient, et deviner le credit serait pire.
+            figs = manifest()["figures"]
+            muettes = [g for g in got if not figs[g].get("credit")]
+            if muettes:
+                print(f"Sans crédit, à renseigner dans frontend/figures.json "
+                      f"avant publication : {', '.join(muettes)}")
+            print("Publier ensuite avec  ./update.sh")
+        else:
+            print("Aucune image sur le disque qui ne soit déjà déclarée.")
+        return
     figs = manifest()["figures"]
     slots = scan()
     ready = 0

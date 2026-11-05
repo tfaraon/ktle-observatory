@@ -69,6 +69,45 @@ for slug, entry in figs.items():
             f"{slug} : légende de remplacement trop courte"
         assert "\u2014" not in entry["caption"], entry["caption"]
 
+# ── Adoption des images orphelines ──────────────────────────
+# Images et declarations vivent separement : les fichiers dans
+# frontend/img/figures/, leur declaration dans figures.json. Une archive
+# deballee par-dessus le manifeste efface les declarations en laissant
+# les fichiers, et la page montre alors « Image to come » devant une
+# image presente. figure_slots.adopt() repare ce cas sans rien
+# retelecharger.
+import json  # noqa: E402
+import shutil  # noqa: E402
+import tempfile  # noqa: E402
+from pathlib import Path as _Path  # noqa: E402
+
+with tempfile.TemporaryDirectory() as _td:
+    work = _Path(_td) / "frontend"
+    work.mkdir()
+    (work / "img" / "figures").mkdir(parents=True)
+    shutil.copy(fs.MANIFEST, work / "figures.json")
+    for name in list(fs.BUILT) + ["methods"]:
+        shutil.copy(fs.FRONTEND / f"{name}.js", work / f"{name}.js")
+    shutil.copy(fs.FRONTEND / "index.html", work / "index.html")
+    keep = (fs.FRONTEND, fs.MANIFEST)
+    fs.FRONTEND, fs.MANIFEST = work, work / "figures.json"
+    try:
+        # Un fichier qui correspond a un emplacement, un autre qui n'en
+        # designe aucun : seul le premier doit etre adopte.
+        (work / "img" / "figures" / "mound-spring.jpg").write_bytes(b"x")
+        (work / "img" / "figures" / "inconnu-xyz.jpg").write_bytes(b"x")
+        got = fs.adopt()
+        assert got == ["mound-spring"], got
+        entry = fs.manifest()["figures"]["mound-spring"]
+        assert entry["file"] == "figures/mound-spring.jpg", entry
+        assert "note" not in entry, "la note d'attente disparaît"
+        assert not entry.get("credit"), \
+            "adopt ne doit jamais inventer un crédit"
+        # Un second passage n'a plus rien a adopter
+        assert fs.adopt() == []
+    finally:
+        fs.FRONTEND, fs.MANIFEST = keep
+
 ready = sum(1 for e in figs.values() if af.panel_files(e))
 views = sum(len(af.panel_files(e)) for e in figs.values())
 print(f"OK — {len(slots)} emplacements dans les pages, tous déclarés et légendés, "

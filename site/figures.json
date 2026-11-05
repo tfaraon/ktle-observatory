@@ -5,41 +5,41 @@
       "credit": "NASA Worldview, MODIS Terra",
       "licence": "Open, with attribution to NASA",
       "url": "https://worldview.earthdata.nasa.gov/",
-      "note": "Le lac en eau après la crue de 2025 : téléchargée par tools/fetch_figures.py"
+      "file": "figures/lake-from-space.jpg"
     },
     "flood-2025-lake": {
       "credit": "NASA Worldview, MODIS Terra",
       "licence": "Open, with attribution to NASA",
       "url": "https://worldview.earthdata.nasa.gov/",
-      "note": "La première vague sur le lit du lac, mai 2025 : téléchargée par tools/fetch_figures.py"
+      "file": "figures/flood-2025-lake.jpg"
     },
     "flood-2025-channel-country": {
       "credit": "NASA Worldview, MODIS Terra",
       "licence": "Open, with attribution to NASA",
       "url": "https://worldview.earthdata.nasa.gov/",
-      "note": "La Channel Country en crue, avril 2025 : téléchargée par tools/fetch_figures.py"
+      "file": "figures/flood-2025-channel-country.jpg"
     },
     "flood-2011-lake": {
       "credit": "NASA Worldview, MODIS Terra",
       "licence": "Open, with attribution to NASA",
       "url": "https://worldview.earthdata.nasa.gov/",
-      "note": "Le lac en eau, mai 2011 : téléchargée par tools/fetch_figures.py"
+      "file": "figures/flood-2011-lake.jpg"
     },
     "dry-lake": {
       "credit": "NASA Worldview, MODIS Terra",
       "licence": "Open, with attribution to NASA",
       "url": "https://worldview.earthdata.nasa.gov/",
-      "note": "Le lac à sec, croûte de sel : téléchargée par tools/fetch_figures.py"
+      "file": "figures/dry-lake.jpg"
     },
     "channel-country-dry": {
       "credit": "NASA Worldview, MODIS Terra",
       "licence": "Open, with attribution to NASA",
       "url": "https://worldview.earthdata.nasa.gov/",
-      "note": "La Channel Country à sec : téléchargée par tools/fetch_figures.py"
+      "file": "figures/channel-country-dry.jpg"
     },
     "mound-spring": {
       "credit": "",
-      "note": "Photograph of a mound spring, to be supplied."
+      "file": "figures/mound-spring.jpg"
     },
     "gibber-plain": {
       "credit": "",
@@ -59,7 +59,7 @@
       "note": "Carte de l'extension du lac Dieri, à dessiner"
     },
     "goyder-channel": {
-      "note": "Photographie ou carte du Goyder Channel"
+      "file": "figures/goyder-channel.jpg"
     },
     "marree-track": {
       "note": "Photographie de la piste de Birdsville près de Marree"
