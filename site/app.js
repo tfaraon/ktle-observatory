@@ -19,7 +19,7 @@
     fieldLayer: null,  // vertical layer index
     fieldTime: null,   // time-step index
     modelLayer: "none", // none | currents | hsign | wlength | period
-    satMap: null,
+    satMap: null, extentRaster: null, extentOn: false,
     modelRaster: null, modelShafts: null, modelHeads: null,
     areaIdx: 0,
     modelData: null,
@@ -328,6 +328,7 @@
     state.canvasRenderer = L.canvas({ padding: 0.3 });
     buildBaseButtons();
     if (!state.staticMode || state.manifest) buildModelButtons();
+    buildExtentButtons();
     setBase("topo", "hydro");
     setBase("topo", "sat");
     map.on("zoomend", () => {
@@ -1246,6 +1247,52 @@
     if (el) el.hidden = true;
   }
 
+  // L'etendue d'eau vient du niveau SWOT, pas du modele : elle vit sur
+  // la carte satellite, avec son propre message, sa propre legende et
+  // son propre calque. Elle partageait l'ardoise du modele, si bien
+  // qu'afficher l'une effacait l'autre.
+  function showExtentMessage(text) {
+    const el = $("map-message-sat");
+    if (!el) return;
+    el.textContent = text;
+    el.hidden = false;
+  }
+
+  function hideExtentMessage() {
+    const el = $("map-message-sat");
+    if (el) el.hidden = true;
+  }
+
+  function setExtentNote(text, isError) {
+    const el = $("extent-note");
+    if (!el) return;
+    el.textContent = text || "";
+    el.classList.toggle("warn", Boolean(isError));
+  }
+
+  function clearWaterExtent() {
+    if (state.extentRaster) {
+      state.satMap.removeLayer(state.extentRaster);
+      state.extentRaster = null;
+    }
+    $("map-legend-sat").hidden = true;
+    $("extent-controls").hidden = true;
+    setExtentNote("");
+  }
+
+  function buildExtentButtons() {
+    const seg = $("extent-seg");
+    if (!seg) return;
+    seg.querySelectorAll(".seg-btn").forEach((b) =>
+      b.addEventListener("click", () => {
+        seg.querySelectorAll(".seg-btn").forEach((o) =>
+          o.classList.toggle("active", o === b));
+        state.extentOn = b.dataset.extent === "water";
+        if (state.extentOn) drawWaterExtent();
+        else { clearWaterExtent(); hideExtentMessage(); }
+      }));
+  }
+
   // ── Value under the cursor ───────────────────────────────
   //
   // The grid is kept client-side so the readout works without a round
@@ -1329,7 +1376,6 @@
       return;
     }
     // L'étendue en eau vient de SWOT, pas d'un scénario apparié.
-    if (state.modelLayer === "water") return drawWaterExtent();
     if (!state.scenario) {
       clearModelLayer();
       hideMapMessage();
@@ -1515,12 +1561,12 @@
   }
 
   function drawWaterExtent() {
-    clearModelLayer();
-    hideMapMessage();
+    clearWaterExtent();
+    hideExtentMessage();
     const dates = areaDates();
     const a = state.extent;
     if (!dates.length || !a || !a.map_bounds) {
-      showMapMessage("No water extent available. Run "
+      showExtentMessage("No water extent available. Run "
         + "pipeline/water_extent.py");
       return;
     }
@@ -1528,17 +1574,17 @@
     state.areaIdx = idx;
     const entry = dates[idx];
 
-    state.modelRaster = L.imageOverlay(
+    state.extentRaster = L.imageOverlay(
       areaBase() + entry.map, a.map_bounds,
-      { opacity: 1, interactive: false }).addTo(state.map);
+      { opacity: 1, interactive: false }).addTo(state.satMap);
 
-    $("legend-title").textContent = "Water depth (m)";
-    $("legend-min").textContent = "shallow";
-    $("legend-max").textContent = "deep";
-    $("map-legend").hidden = false;
+    $("legend-title-sat").textContent = "Water depth (m)";
+    $("legend-min-sat").textContent = "shallow";
+    $("legend-max-sat").textContent = "deep";
+    $("map-legend-sat").hidden = false;
     // La palette du modèle n'a pas de sens ici : une seule teinte,
     // dont l'opacité suit la fraction d'eau de la maille.
-    const bar = document.querySelector(".legend-bar");
+    const bar = $("map-legend-sat").querySelector(".legend-bar");
     if (bar) {
       bar.style.background =
         "linear-gradient(to right, rgba(30,95,107,0.08), rgba(30,95,107,0.85))";
@@ -1547,7 +1593,7 @@
     buildAreaDateControls(dates, idx, entry);
     // L'étendue vient du niveau mesuré, pas de la classification du
     // radar : c'est ce que la note doit dire.
-    setModelNote(`${entry.date}, level ${entry.level_m.toFixed(2)} m, `
+    setExtentNote(`${entry.date}, level ${entry.level_m.toFixed(2)} m, `
       + `${entry.area_km2.toLocaleString("en-GB")} km², `
       + `${entry.volume_km3.toFixed(3)} km³, derived from the SWOT level`
       + (a.wlvl_offset ? "" : ", datum offset not yet applied"),
@@ -1555,7 +1601,7 @@
   }
 
   function buildAreaDateControls(dates, idx, entry) {
-    const box = $("model-controls");
+    const box = $("extent-controls");
     box.hidden = false;
     box.innerHTML =
       `<button type="button" id="area-prev" class="date-btn" `
@@ -1576,7 +1622,6 @@
   function buildModelButtons() {
     const seg = $("model-seg");
     const specs = [
-      { id: "water", label: "Water extent" },
       { id: "currents", label: "Currents" },
       { id: "hsign", label: "Wave height" },
       { id: "wlength", label: "Wavelength" },

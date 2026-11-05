@@ -106,6 +106,11 @@
             <div class="seg" id="base-seg-sat" role="group" aria-label="Base map">
               <button type="button" class="seg-btn active" data-base="topo">Map</button>
             </div>
+            <div class="seg" id="extent-seg" role="group" aria-label="Water extent">
+              <button type="button" class="seg-btn active" data-extent="none">No extent</button>
+              <button type="button" class="seg-btn" data-extent="water">Water extent</button>
+            </div>
+            <div id="extent-controls" class="imagery-controls mono" hidden></div>
             <div id="imagery-controls" class="imagery-controls mono" hidden>
               <button type="button" id="imagery-prev" class="date-btn" aria-label="Previous day">&#9664;</button>
               <input type="date" id="imagery-date" aria-label="Imagery date">
@@ -114,7 +119,7 @@
             </div>
           </div>
           <div class="map-wrap">
-            <div id="map-sat" aria-label="Map of the SWOT extraction sites and the observed water extent"></div>
+            <div id="map-sat" class="map-pane" aria-label="Map of the SWOT extraction sites and the observed water extent"></div>
             <div id="map-message-sat" class="map-message mono" hidden></div>
             <div id="map-legend-sat" class="map-legend mono" hidden>
               <span id="legend-title-sat"></span>
@@ -187,6 +192,7 @@
           </div>
           <button type="button" id="dl-area2" class="dl-btn">Download CSV</button>
         </div>
+        <p id="extent-note" class="extent-note mono"></p>
         <div id="area-chart" class="chart"></div>
         <p class="chart-note">Derived from SWOT following Rai et&nbsp;al. (2026). Open circles mark passes that covered only part of the lake. The shaded band is the formal precision of the sum, not a validated accuracy — the source paper reports around 15&nbsp;% error against optical water masks.</p>
       </article>
@@ -222,7 +228,7 @@
             </div>
           </div>
           <div class="map-wrap">
-            <div id="map-hydro" aria-label="Map of the modelled flow field"></div>
+            <div id="map-hydro" class="map-pane" aria-label="Map of the modelled flow field"></div>
             <div id="map-message" class="map-message mono" hidden></div>
             <div id="map-readout" class="map-readout mono" hidden></div>
             <div id="map-legend" class="map-legend mono" hidden>
