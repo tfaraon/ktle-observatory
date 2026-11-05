@@ -357,6 +357,16 @@
     wireMapBar();
     wireScaleToggle();
     wireHover(map);
+
+    // Leaflet mesure son conteneur a la creation. Celui de l'onglet qui
+    // n'est pas ouvert est alors masque, donc mesure zero : la carte
+    // s'initialise, ses controles apparaissent, et aucune tuile n'est
+    // demandee parce qu'elle se croit de taille nulle. showTab remesure
+    // au changement d'onglet, mais pas pour l'onglet deja ouvert au
+    // moment ou les donnees arrivent, qui est le cas au chargement.
+    requestAnimationFrame(() => {
+      [state.map, state.satMap].forEach((m) => { if (m) m.invalidateSize(); });
+    });
   }
 
   function refreshMarkers() {
