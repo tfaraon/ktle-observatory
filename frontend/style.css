@@ -1945,9 +1945,3 @@ nav.tabs, .subbar { max-width: calc(var(--page) - 56px); padding-left: 0; paddin
   .group-page .person-affiliations { grid-row: auto; margin-top: 6px; }
 }
 
-/* Hydrodynamics and Satellite imaging share one panel, one map and one
-   set of data bindings. data-view says which is being read. */
-#tab-dashboard[data-view="satellite"] [data-dashboard-view]:not([data-dashboard-view="satellite"]):not([data-dashboard-view="map"]),
-#tab-dashboard[data-view="hydrodynamics"] [data-dashboard-view]:not([data-dashboard-view="hydrodynamics"]):not([data-dashboard-view="map"]) {
-  display: none;
-}

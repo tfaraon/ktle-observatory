@@ -75,7 +75,7 @@ with sync_playwright() as p:
     pg.click('.section-btn[data-section="people"]'); pg.wait_for_timeout(200)
     pg.click('.section-btn[data-section="science"]'); pg.wait_for_timeout(200)
     s = state(pg)
-    check("retour sur le dernier onglet de Science", s["panel"] == ["tab-dashboard"], s)
+    check("retour sur le dernier onglet de Science", s["panel"] == ["tab-hydrodynamics"], s)
     pg.goto(BASE + "#floods"); pg.wait_for_timeout(500)
     s = state(pg)
     check("sous-onglet Fillings", s["panel"] == ["tab-floods"] and s["navs"] == ["lake"], s)
@@ -89,45 +89,53 @@ with sync_playwright() as p:
           pg.evaluate("() => Boolean(document.getElementById('travel-live'))"))
     pg.goto(BASE + "#hydrodynamics"); pg.wait_for_timeout(400)
     s = state(pg)
-    check("Hydrodynamics dans Science", s["panel"] == ["tab-dashboard"] and s["navs"] == ["science"], s)
+    check("Hydrodynamics est son propre panneau",
+          s["panel"] == ["tab-hydrodynamics"] and s["navs"] == ["science"], s)
 
-    # Les deux lectures du panneau partagé : une seule carte, des cartes
-    # de données propres à chacune. Masquer est fait par le CSS, donc on
-    # interroge la mise en page réelle et non l'attribut hidden.
-    #
-    # Sans données, #dashboard reste masqué au profit de l'état vide, et
-    # tout y serait invisible pour la mauvaise raison : le test
-    # découvrirait une scission correcte même si le CSS ne faisait rien.
-    # On le découvre donc à la main avant de mesurer.
+    # Sans donnees, le corps du tableau de bord reste masque au profit de
+    # l'etat vide, et tout y serait invisible pour la mauvaise raison. On
+    # le decouvre a la main avant de mesurer.
     pg.evaluate("""() => {
-      document.getElementById('empty-state').hidden = true;
-      document.getElementById('dashboard').hidden = false;
+      document.querySelectorAll('.empty-state').forEach(e => { e.hidden = true; });
+      document.querySelectorAll('.dashboard-body').forEach(e => { e.hidden = false; });
     }""")
     pg.wait_for_timeout(100)
 
-    def shown(sel):
-        return pg.evaluate("(s) => { const e = document.querySelector(s);"
-                           " return Boolean(e && e.getClientRects().length); }", sel)
+    def inside(panel, sel):
+        return pg.evaluate("([p, s]) => { const e = document.querySelector('#' + p + ' ' + s);"
+                           " return Boolean(e); }", [panel, sel])
 
-    # Garde-fou : la mesure doit savoir voir quelque chose.
-    check("l'état vide écarté, le tableau de bord est mesurable",
-          shown("#dashboard"))
-    check("Hydrodynamics : scénario Delft3D visible", shown(".model-card"))
-    check("Hydrodynamics : série SWOT masquée", not shown(".level-series"))
-    check("Hydrodynamics : carte partagée non masquée par le CSS",
-          pg.evaluate("() => getComputedStyle(document.querySelector"
-                      "('.map-card')).display !== 'none'"))
-    pg.click('.tab[data-tab="satellite"]'); pg.wait_for_timeout(300)
+    check("Hydrodynamics : scenario Delft3D", inside("tab-hydrodynamics", ".model-card"))
+    check("Hydrodynamics : selecteur de couche", inside("tab-hydrodynamics", "#model-seg"))
+    check("Hydrodynamics : lecture au survol", inside("tab-hydrodynamics", "#map-readout"))
+    check("Hydrodynamics : frise temporelle", inside("tab-hydrodynamics", "#timeline"))
+    check("Hydrodynamics : sa carte", inside("tab-hydrodynamics", "#map-hydro"))
+    check("Hydrodynamics : pas la serie SWOT", not inside("tab-hydrodynamics", ".level-series"))
+    check("Hydrodynamics : pas les reglages d'imagerie",
+          not inside("tab-hydrodynamics", "#imagery-controls"))
+
+    pg.goto(BASE + "#satellite"); pg.wait_for_timeout(400)
     s = state(pg)
-    check("Satellite imaging dans Science",
-          s["panel"] == ["tab-dashboard"] and s["navs"] == ["science"], s)
-    check("Satellite : série SWOT visible", shown(".level-series"))
-    check("Satellite : scénario Delft3D masqué", not shown(".model-card"))
-    check("Satellite : carte partagée non masquée par le CSS",
-          pg.evaluate("() => getComputedStyle(document.querySelector"
-                      "('.map-card')).display !== 'none'"))
-    check("une seule carte Leaflet dans la page",
-          pg.evaluate("() => document.querySelectorAll('#map').length") == 1)
+    check("Satellite imaging est son propre panneau",
+          s["panel"] == ["tab-satellite"] and s["navs"] == ["science"], s)
+    pg.evaluate("""() => {
+      document.querySelectorAll('.empty-state').forEach(e => { e.hidden = true; });
+      document.querySelectorAll('.dashboard-body').forEach(e => { e.hidden = false; });
+    }""")
+    pg.wait_for_timeout(100)
+    check("Satellite : serie SWOT", inside("tab-satellite", ".level-series"))
+    check("Satellite : surface en eau", inside("tab-satellite", "#area-card"))
+    check("Satellite : reglages d'imagerie", inside("tab-satellite", "#imagery-controls"))
+    check("Satellite : sa carte", inside("tab-satellite", "#map-sat"))
+    check("Satellite : pas le scenario Delft3D", not inside("tab-satellite", ".model-card"))
+    check("Satellite : pas la frise temporelle", not inside("tab-satellite", "#timeline"))
+
+    check("deux conteneurs de carte distincts",
+          pg.evaluate("() => document.querySelectorAll('#map-sat, #map-hydro').length") == 2)
+    check("plus de conteneur partage",
+          pg.evaluate("() => !document.getElementById('map')"))
+    check("chaque carte a son segment de fond",
+          pg.evaluate("() => document.querySelectorAll('#base-seg-sat, #base-seg-hydro').length") == 2)
 
     pg.goto(BASE + "#hydrology"); pg.wait_for_timeout(300)
     s = state(pg)
@@ -154,7 +162,7 @@ with sync_playwright() as p:
     s = state(pg)
     check("sous-onglet Rainfall dans Basin", s["panel"] == ["tab-rainfall"] and s["navs"] == ["basin"], s)
     # Anciennes adresses : #modelling a ete partage avant la scission
-    for old_hash, want in (("#observatory", "tab-dashboard"), ("#modelling", "tab-dashboard"),
+    for old_hash, want in (("#observatory", "tab-hydrodynamics"), ("#modelling", "tab-hydrodynamics"),
                            ("#rain-rivers", "tab-river-flow")):
         pg.goto(BASE + old_hash); pg.wait_for_timeout(400)
         s = state(pg)
@@ -168,7 +176,7 @@ with sync_playwright() as p:
                     ("#ff-animals", "tab-fauna-flora"), ("#birds", "tab-birds"),
                     ("#inaturalist", "tab-inaturalist"), ("#river-flow", "tab-river-flow"),
                     ("#weather", "tab-weather"), ("#rainfall", "tab-rainfall"),
-                    ("#hydrodynamics", "tab-dashboard"), ("#satellite", "tab-dashboard"),
+                    ("#hydrodynamics", "tab-hydrodynamics"), ("#satellite", "tab-satellite"),
                     ("#hydrology", "tab-hydrology"), ("#group", "tab-group"),
                     ("#floods", "tab-floods"),
                     ("#lake-overview", "tab-lake-overview"), ("#country", "tab-country"),

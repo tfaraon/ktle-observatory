@@ -85,8 +85,8 @@ finally:
 html = (ROOT / "frontend" / "index.html").read_text(encoding="utf-8")
 check("group.js chargé par index.html", 'src="group.js"' in html)
 check("panneau tab-group présent", 'id="tab-group"' in html)
-check("onglet Research group dans la barre",
-      'data-tab="group"' in html)
+check("Research group est une partie, pas un onglet de Science",
+      'data-section="group"' in html and 'data-tab="group"' not in html)
 app = (ROOT / "frontend" / "app.js").read_text(encoding="utf-8")
 check("onglet rattaché à une partie",
       re.search(r"group:\s*\"[a-z-]+\"", app) is not None)

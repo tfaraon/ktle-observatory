@@ -92,67 +92,38 @@
 
   <main>
 
-    <section id="tab-dashboard" class="tab-panel" role="tabpanel" hidden>
+    <section id="tab-satellite" class="tab-panel" role="tabpanel" hidden>
 
-    <!-- Empty state: shown until the JSON exists -->
-    <section id="empty-state" class="panel empty-state" hidden>
+<section class="panel empty-state" hidden>
       <h2>No data to display</h2>
       <p>The file <code>data/swot_wse.json</code> has not been generated yet.</p>
       <p>Run <code>python pipeline/update_swot.py</code>, or add <code>--demo</code> for demonstration data.</p>
     </section>
 
-    <section id="dashboard" hidden>
-
-      <!-- Panel 1: map with model layers -->
-        <article class="panel map-card" data-dashboard-view="map">
+    <section class="dashboard-body" hidden>
+      <article class="panel map-card">
           <div class="map-bar">
-            <div class="seg" id="base-seg" role="group" aria-label="Base map">
+            <div class="seg" id="base-seg-sat" role="group" aria-label="Base map">
               <button type="button" class="seg-btn active" data-base="topo">Map</button>
             </div>
-            <div class="seg" id="model-seg" role="group" aria-label="Model layer">
-              <button type="button" class="seg-btn active" data-model="none">No model</button>
-            </div>
-            <div id="model-controls" class="imagery-controls mono" hidden>
-              <select id="model-layer-idx" class="site-select" aria-label="Vertical layer"></select>
-              <select id="model-time" class="site-select" aria-label="Time step"></select>
-              <button type="button" id="scale-toggle" class="date-btn active"
-                      title="Auto: scale fitted to this scenario. Fixed: same scale for all scenarios.">Auto scale</button>
-              <label class="arrow-size-wrap">Arrows
-                <input type="range" id="arrow-size" min="6" max="42" step="2"
-                       value="16" aria-label="Arrow size">
-              </label>
-            </div>
             <div id="imagery-controls" class="imagery-controls mono" hidden>
-              <button type="button" id="imagery-prev" class="date-btn" aria-label="Previous day">◀</button>
+              <button type="button" id="imagery-prev" class="date-btn" aria-label="Previous day">&#9664;</button>
               <input type="date" id="imagery-date" aria-label="Imagery date">
-              <button type="button" id="imagery-next" class="date-btn" aria-label="Next day">▶</button>
+              <button type="button" id="imagery-next" class="date-btn" aria-label="Next day">&#9654;</button>
               <button type="button" id="imagery-latest" class="date-btn date-btn-latest active">Latest</button>
             </div>
           </div>
           <div class="map-wrap">
-            <div id="map" aria-label="Map of SWOT extraction sites"></div>
-            <div id="map-message" class="map-message mono" hidden></div>
-            <div id="map-readout" class="map-readout mono" hidden></div>
-            <div id="map-legend" class="map-legend mono" hidden>
-              <span id="legend-title"></span>
+            <div id="map-sat" aria-label="Map of the SWOT extraction sites and the observed water extent"></div>
+            <div id="map-message-sat" class="map-message mono" hidden></div>
+            <div id="map-legend-sat" class="map-legend mono" hidden>
+              <span id="legend-title-sat"></span>
               <span class="legend-bar"><i></i></span>
-              <span id="legend-min"></span><span id="legend-max"></span>
+              <span id="legend-min-sat"></span><span id="legend-max-sat"></span>
             </div>
           </div>
-        <div class="timeline mono" id="timeline" hidden>
-          <button type="button" id="tl-play" class="date-btn" aria-label="Play through time">▶</button>
-          <input type="range" id="tl-range" min="0" max="0" step="1" value="0"
-                 aria-label="Time of the observed conditions">
-          <span id="tl-label">now</span>
-          <button type="button" id="tl-now" class="date-btn active">Now</button>
-        </div>
-
         </article>
-
-
-
-      <!-- Panel 2: water level and time series -->
-      <article class="panel level-series" data-dashboard-view="satellite">
+<article class="panel level-series">
         <div class="level-card">
           <div class="level-card-head">
             <label class="site-select-wrap">
@@ -194,11 +165,22 @@
         <div id="chart" class="chart"></div>
         <p class="chart-note">Each point is a SWOT observation (L2 HR Raster) extracted at the selected site. Without an observation there is no point: sampling follows the satellite pass cycle. Water area, where available, follows the method of Rai et al. (2026); open circles mark passes that covered only part of the lake.</p>
       </div>
-
-      </article>
-
-      <!-- Panel 3b: surface water area -->
-      <article class="panel chart-card" id="area-card" data-dashboard-view="satellite" hidden>
+<div class="chart-card">
+        <div class="panel-head head-row">
+          <div>
+            <h2 id="chart-title">SWOT water surface elevation</h2>
+          </div>
+          <span class="head-actions">
+            <button type="button" id="dl-wse" class="dl-btn"
+                    title="All sites, all observations, as CSV">Water levels</button>
+            <button type="button" id="dl-area" class="dl-btn" hidden
+                    title="Surface water area, method of Rai et al. (2026)">Water area</button>
+          </span>
+        </div>
+        <div id="chart" class="chart"></div>
+        <p class="chart-note">Each point is a SWOT observation (L2 HR Raster) extracted at the selected site. Without an observation there is no point: sampling follows the satellite pass cycle. Water area, where available, follows the method of Rai et al. (2026); open circles mark passes that covered only part of the lake.</p>
+      </div>
+<article class="panel chart-card" id="area-card" hidden>
         <div class="panel-head head-row">
           <div>
             <h2>Lake water area</h2>
@@ -208,9 +190,56 @@
         <div id="area-chart" class="chart"></div>
         <p class="chart-note">Derived from SWOT following Rai et&nbsp;al. (2026). Open circles mark passes that covered only part of the lake. The shaded band is the formal precision of the sum, not a validated accuracy — the source paper reports around 15&nbsp;% error against optical water masks.</p>
       </article>
+    </section>
+    </section>
 
-      <!-- Panel 4: matched Delft3D scenario -->
-      <article class="panel model-card" data-dashboard-view="hydrodynamics">
+    <section id="tab-hydrodynamics" class="tab-panel" role="tabpanel" hidden>
+
+<section class="panel empty-state" hidden>
+      <h2>No data to display</h2>
+      <p>The file <code>data/swot_wse.json</code> has not been generated yet.</p>
+      <p>Run <code>python pipeline/update_swot.py</code>, or add <code>--demo</code> for demonstration data.</p>
+    </section>
+
+    <section class="dashboard-body" hidden>
+      <article class="panel map-card">
+          <div class="map-bar">
+            <div class="seg" id="base-seg-hydro" role="group" aria-label="Base map">
+              <button type="button" class="seg-btn active" data-base="topo">Map</button>
+            </div>
+            <div class="seg" id="model-seg" role="group" aria-label="Model layer">
+              <button type="button" class="seg-btn active" data-model="none">No model</button>
+            </div>
+            <div id="model-controls" class="imagery-controls mono" hidden>
+              <select id="model-layer-idx" class="site-select" aria-label="Vertical layer"></select>
+              <select id="model-time" class="site-select" aria-label="Time step"></select>
+              <button type="button" id="scale-toggle" class="date-btn active"
+                      title="Auto: scale fitted to this scenario. Fixed: same scale for all scenarios.">Auto scale</button>
+              <label class="arrow-size-wrap">Arrows
+                <input type="range" id="arrow-size" min="6" max="42" step="2"
+                       value="16" aria-label="Arrow size">
+              </label>
+            </div>
+          </div>
+          <div class="map-wrap">
+            <div id="map-hydro" aria-label="Map of the modelled flow field"></div>
+            <div id="map-message" class="map-message mono" hidden></div>
+            <div id="map-readout" class="map-readout mono" hidden></div>
+            <div id="map-legend" class="map-legend mono" hidden>
+              <span id="legend-title"></span>
+              <span class="legend-bar"><i></i></span>
+              <span id="legend-min"></span><span id="legend-max"></span>
+            </div>
+          </div>
+<div class="timeline mono" id="timeline" hidden>
+          <button type="button" id="tl-play" class="date-btn" aria-label="Play through time">▶</button>
+          <input type="range" id="tl-range" min="0" max="0" step="1" value="0"
+                 aria-label="Time of the observed conditions">
+          <span id="tl-label">now</span>
+          <button type="button" id="tl-now" class="date-btn active">Now</button>
+        </div>
+        </article>
+<article class="panel model-card">
         <div class="panel-head scenario-head">
           <div>
             <h2>Matching Delft3D scenario</h2>
@@ -225,9 +254,7 @@
           <p class="scenario-empty mono">Loading scenarios…</p>
         </div>
       </article>
-
     </section>
-
     </section>
 
     <section id="tab-home" class="tab-panel home" role="tabpanel">
