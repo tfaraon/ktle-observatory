@@ -395,7 +395,9 @@ main {
   flex-direction: column;
 }
 .map-wrap { position: relative; flex: 1; min-height: 620px; display: flex; }
-#map { width: 100%; flex: 1; min-height: 620px; }
+/* Par classe : la regle survit au renommage des conteneurs, qui a
+   deja coute une carte de hauteur nulle une fois. */
+.map-pane { width: 100%; flex: 1; min-height: 620px; }
 
 /* Lecture de la valeur sous le curseur */
 .map-readout {
@@ -894,7 +896,7 @@ main {
     border-bottom: 1px solid var(--panel-edge);
   }
   .map-card { min-height: 520px; }
-  .map-wrap, #map { min-height: 440px; }
+  .map-wrap, .map-pane { min-height: 440px; }
   .site-header { flex-direction: column; align-items: flex-start; gap: 8px; }
   .header-right { align-items: flex-start; }
 }
@@ -1945,3 +1947,13 @@ nav.tabs, .subbar { max-width: calc(var(--page) - 56px); padding-left: 0; paddin
   .group-page .person-affiliations { grid-row: auto; margin-top: 6px; }
 }
 
+
+/* Note de l'étendue d'eau, sous le titre de la carte des surfaces. */
+.extent-note {
+  margin: 0;
+  padding: 0 22px 12px;
+  font-size: 0.82rem;
+  color: var(--dune);
+}
+.extent-note:empty { display: none; }
+.extent-note.warn { color: var(--ochre); }

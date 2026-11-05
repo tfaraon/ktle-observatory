@@ -129,6 +129,14 @@ with sync_playwright() as p:
     check("Satellite : sa carte", inside("tab-satellite", "#map-sat"))
     check("Satellite : pas le scenario Delft3D", not inside("tab-satellite", ".model-card"))
     check("Satellite : pas la frise temporelle", not inside("tab-satellite", "#timeline"))
+    check("Satellite : selecteur d'etendue d'eau", inside("tab-satellite", "#extent-seg"))
+    check("Satellite : note de l'etendue", inside("tab-satellite", "#extent-note"))
+    check("l'etendue d'eau n'est plus une couche du modele",
+          pg.evaluate("() => !document.querySelector('[data-model=\"water\"]')"))
+    check("chaque carte a sa legende",
+          pg.evaluate("() => document.querySelectorAll('#map-legend, #map-legend-sat').length") == 2)
+    check("la hauteur des cartes tient a une classe",
+          pg.evaluate("() => document.querySelectorAll('.map-pane').length") == 2)
 
     check("deux conteneurs de carte distincts",
           pg.evaluate("() => document.querySelectorAll('#map-sat, #map-hydro').length") == 2)
