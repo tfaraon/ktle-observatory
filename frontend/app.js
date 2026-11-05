@@ -32,7 +32,11 @@
     loadedPages: {},
     ebird: null,
     birdsLayer: null,
-    lastTab: { lake: "lake-overview", basin: "catchment", water: "methods",
+    // Onglet ouvert par defaut dans chaque partie. Un nom de partie
+    // n'est pas un nom d'onglet : sans entree ici, showTab ne reconnait
+    // pas le nom et retombe sur l'accueil, barre d'onglets masquee.
+    lastTab: { lake: "lake-overview", basin: "catchment",
+               science: "hydrodynamics",
                nature: "natural-history", people: "country" },
     figures: null, showPlaceholders: true, wxMap: null,
     rain: null, rivers: null, rainMap: null, flowMap: null, rainOverlay: null, flowStations: null, rrView: "sum7",
@@ -1811,6 +1815,7 @@
   // Trois parties : Natural History et Aboriginal Culture, des lectures
   // référencées, et Observatory, qui regroupe le tableau de bord, les
   // méthodes et les publications. Chaque onglet appartient à une partie.
+  const DASHBOARD_VIEWS = ["hydrodynamics", "satellite"];
   const SECTION_OF = {
     home: "home",
     "lake-overview": "lake",
@@ -1818,11 +1823,14 @@
     catchment: "basin",
     "rain-to-lake": "basin",
     "river-flow": "basin",
-    methods: "water",
-    modelling: "water",
-    rainfall: "water",
-    weather: "water",
-    publications: "water",
+    hydrology: "science",
+    hydrodynamics: "science",
+    satellite: "science",
+    methods: "science",
+    publications: "science",
+    group: "science",
+    rainfall: "basin",
+    weather: "basin",
     "natural-history": "nature",
     "fauna-flora": "nature",
     birds: "nature",
@@ -1833,7 +1841,8 @@
     data: "people",
   };
   // Anciennes adresses, pour que les liens déjà partagés continuent de marcher
-  const ALIASES = { observatory: "modelling", "rain-rivers": "river-flow", lake: "lake-overview" };
+  const ALIASES = { observatory: "hydrodynamics", modelling: "hydrodynamics",
+    "rain-rivers": "river-flow", lake: "lake-overview" };
   // Contenus injectés à la première ouverture, et préfixes des ancres
   // qu'ils portent : sections et références de chaque page.
   // Un « const » global n'est pas une propriété de window : window[nom]
@@ -1875,6 +1884,10 @@
     stories: {
       html: () => (typeof STORIES_HTML === "string" ? STORIES_HTML : null),
       anchors: /^(st|stref)-/,
+    },
+    group: {
+      html: () => (typeof GROUP_HTML === "string" ? GROUP_HTML : null),
+      anchors: /^gr-/,
     },
   };
 
@@ -1923,8 +1936,15 @@
       b.classList.toggle("active", on);
       b.setAttribute("aria-selected", on ? "true" : "false");
     });
+    // Hydrodynamique et imagerie satellite partagent un panneau : une
+    // seule carte Leaflet, une seule liaison aux donnees. La lecture
+    // active est portee par data-view, et le CSS masque les cartes de
+    // l'autre. Deux panneaux voudraient dire deux cartes, donc deux
+    // fois les tuiles et un invalidateSize a tenir pour chacune.
+    const onDashboard = DASHBOARD_VIEWS.includes(name);
+    if (onDashboard) $("tab-dashboard").dataset.view = name;
     document.querySelectorAll(".tab-panel").forEach((p) => {
-      p.hidden = p.id !== "tab-" + name;
+      p.hidden = p.id !== "tab-" + (onDashboard ? "dashboard" : name);
     });
 
     if (name === "methods" && !state.methodsLoaded) {
@@ -1940,8 +1960,8 @@
     // Leaflet et Plotly calculent leurs dimensions au moment du rendu :
     // masqués, ils mesurent zéro et restent figés au retour.
     requestAnimationFrame(() => {
-      if (name === "modelling" && state.map) state.map.invalidateSize();
-      const panel = $("tab-" + name);
+      if (onDashboard && state.map) state.map.invalidateSize();
+      const panel = $("tab-" + (onDashboard ? "dashboard" : name));
       if (panel) panel.querySelectorAll(".js-plotly-plot").forEach((el) => Plotly.Plots.resize(el));
     });
 
@@ -2015,7 +2035,13 @@
     document.querySelectorAll(".section-btn").forEach((b) =>
       b.addEventListener("click", () => {
         const section = b.dataset.section;
-        showTab(state.lastTab[section] || section);
+        // A defaut de memoire, le premier onglet de la partie. Passer le
+        // nom de la partie ne marcherait que s'il est aussi un nom
+        // d'onglet, sans quoi showTab retombe sur l'accueil.
+        const first = document.querySelector(
+          `.tabs[data-for="${section}"] .tab`);
+        showTab(state.lastTab[section]
+                || (first && first.dataset.tab) || section);
       }));
     window.addEventListener("hashchange", () => route(location.hash));
     if (!route(location.hash)) showTab("home");

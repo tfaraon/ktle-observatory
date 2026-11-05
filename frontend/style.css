@@ -1851,3 +1851,103 @@ nav.tabs, .subbar { max-width: calc(var(--page) - 56px); padding-left: 0; paddin
 .wx-plate { margin: 22px 0 30px; }
 .wx-map { height: 380px; border: 1px solid var(--panel-edge); background: var(--grid); }
 .obs-list img { width: 64px; height: 64px; }
+
+/* ── Research group ───────────────────────────────────────── */
+
+.group-page .people {
+  list-style: none;
+  margin: 26px 0 0;
+  padding: 0;
+  border-top: 1px solid var(--panel-edge);
+}
+.group-page .person {
+  display: grid;
+  grid-template-columns: minmax(0, 15em) minmax(0, 1fr);
+  gap: 2px 28px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--panel-edge);
+}
+.group-page .person-name {
+  grid-column: 1;
+  font-family: var(--font-display);
+  font-stretch: 108%;
+  font-weight: 600;
+  font-size: 1rem;
+  margin: 0;
+  color: var(--basin);
+}
+.group-page .person-role {
+  grid-column: 1;
+  font-size: 0.82rem;
+  color: var(--dune);
+  margin: 0;
+}
+.group-page .person-affiliations {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-read);
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: var(--basin);
+}
+.group-page .person-orcid {
+  grid-column: 2;
+  margin: 6px 0 0;
+  font-size: 0.82rem;
+  font-variant-numeric: tabular-nums;
+}
+.group-page .person-orcid a {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 24px;
+  color: var(--flood-deep);
+  text-decoration-color: var(--panel-edge);
+}
+/* Un disque, pas la marque ORCID : leur logo est protégé. */
+.group-page .orcid-mark {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #A6CE39;
+  flex: none;
+}
+.group-page .institutions {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+}
+.group-page .institutions li {
+  padding: 9px 0;
+  border-bottom: 1px solid var(--panel-edge);
+}
+.group-page .institutions a {
+  display: inline-block;
+  min-height: 24px;
+  font-size: 0.95rem;
+}
+.group-page .inst-unit {
+  display: block;
+  font-family: var(--font-read);
+  font-size: 0.85rem;
+  color: var(--dune);
+}
+
+@media (max-width: 620px) {
+  .group-page .person { grid-template-columns: 1fr; gap: 2px; }
+  .group-page .person-name,
+  .group-page .person-role,
+  .group-page .person-affiliations,
+  .group-page .person-orcid { grid-column: 1; }
+  .group-page .person-affiliations { grid-row: auto; margin-top: 6px; }
+}
+
+/* Hydrodynamics and Satellite imaging share one panel, one map and one
+   set of data bindings. data-view says which is being read. */
+#tab-dashboard[data-view="satellite"] [data-dashboard-view]:not([data-dashboard-view="satellite"]):not([data-dashboard-view="map"]),
+#tab-dashboard[data-view="hydrodynamics"] [data-dashboard-view]:not([data-dashboard-view="hydrodynamics"]):not([data-dashboard-view="map"]) {
+  display: none;
+}
