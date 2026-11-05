@@ -135,8 +135,10 @@ with sync_playwright() as p:
           s["panel"] == ["tab-hydrology"] and s["navs"] == ["science"], s)
     pg.goto(BASE + "#group"); pg.wait_for_timeout(400)
     s = state(pg)
-    check("Research group dans Science",
-          s["panel"] == ["tab-group"] and s["navs"] == ["science"], s)
+    check("Research group est une partie a elle seule",
+          s["panel"] == ["tab-group"] and s["navs"] == [], s)
+    check("et n'est plus un onglet de Science",
+          pg.evaluate("() => !document.querySelector('.tab[data-tab=\"group\"]')"))
     n = pg.evaluate("() => document.querySelectorAll('#tab-group .person').length")
     check("cinq personnes dans le groupe", n == 5, n)
     check("aucun ORCID inventé",

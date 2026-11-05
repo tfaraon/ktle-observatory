@@ -36,7 +36,7 @@
     // n'est pas un nom d'onglet : sans entree ici, showTab ne reconnait
     // pas le nom et retombe sur l'accueil, barre d'onglets masquee.
     lastTab: { lake: "lake-overview", basin: "catchment",
-               science: "hydrodynamics",
+               science: "hydrodynamics", group: "group",
                nature: "natural-history", people: "country" },
     figures: null, showPlaceholders: true, wxMap: null,
     rain: null, rivers: null, rainMap: null, flowMap: null, rainOverlay: null, flowStations: null, rrView: "sum7",
@@ -1828,13 +1828,13 @@
     satellite: "science",
     methods: "science",
     publications: "science",
-    group: "science",
     rainfall: "basin",
     weather: "basin",
     "natural-history": "nature",
     "fauna-flora": "nature",
     birds: "nature",
     inaturalist: "nature",
+    group: "group",
     country: "people",
     culture: "people",
     stories: "people",
