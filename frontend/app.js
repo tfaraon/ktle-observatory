@@ -29,7 +29,6 @@
     staticMode: false, // no server: pre-rendered layers
     manifest: null, staticIndex: null, paramGrid: null,
     staticArrows: null, staticArrowsKey: null,
-    methodsLoaded: false,
     loadedPages: {},
     ebird: null,
     birdsLayer: null,
@@ -1981,6 +1980,13 @@
       html: () => (typeof GROUP_HTML === "string" ? GROUP_HTML : null),
       anchors: /^gr-/,
     },
+    // Methods etait injectee par une casse speciale de showTab, donc
+    // sans routage par ancre : #me-model ouvrait l'accueil. Les notes
+    // de methode des onglets de Science renvoient vers ces ancres.
+    methods: {
+      html: () => (typeof METHODS_HTML === "string" ? METHODS_HTML : null),
+      anchors: /^me-/,
+    },
   };
 
   function lazyPage(name) {
@@ -2032,14 +2038,6 @@
       p.hidden = p.id !== "tab-" + name;
     });
 
-    if (name === "methods" && !state.methodsLoaded) {
-      const box = $("tab-methods");
-      // METHODS_HTML vient de methods.js, chargé avant ce fichier
-      box.innerHTML = typeof METHODS_HTML === "string" ? METHODS_HTML
-        : '<article class="panel"><div class="prose-body">'
-          + "<p>Methods documentation unavailable.</p></div></article>";
-      state.methodsLoaded = true;
-    }
     lazyPage(name);
 
     // Leaflet et Plotly calculent leurs dimensions au moment du rendu :

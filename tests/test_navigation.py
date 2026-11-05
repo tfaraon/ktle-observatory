@@ -110,6 +110,7 @@ with sync_playwright() as p:
     check("Hydrodynamics : lecture au survol", inside("tab-hydrodynamics", "#map-readout"))
     check("Hydrodynamics : frise temporelle", inside("tab-hydrodynamics", "#timeline"))
     check("Hydrodynamics : sa carte", inside("tab-hydrodynamics", "#map-hydro"))
+    check("Hydrodynamics : note de methode", inside("tab-hydrodynamics", ".method-note"))
     check("Hydrodynamics : pas la serie SWOT", not inside("tab-hydrodynamics", ".level-series"))
     check("Hydrodynamics : pas les reglages d'imagerie",
           not inside("tab-hydrodynamics", "#imagery-controls"))
@@ -130,6 +131,7 @@ with sync_playwright() as p:
     check("Satellite : pas le scenario Delft3D", not inside("tab-satellite", ".model-card"))
     check("Satellite : pas la frise temporelle", not inside("tab-satellite", "#timeline"))
     check("Satellite : selecteur d'etendue d'eau", inside("tab-satellite", "#extent-seg"))
+    check("Satellite : note de methode", inside("tab-satellite", ".method-note"))
     check("Satellite : note de l'etendue", inside("tab-satellite", "#extent-note"))
     check("l'etendue d'eau n'est plus une couche du modele",
           pg.evaluate("() => !document.querySelector('[data-model=\"water\"]')"))
@@ -144,6 +146,18 @@ with sync_playwright() as p:
           pg.evaluate("() => !document.getElementById('map')"))
     check("chaque carte a son segment de fond",
           pg.evaluate("() => document.querySelectorAll('#base-seg-sat, #base-seg-hydro').length") == 2)
+
+    # Un renvoi de note de methode ouvre Methods et y defile
+    for anchor in ("me-swot", "me-model", "me-imagery", "me-matching"):
+        # Le defilement est anime : une ancre a 4500 px met un moment a
+        # arriver, et un test impatient la declare hors ecran.
+        pg.goto(BASE + "#" + anchor); pg.wait_for_timeout(1000)
+        st = state(pg)
+        ok = st["panel"] == ["tab-methods"] and st["hash"] == "#" + anchor
+        vis = pg.evaluate("(a) => { const e = document.getElementById(a);"
+                          " if (!e) return false; const r = e.getBoundingClientRect();"
+                          " return r.top >= -2 && r.top < innerHeight; }", anchor)
+        check(f"renvoi #{anchor} vers Methods", ok and vis, st)
 
     pg.goto(BASE + "#hydrology"); pg.wait_for_timeout(300)
     s = state(pg)
