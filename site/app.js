@@ -19,6 +19,7 @@
     fieldLayer: null,  // vertical layer index
     fieldTime: null,   // time-step index
     modelLayer: "none", // none | currents | hsign | wlength | period
+    satMap: null,
     modelRaster: null, modelShafts: null, modelHeads: null,
     areaIdx: 0,
     modelData: null,
@@ -36,7 +37,7 @@
     // n'est pas un nom d'onglet : sans entree ici, showTab ne reconnait
     // pas le nom et retombe sur l'accueil, barre d'onglets masquee.
     lastTab: { lake: "lake-overview", basin: "catchment",
-               science: "hydrodynamics",
+               science: "hydrodynamics", group: "group",
                nature: "natural-history", people: "country" },
     figures: null, showPlaceholders: true, wxMap: null,
     rain: null, rivers: null, rainMap: null, flowMap: null, rainOverlay: null, flowStations: null, rrView: "sum7",
@@ -216,32 +217,52 @@
     return d.toISOString().slice(0, 10);
   }
 
+  // Les deux cartes ont chacune leur fond, donc leur propre segment de
+  // boutons et leur propre calque. Un seul etat partage ferait que
+  // changer de fond sur une carte changerait l'autre a son insu.
+  const BASES = {
+    sat:   { seg: "base-seg-sat",   map: () => state.satMap, layer: null, key: "topo" },
+    hydro: { seg: "base-seg-hydro", map: () => state.map,    layer: null, key: "topo" },
+  };
+
   function buildBaseButtons() {
-    const seg = $("base-seg");
-    state.imagery.layers.forEach((spec, i) => {
-      const b = document.createElement("button");
-      b.type = "button";
-      b.className = "seg-btn";
-      b.dataset.base = String(i);
-      b.textContent = spec.label || spec.layer;
-      b.title = spec.layer;
-      seg.appendChild(b);
+    Object.entries(BASES).forEach(([which, b]) => {
+      const seg = $(b.seg);
+      if (!seg) return;
+      // L'imagerie satellite n'a de sens que sur la carte qui lui est
+      // dediee : la carte du modele garde le fond topographique.
+      if (which === "sat") {
+        state.imagery.layers.forEach((spec, i) => {
+          const el = document.createElement("button");
+          el.type = "button";
+          el.className = "seg-btn";
+          el.dataset.base = String(i);
+          el.textContent = spec.label || spec.layer;
+          el.title = spec.layer;
+          seg.appendChild(el);
+        });
+      }
+      seg.querySelectorAll(".seg-btn").forEach((el) =>
+        el.addEventListener("click", () => setBase(el.dataset.base, which)));
     });
-    seg.querySelectorAll(".seg-btn").forEach((b) =>
-      b.addEventListener("click", () => setBase(b.dataset.base)));
   }
 
-  function setBase(key) {
-    state.baseKey = key;
-    if (state.baseLayer) state.map.removeLayer(state.baseLayer);
-    state.baseLayer = key === "topo"
+  function setBase(key, which) {
+    const b = BASES[which];
+    const map = b.map();
+    if (!map) return;
+    b.key = key;
+    if (b.layer) map.removeLayer(b.layer);
+    b.layer = key === "topo"
       ? topoLayer()
       : gibsLayer(state.imagery.layers[+key], state.imgTime);
-    state.baseLayer.addTo(state.map);
+    b.layer.addTo(map);
 
-    document.querySelectorAll(".seg-btn").forEach((b) =>
-      b.classList.toggle("active", b.dataset.base === key));
-    $("imagery-controls").hidden = key === "topo";
+    // Portee au segment de cette carte : sans cela, le bouton actif de
+    // l'autre carte, et ceux du selecteur de couche, changeraient aussi.
+    $(b.seg).querySelectorAll(".seg-btn").forEach((el) =>
+      el.classList.toggle("active", el.dataset.base === key));
+    if (which === "sat") $("imagery-controls").hidden = key === "topo";
   }
 
   function setImgTime(time) {
@@ -249,7 +270,8 @@
     $("imagery-latest").classList.toggle("active", time === "default");
     $("imagery-date").value = time === "default" ? "" : time;
     $("imagery-next").disabled = time !== "default" && time >= todayUTC();
-    if (state.baseKey !== "topo") setBase(state.baseKey); // reload the layer
+    // L'imagerie datee ne vit que sur la carte satellite
+    if (BASES.sat.key !== "topo") setBase(BASES.sat.key, "sat");
   }
 
   function wireScaleToggle() {
@@ -284,14 +306,30 @@
     });
   }
 
+  // Deux cartes independantes, une par onglet de Science.
+  //
+  //   state.map    : Hydrodynamics and sediments. Couches du modele,
+  //                  fleches, etendue d'eau, lecture au survol, legende,
+  //                  frise temporelle et stations qui l'alimentent.
+  //   state.satMap : Satellite imaging. Imagerie GIBS datee et sites
+  //                  d'extraction SWOT.
+  //
+  // Elles ne partagent rien : chacune a son fond, ses calques et son
+  // segment de boutons. C'est deux jeux de tuiles au lieu d'un, le prix
+  // de deux cartes reglables separement.
   function initMap(lake, sites) {
-    const map = L.map("map", { scrollWheelZoom: false })
-      .setView([lake.center.lat, lake.center.lon], lake.zoom || 8);
+    const view = [lake.center.lat, lake.center.lon];
+    const zoom = lake.zoom || 8;
+
+    const map = L.map("map-hydro", { scrollWheelZoom: false }).setView(view, zoom);
     state.map = map;
+    state.satMap = L.map("map-sat", { scrollWheelZoom: false }).setView(view, zoom);
+
     state.canvasRenderer = L.canvas({ padding: 0.3 });
     buildBaseButtons();
     if (!state.staticMode || state.manifest) buildModelButtons();
-    setBase("topo");
+    setBase("topo", "hydro");
+    setBase("topo", "sat");
     map.on("zoomend", () => {
       if (state.modelData && state.modelLayer !== "none") {
         const d = state.modelData;
@@ -306,7 +344,7 @@
         iconSize: [14, 14],
         iconAnchor: [7, 7],
       });
-      const m = L.marker([site.lat, site.lon], { icon }).addTo(map);
+      const m = L.marker([site.lat, site.lon], { icon }).addTo(state.satMap);
       const latest = site.latest
         ? `${site.latest.wse.toFixed(2)} m, ${fmtDateShort(site.latest.date)}`
         : "no data";
@@ -554,7 +592,7 @@
     drawGauge(site);
     drawChart(site);
     refreshMarkers();
-    if (state.map) state.map.panTo([site.lat, site.lon]);
+    if (state.satMap) state.satMap.panTo([site.lat, site.lon]);
   }
 
   // ── BOM weather ──────────────────────────────────────────
@@ -1815,7 +1853,6 @@
   // Trois parties : Natural History et Aboriginal Culture, des lectures
   // référencées, et Observatory, qui regroupe le tableau de bord, les
   // méthodes et les publications. Chaque onglet appartient à une partie.
-  const DASHBOARD_VIEWS = ["hydrodynamics", "satellite"];
   const SECTION_OF = {
     home: "home",
     "lake-overview": "lake",
@@ -1828,13 +1865,13 @@
     satellite: "science",
     methods: "science",
     publications: "science",
-    group: "science",
     rainfall: "basin",
     weather: "basin",
     "natural-history": "nature",
     "fauna-flora": "nature",
     birds: "nature",
     inaturalist: "nature",
+    group: "group",
     country: "people",
     culture: "people",
     stories: "people",
@@ -1936,15 +1973,8 @@
       b.classList.toggle("active", on);
       b.setAttribute("aria-selected", on ? "true" : "false");
     });
-    // Hydrodynamique et imagerie satellite partagent un panneau : une
-    // seule carte Leaflet, une seule liaison aux donnees. La lecture
-    // active est portee par data-view, et le CSS masque les cartes de
-    // l'autre. Deux panneaux voudraient dire deux cartes, donc deux
-    // fois les tuiles et un invalidateSize a tenir pour chacune.
-    const onDashboard = DASHBOARD_VIEWS.includes(name);
-    if (onDashboard) $("tab-dashboard").dataset.view = name;
     document.querySelectorAll(".tab-panel").forEach((p) => {
-      p.hidden = p.id !== "tab-" + (onDashboard ? "dashboard" : name);
+      p.hidden = p.id !== "tab-" + name;
     });
 
     if (name === "methods" && !state.methodsLoaded) {
@@ -1960,8 +1990,11 @@
     // Leaflet et Plotly calculent leurs dimensions au moment du rendu :
     // masqués, ils mesurent zéro et restent figés au retour.
     requestAnimationFrame(() => {
-      if (onDashboard && state.map) state.map.invalidateSize();
-      const panel = $("tab-" + (onDashboard ? "dashboard" : name));
+      // Leaflet mesure zero tant que son conteneur est masque : chaque
+      // carte doit se remesurer quand son onglet s'ouvre.
+      if (name === "hydrodynamics" && state.map) state.map.invalidateSize();
+      if (name === "satellite" && state.satMap) state.satMap.invalidateSize();
+      const panel = $("tab-" + name);
       if (panel) panel.querySelectorAll(".js-plotly-plot").forEach((el) => Plotly.Plots.resize(el));
     });
 
@@ -3121,7 +3154,7 @@
     const { data, viaApi } = await loadData();
 
     if (!data || !data.sites) {
-      $("empty-state").hidden = false;
+      document.querySelectorAll(".empty-state").forEach((e) => { e.hidden = false; });
       renderHome();
       loadIndependentData(false);
       return;
@@ -3130,7 +3163,7 @@
     state.data = data;
     renderHome();
     refreshDownloadButtons();
-    $("dashboard").hidden = false;
+    document.querySelectorAll(".dashboard-body").forEach((e) => { e.hidden = false; });
     $("generated-at").textContent = fmtDate(data.generated_at.replace("Z", ""));
     $("datum-label").textContent = data.datum_label || "WSE (m)";
     if (data.demo) $("demo-banner").hidden = false;
