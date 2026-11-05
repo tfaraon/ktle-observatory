@@ -394,10 +394,14 @@ main {
   display: flex;
   flex-direction: column;
 }
-.map-wrap { position: relative; flex: 1; min-height: 620px; display: flex; }
-/* Par classe : la regle survit au renommage des conteneurs, qui a
-   deja coute une carte de hauteur nulle une fois. */
-.map-pane { width: 100%; flex: 1; min-height: 620px; }
+.map-wrap { position: relative; flex: 1; min-height: 620px; }
+/* Par classe, pour survivre a un renommage du conteneur, et en
+   positionnement absolu dans .map-wrap plutot qu'en element flex : la
+   taille ne depend plus alors d'une chaine de conteneurs flex, dont un
+   seul maillon indefini suffisait a donner une largeur nulle. Leaflet
+   mesure son conteneur, donc une carte de largeur nulle s'initialise,
+   affiche ses controles et ne demande aucune tuile. */
+.map-pane { position: absolute; inset: 0; width: 100%; height: 100%; }
 
 /* Lecture de la valeur sous le curseur */
 .map-readout {
