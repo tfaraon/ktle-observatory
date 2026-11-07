@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-11-07T00:17:06Z",
+ "fetched_at": "2026-11-07T23:54:44Z",
  "demo": false,
  "stale": false,
  "errors": [],
@@ -14,9 +14,9 @@
  },
  "attribution": "Observations and photos from iNaturalist, each photo under the licence chosen by its observer.",
  "totals": {
-  "observations": 2754,
+  "observations": 2755,
   "species": 591,
-  "observers": 313
+  "observers": 314
  },
  "top_species": 12,
  "recent": [
@@ -3132,6 +3132,23 @@
   },
   {
    "count": 4,
+   "taxon_id": 333775,
+   "url": "https://www.inaturalist.org/taxa/333775",
+   "taxon": {
+    "name": "Danaus petilia",
+    "common": "Lesser Wanderer",
+    "rank": "species",
+    "group": "Insecta"
+   },
+   "photo": {
+    "square": "https://inaturalist-open-data.s3.amazonaws.com/photos/23166410/square.jpeg",
+    "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/23166410/medium.jpeg",
+    "license": "CC-BY-NC-SA",
+    "attribution": "(c) Reiner Richter, some rights reserved (CC BY-NC-SA), uploaded by Reiner Richter"
+   }
+  },
+  {
+   "count": 4,
    "taxon_id": 370535,
    "url": "https://www.inaturalist.org/taxa/370535",
    "taxon": {
@@ -3722,23 +3739,6 @@
     "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/11282373/medium.jpg",
     "license": "CC-BY-NC",
     "attribution": "(c) Reiner Richter, some rights reserved (CC BY-NC), uploaded by Reiner Richter"
-   }
-  },
-  {
-   "count": 3,
-   "taxon_id": 333775,
-   "url": "https://www.inaturalist.org/taxa/333775",
-   "taxon": {
-    "name": "Danaus petilia",
-    "common": "Lesser Wanderer",
-    "rank": "species",
-    "group": "Insecta"
-   },
-   "photo": {
-    "square": "https://inaturalist-open-data.s3.amazonaws.com/photos/23166410/square.jpeg",
-    "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/23166410/medium.jpeg",
-    "license": "CC-BY-NC-SA",
-    "attribution": "(c) Reiner Richter, some rights reserved (CC BY-NC-SA), uploaded by Reiner Richter"
    }
   },
   {
