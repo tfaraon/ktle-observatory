@@ -272,10 +272,56 @@ def _earthdata_login(earthaccess):
                 continue
             if auth and getattr(auth, "authenticated", False):
                 return auth
-    raise RuntimeError(
-        "Identifiants Earthdata indisponibles : executez une fois "
-        "`python pipeline/update_swot.py --download` dans un terminal "
-        "(login interactif, memorise dans ~/.netrc)."
+    raise RuntimeError(_earthdata_diagnosis())
+
+
+def _earthdata_diagnosis():
+    """Dire lequel des trois cas s'est produit.
+
+    Le message precedent disait « identifiants indisponibles » quoi qu'il
+    arrive, et renvoyait vers un login interactif. Sur un runner, ce
+    conseil est inapplicable, et il est trompeur quand les identifiants
+    ont bien ete fournis puis refuses : on va les chercher la ou ils ne
+    manquent pas. Un secret absent de GitHub Actions se resout en chaine
+    vide sans la moindre erreur, ce qui est precisement le cas que le
+    message confondait avec les deux autres.
+    """
+    user = os.environ.get("EARTHDATA_USERNAME") or ""
+    pwd = os.environ.get("EARTHDATA_PASSWORD") or ""
+    netrc = Path.home() / ".netrc"
+    has_netrc = netrc.exists() and "urs.earthdata.nasa.gov" in (
+        netrc.read_text(encoding="utf-8", errors="replace")
+        if netrc.exists() else "")
+
+    if user and pwd:
+        return (
+            f"Earthdata a refuse les identifiants fournis pour « {user} ». "
+            "Ils sont bien presents dans l'environnement, donc le probleme "
+            "n'est pas leur absence : mot de passe change, compte verrouille, "
+            "ou licence du produit non acceptee. Les produits SWOT du PO.DAAC "
+            "demandent une acceptation unique sur urs.earthdata.nasa.gov, "
+            "sous Applications puis Authorized Apps."
+        )
+
+    manquants = [n for n, v in (("EARTHDATA_USERNAME", user),
+                                ("EARTHDATA_PASSWORD", pwd)) if not v]
+    detail = " et ".join(manquants) + (" est vide" if len(manquants) == 1
+                                       else " sont vides")
+    if os.environ.get("GITHUB_ACTIONS") == "true":
+        return (
+            f"Identifiants Earthdata absents sur le runner : {detail}. "
+            "Un secret non declare se resout en chaine vide sans erreur, "
+            "donc le workflow part et echoue ici. A declarer dans Settings, "
+            "Secrets and variables, Actions, sous ces deux noms exactement."
+        )
+    return (
+        f"Identifiants Earthdata indisponibles : {detail}, et "
+        + ("~/.netrc ne porte pas d'entree urs.earthdata.nasa.gov."
+           if not has_netrc else
+           "l'entree ~/.netrc existe mais n'a pas authentifie.")
+        + " Executez une fois `python pipeline/update_swot.py --download` "
+        "dans un terminal : le login interactif memorise les identifiants "
+        "dans ~/.netrc."
     )
 
 
