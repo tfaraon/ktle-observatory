@@ -81,7 +81,11 @@ jobs:
         with:
           python-version: "3.12"
 
-      - run: pip install PyYAML numpy netCDF4 Pillow scipy pandas earthaccess
+      # La liste vit dans requirements.txt, pas ici. Ecrite deux fois,
+      # elle derive : rasterio et tqdm y figuraient, le workflow ne les
+      # installait pas, et l'extraction tombait apres douze minutes de
+      # telechargement reussi.
+      - run: pip install -r requirements.txt
 
       - name: Download the new granules and extract the levels
         run: |

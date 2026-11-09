@@ -187,3 +187,119 @@ assert len({c for c, _ in slots}) == len(slots), f"horaires en double : {slots}"
 print(f"OK — {len(flows)} workflows : déclencheurs valides, SWOT sans disque "
       f"externe, état versionné exigé avant publication, {len(slots)} créneaux "
       "quotidiens distincts, séries couvertes par .gitattributes.")
+
+# ── Ce qu'un workflow installe couvre ce que ses scripts importent ──
+#
+# swot.yml a telecharge douze minutes de granules avant de tomber sur
+# « No module named 'rasterio' ». Le module figurait dans
+# requirements.txt, commentaire a l'appui, mais la ligne pip du workflow
+# etait ecrite a la main et ne le mentionnait pas. Deux listes pour une
+# seule verite derivent toujours ; ce test fait echouer la derive ici
+# plutot qu'apres un telechargement.
+
+import ast as _ast
+import sys as _sys
+
+# Nom importe -> nom distribue, quand ils different
+DIST = {"PIL": "Pillow", "yaml": "PyYAML", "cv2": "opencv-python",
+        "dateutil": "python-dateutil", "sklearn": "scikit-learn"}
+
+_STD = set(_sys.stdlib_module_names)
+_REPO_PY = {p.stem: p for p in ROOT.rglob("*.py")
+            if ".git" not in p.parts and "tests" not in p.parts}
+# Les paquets du depot comptent comme locaux : SWOT_toolbox est un
+# dossier avec __init__.py, pas un fichier, et serait sinon pris pour
+# une dependance a installer.
+_REPO_PY.update({d.name: d / "__init__.py" for d in ROOT.iterdir()
+                 if d.is_dir() and (d / "__init__.py").exists()})
+
+
+def _optional(tree):
+    """Ids des noeuds sous un try/except ImportError.
+
+    C'est le signal explicite qu'une dependance est facultative :
+    SWOT_toolbox importe ainsi son module de cartographie, inutile cote
+    serveur. Les compter reviendrait a exiger geopandas et matplotlib
+    sur un runner qui ne trace rien.
+    """
+    skip = set()
+    for node in _ast.walk(tree):
+        if not isinstance(node, _ast.Try):
+            continue
+        if any(h.type is None or "ImportError" in _ast.dump(h.type)
+               for h in node.handlers):
+            for stmt in node.body:
+                for sub in _ast.walk(stmt):
+                    skip.add(id(sub))
+    return skip
+
+
+def _imports(path, seen):
+    """Modules tiers importes par un script, imports locaux suivis."""
+    if path in seen:
+        return set()
+    seen.add(path)
+    try:
+        tree = _ast.parse(path.read_text(encoding="utf-8"))
+    except (OSError, SyntaxError):
+        return set()
+    skip = _optional(tree)
+    out = set()
+    for node in _ast.walk(tree):
+        if id(node) in skip:
+            continue
+        names = []
+        if isinstance(node, _ast.Import):
+            names = [a.name.split(".")[0] for a in node.names]
+        elif isinstance(node, _ast.ImportFrom):
+            if node.level:                      # from . import X
+                pkg = path.parent
+                names = [a.name.split(".")[0] for a in node.names]
+                for n in names:
+                    f = pkg / f"{n}.py"
+                    if f.exists():
+                        out |= _imports(f, seen)
+                continue
+            if node.module:
+                names = [node.module.split(".")[0]]
+        for n in names:
+            if n in _STD:
+                continue
+            local = _REPO_PY.get(n)
+            if local is not None:
+                out |= _imports(local, seen)
+            else:
+                out.add(n)
+    return out
+
+
+_req = {ln.split("#")[0].strip().lower()
+        for ln in (ROOT / "requirements.txt").read_text(encoding="utf-8").splitlines()
+        if ln.split("#")[0].strip()}
+
+_gaps = []
+for name, text in texts.items():
+    installed = set()
+    for line in text.splitlines():
+        if "pip install" not in line:
+            continue
+        arg = line.split("pip install", 1)[1].strip()
+        if arg.startswith("-r "):
+            installed |= _req
+        else:
+            installed |= {w.lower() for w in arg.split() if not w.startswith("-")}
+    if not installed:
+        continue
+    needed = set()
+    for line in text.splitlines():
+        for tok in line.split():
+            if tok.endswith(".py") and (ROOT / tok).exists():
+                needed |= _imports(ROOT / tok, set())
+    for mod in sorted(needed):
+        if DIST.get(mod, mod).lower() not in installed:
+            _gaps.append(f"{name} exécute un script qui importe « {mod} » "
+                         f"sans l'installer")
+
+assert not _gaps, "\n  ".join([""] + _gaps)
+print(f"OK — chaque workflow installe ce que ses scripts importent "
+      f"({len(texts)} workflows vérifiés).")
