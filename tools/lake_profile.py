@@ -26,9 +26,28 @@ s'accumule sur la rive sous le vent et se retire de la rive au vent.
 de niveau - setup a l'ouest a niveau + setup a l'est. Une valeur
 negative inverse le sens.
 
+Depuis un interpreteur, Spyder ou un carnet, il n'y a rien a taper dans
+un terminal : les constantes LEVEL, SETUP, AT, DEM et OUT sont en tete
+de la seconde moitie du fichier, et lancer le module les utilise.
+
+    run()                                   # les constantes font foi
+    panels = run(level=-12.4, setup=0.15)   # ou des valeurs ponctuelles
+    panels[1]["per_cm"]                     # km de largeur par cm
+
+    grid = open_grid()
+    levels, widths, sens = sweep(grid, transects(grid))
+    preview(panels)                         # apercu, si matplotlib est la
+
+run() rend la liste des profils, chacun un dictionnaire portant ses
+tableaux s et bed, la surface wl, et les mesures. write=False trace sans
+ecrire de fichier, quiet=True sans rien afficher.
+
+La ligne de commande reste disponible et ses options l'emportent :
+
     python tools/lake_profile.py
     python tools/lake_profile.py --level -13.5 --setup 0.15
     python tools/lake_profile.py --at 6803.9 --at 6863.9 --level -14.0
+    python tools/lake_profile.py --sweep
     python tools/lake_profile.py --dem mnt.tif --from 678465,6800871 \\
                                  --to 781465,6800871
 """
@@ -342,120 +361,232 @@ def draw(panels, level, setup, exag, source):
     return "\n".join(out)
 
 
-# ── Programme ───────────────────────────────────────────────
+# ── Reglages, pour une execution depuis l'interpreteur ──────
+#
+# Ouvrir ce fichier dans Spyder, PyCharm ou un carnet et lancer le
+# module execute run() avec les valeurs ci-dessous. Les modifier ici
+# suffit : rien a taper dans un terminal. La ligne de commande reste
+# disponible et ses options l'emportent quand il y en a.
 
-def main():
-    ap = argparse.ArgumentParser(description=__doc__,
-                                 formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--level", type=float, default=-12.6,
-                    help="niveau d'eau au repos, en m AHD (defaut -12.6, "
-                         "ou le lit plat du nord commence a se couvrir et "
-                         "ou la sensibilite est maximale ; --sweep la montre)")
-    ap.add_argument("--setup", type=float, default=0.10,
-                    help="amplitude du setup a chaque rive, en m (defaut 0.10)")
-    ap.add_argument("--datum-offset", type=float, default=0.0,
-                    help="ajoute au niveau : conversion EGM2008 vers AHD")
-    ap.add_argument("--at", type=float, action="append",
-                    help="ordonnee UTM d'un transect ouest-est, en m ou en km")
-    ap.add_argument("--from", dest="p0", help="debut d'un transect libre, x,y")
-    ap.add_argument("--to", dest="p1", help="fin d'un transect libre, x,y")
-    ap.add_argument("--dem", help="MNT GeoTIFF a la place de bathymetry.npz")
-    ap.add_argument("--sweep", action="store_true",
-                    help="tabule la largeur mouillee en fonction du niveau, "
-                         "et s'arrete la")
-    ap.add_argument("--out", default="lake-profiles.svg")
-    a = ap.parse_args()
+LEVEL = -12.6           # niveau d'eau au repos, en m AHD
+SETUP = 0.10            # amplitude du setup a chaque rive, en m
+DATUM_OFFSET = 0.0      # ajoute au niveau : EGM2008 vers AHD
+AT = list(DEFAULT_NORTHINGS)   # ordonnees UTM des transects ouest-est
+DEM = None              # chemin d'un GeoTIFF, ou None pour la npz
+OUT = "lake-profiles.svg"
 
-    grid = load_dem(a.dem) if a.dem else load_bathymetry()
+
+# ── Interface ───────────────────────────────────────────────
+
+def open_grid(dem=None):
+    """Le relief, depuis un GeoTIFF ou depuis la bathymetrie du modele."""
+    return load_dem(dem) if dem else load_bathymetry()
+
+
+def transects(grid, at=None, p0=None, p1=None):
+    """Les traces a echantillonner, sous forme (debut, fin, titre)."""
     x0, y0, x1, y1 = grid.bounds
-    level = a.level + a.datum_offset
+    if p0 and p1:
+        return [(tuple(p0), tuple(p1), "Transect")]
+    ys = list(at) if at else list(DEFAULT_NORTHINGS)
+    ys = [v * 1000.0 if v < 100000 else v for v in ys]
+    return [((x0, y), (x1, y), f"Transect at {y/1000:.1f} km N") for y in ys]
 
-    if a.p0 and a.p1:
-        p0 = tuple(float(v) for v in a.p0.split(","))
-        p1 = tuple(float(v) for v in a.p1.split(","))
-        lines = [(p0, p1, "Transect")]
-    else:
-        ys = a.at or list(DEFAULT_NORTHINGS)
-        ys = [v * 1000.0 if v < 100000 else v for v in ys]
-        lines = [((x0, y), (x1, y), f"Transect at {y/1000:.1f} km N")
-                 for y in ys]
+
+def analyse(grid, line, level, setup):
+    """Un profil et ses mesures, sans rien afficher ni ecrire.
+
+    Rend un dictionnaire : s et bed sont les tableaux du trace, wl la
+    surface basculee, per_cm les kilometres de largeur mouillee gagnes
+    par centimetre de montee uniforme, within la longueur de fond
+    comprise dans la bande balayee par le vent.
+    """
+    p0, p1, title = line
+    s, bed = profile(grid, p0, p1)
+    if not np.isfinite(bed).any():
+        return None
+    wl = surface(s, level, setup)
+    flat = np.full_like(s, level)
+
+    c_flat, c_tilt = crossings(s, bed, flat), crossings(s, bed, wl)
+    shift = {}
+    if c_flat and c_tilt:
+        shift["west"] = (c_flat[0], c_tilt[0])
+        shift["east"] = (c_flat[-1], c_tilt[-1])
+
+    _, w_flat = wetted(s, bed, flat)
+    _, w_tilt = wetted(s, bed, wl)
+    _, w_up = wetted(s, bed, flat + 0.05)
+    _, w_dn = wetted(s, bed, flat - 0.05)
+    near = np.isfinite(bed) & (np.abs(bed - level) <= abs(setup))
+    within = float(np.trapezoid(near.astype(float), s)) if near.any() else 0.0
+
+    return {"s": s, "bed": bed, "wl": wl, "title": title, "shift": shift,
+            "wet_rest": w_flat, "wet_setup": w_tilt,
+            "per_cm": (w_up - w_dn) / 1000.0 / 10.0, "within": within,
+            "sub": f"wetted {w_flat/1000:.0f} km at rest"}
+
+
+def report(panel, setup):
+    """Les mesures d'un profil, en clair."""
+    s, bed = panel["s"], panel["bed"]
+    out = [panel["title"],
+           f"  longueur du trace        {s[-1]/1000:7.1f} km",
+           f"  fond                     {np.nanmin(bed):7.2f} a "
+           f"{np.nanmax(bed):.2f} m AHD",
+           f"  largeur mouillee, repos  {panel['wet_rest']/1000:7.1f} km",
+           f"  largeur mouillee, setup  {panel['wet_setup']/1000:7.1f} km"]
+    for side in ("west", "east"):
+        if side in panel["shift"]:
+            a, b = panel["shift"][side]
+            out.append(f"  rivage {side:5}            {abs(b-a)/1000:7.2f} km "
+                       f"deplaces par {abs(setup)*100:.0f} cm")
+    out.append(f"  une montee uniforme de 1 cm ajoute "
+               f"{panel['per_cm']:.2f} km de largeur mouillee")
+    out.append(f"  fond compris a +/- {abs(setup)*100:.0f} cm de la surface "
+               f"sur {panel['within']/1000:.1f} km")
+    return "\n".join(out)
+
+
+def sweep(grid, lines, lo=-15.0, hi=-10.0, step=0.2):
+    """Largeur mouillee et sensibilite, niveau par niveau.
+
+    Rend (niveaux, largeurs, sensibilites), chacun un tableau dont la
+    seconde dimension suit l'ordre des traces. Sert a choisir le niveau
+    qui illustre le propos : elle n'est pas uniforme, et son maximum
+    n'est pas au meme endroit d'un transect a l'autre.
+    """
+    levels = np.arange(lo, hi, step)
+    widths = np.zeros((len(levels), len(lines)))
+    sens = np.zeros_like(widths)
+    for j, (p0, p1, _) in enumerate(lines):
+        s, bed = profile(grid, p0, p1)
+        for i, lv in enumerate(levels):
+            _, w = wetted(s, bed, np.full_like(s, lv))
+            _, up = wetted(s, bed, np.full_like(s, lv + 0.05))
+            _, dn = wetted(s, bed, np.full_like(s, lv - 0.05))
+            widths[i, j] = w / 1000.0
+            sens[i, j] = (up - dn) / 1e4
+    return levels, widths, sens
+
+
+def run(level=None, setup=None, at=None, dem=None, out=None,
+        datum_offset=None, p0=None, p1=None, write=True, quiet=False):
+    """Trace les profils et rend leurs mesures.
+
+    Appelee sans argument, elle utilise les constantes en tete de
+    fichier. Rend la liste des dictionnaires produits par analyse().
+
+        import lake_profile as lp
+        panels = lp.run(level=-12.4, setup=0.15)
+        panels[1]["per_cm"]
+    """
+    level = LEVEL if level is None else level
+    setup = SETUP if setup is None else setup
+    out = OUT if out is None else out
+    dem = DEM if dem is None else dem
+    level = level + (DATUM_OFFSET if datum_offset is None else datum_offset)
+
+    grid = open_grid(dem)
+    lines = transects(grid, at if at is not None else AT, p0, p1)
+
+    panels = []
+    for line in lines:
+        panel = analyse(grid, line, level, setup)
+        if panel is None:
+            if not quiet:
+                print(f"  {line[2]} : aucune donnee sur ce trace, ignore")
+            continue
+        panels.append(panel)
+        if not quiet:
+            print()
+            print(report(panel, setup))
+    if not panels:
+        raise ValueError("aucun transect exploitable")
+
+    if write:
+        smax = max(p["s"][-1] for p in panels)
+        zspan = max(np.ptp(p["bed"][np.isfinite(p["bed"])])
+                    for p in panels) + 1.5
+        exag = (smax / 1548.0) / (zspan / 300.0)
+        Path(out).write_text(draw(panels, level, setup, exag, grid.label),
+                             encoding="utf-8")
+        if not quiet:
+            print(f"\n{out} ecrit ({len(panels)} profil(s))")
+    return panels
+
+
+def preview(panels, level=None, setup=None):
+    """Apercu a l'ecran, si matplotlib est installe.
+
+    Facultatif a dessein : le livrable est le SVG, et la chaine ne doit
+    pas dependre d'une bibliotheque de trace pour tourner.
+    """
+    try:
+        import matplotlib.pyplot as plt
+    except ImportError:
+        print("matplotlib absent : l'apercu est saute, le SVG reste ecrit.")
+        return None
+    level = LEVEL if level is None else level
+    setup = SETUP if setup is None else setup
+    fig, axes = plt.subplots(len(panels), 1, figsize=(11, 3.2 * len(panels)),
+                             squeeze=False)
+    for ax, p in zip(axes[:, 0], panels):
+        km = p["s"] / 1000.0
+        ax.fill_between(km, p["bed"], np.nanmin(p["bed"]) - 0.4,
+                        color="#E7DCC4")
+        ax.fill_between(km, p["bed"], p["wl"], where=p["wl"] > p["bed"],
+                        color="#BBD6DC")
+        ax.plot(km, p["bed"], color="#9A8759", lw=1.2)
+        ax.axhline(level, color="#2E6B78", ls="--", lw=1.0)
+        ax.plot(km, p["wl"], color="#2E6B78", lw=1.4)
+        ax.set_title(f"{p['title']}  |  1 cm = {p['per_cm']:.2f} km",
+                     fontsize=10, loc="left")
+        ax.set_ylabel("m AHD")
+    axes[-1, 0].set_xlabel("distance along the transect (km)")
+    fig.tight_layout()
+    return fig
+
+
+# ── Ligne de commande ───────────────────────────────────────
+
+def main(argv=None):
+    ap = argparse.ArgumentParser(
+        description=__doc__,
+        formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--level", type=float, default=LEVEL)
+    ap.add_argument("--setup", type=float, default=SETUP)
+    ap.add_argument("--datum-offset", type=float, default=DATUM_OFFSET)
+    ap.add_argument("--at", type=float, action="append")
+    ap.add_argument("--from", dest="p0")
+    ap.add_argument("--to", dest="p1")
+    ap.add_argument("--dem")
+    ap.add_argument("--sweep", action="store_true")
+    ap.add_argument("--out", default=OUT)
+    a = ap.parse_args(argv)
+
+    pt = [tuple(float(v) for v in x.split(",")) if x else None
+          for x in (a.p0, a.p1)]
 
     if a.sweep:
+        grid = open_grid(a.dem)
+        lines = transects(grid, a.at, *pt)
+        levels, widths, sens = sweep(grid, lines)
         print(f"{'niveau':>8}" + "".join(f"{t[:22]:>26}" for _, _, t in lines))
         print(f"{'m AHD':>8}" + "".join(f"{'largeur (km)   km/cm':>26}"
                                         for _ in lines))
-        for lv in np.arange(-15.0, -10.0, 0.2):
-            row = [f"{lv:8.1f}"]
-            for p0, p1, _ in lines:
-                s_, bed_ = profile(grid, p0, p1)
-                _, w = wetted(s_, bed_, np.full_like(s_, lv))
-                _, up = wetted(s_, bed_, np.full_like(s_, lv + 0.05))
-                _, dn = wetted(s_, bed_, np.full_like(s_, lv - 0.05))
-                row.append(f"{w/1000:17.1f}{(up-dn)/1e4:9.2f}")
-            print("".join(row))
+        for i, lv in enumerate(levels):
+            print(f"{lv:8.1f}" + "".join(
+                f"{widths[i, j]:17.1f}{sens[i, j]:9.2f}"
+                for j in range(len(lines))))
         return
 
-    panels = []
-    for i, (p0, p1, title) in enumerate(lines):
-        s, bed = profile(grid, p0, p1)
-        if not np.isfinite(bed).any():
-            print(f"  {title} : aucune donnee sur ce trace, ignore")
-            continue
-        wl = surface(s, level, a.setup)
-        flat = np.full_like(s, level)
-
-        c_flat = crossings(s, bed, flat)
-        c_tilt = crossings(s, bed, wl)
-        shift = {}
-        if c_flat and c_tilt:
-            shift["west"] = (c_flat[0], c_tilt[0])
-            shift["east"] = (c_flat[-1], c_tilt[-1])
-
-        _, w_flat = wetted(s, bed, flat)
-        _, w_tilt = wetted(s, bed, wl)
-        # Sensibilite a une montee uniforme, par difference centree sur
-        # 10 cm : c'est elle qui dit combien de kilometres vaut un
-        # centimetre, independamment du basculement du vent.
-        _, w_up = wetted(s, bed, flat + 0.05)
-        _, w_dn = wetted(s, bed, flat - 0.05)
-        per_cm = (w_up - w_dn) / 1000.0 / 10.0
-        near = np.isfinite(bed) & (np.abs(bed - level) <= abs(a.setup))
-        within = float(np.trapezoid(near.astype(float), s)) if near.any() else 0.0
-        panels.append({
-            "s": s, "bed": bed, "wl": wl, "title": title, "shift": shift,
-            "sub": f"wetted {w_flat/1000:.0f} km at rest",
-            "per_cm": per_cm, "within": within,
-        })
-
-        print(f"\n{title}")
-        print(f"  longueur du trace        {s[-1]/1000:7.1f} km")
-        print(f"  fond                     {np.nanmin(bed):7.2f} a "
-              f"{np.nanmax(bed):.2f} m AHD")
-        print(f"  largeur mouillee, repos  {w_flat/1000:7.1f} km")
-        print(f"  largeur mouillee, setup  {w_tilt/1000:7.1f} km")
-        for side in ("west", "east"):
-            if side in shift:
-                d = abs(shift[side][1] - shift[side][0])
-                print(f"  rivage {side:5}            {d/1000:7.2f} km deplaces "
-                      f"par {abs(a.setup)*100:.0f} cm")
-        print(f"  une montee uniforme de 1 cm ajoute {per_cm:.2f} km "
-              f"de largeur mouillee")
-        print(f"  fond compris a +/- {abs(a.setup)*100:.0f} cm de la surface "
-              f"sur {within/1000:.1f} km")
-
-    if not panels:
-        sys.exit("aucun transect exploitable")
-
-    # Exageration verticale reellement appliquee
-    smax = max(p["s"][-1] for p in panels)
-    zspan = max(np.ptp(p["bed"][np.isfinite(p["bed"])]) for p in panels) + 1.5
-    exag = (smax / 1548.0) / (zspan / 300.0)
-
-    out = Path(a.out)
-    out.write_text(draw(panels, level, a.setup, exag, grid.label),
-                   encoding="utf-8")
-    print(f"\n{out} ecrit ({len(panels)} profil(s))")
+    run(level=a.level, setup=a.setup, at=a.at, dem=a.dem, out=a.out,
+        datum_offset=a.datum_offset, p0=pt[0], p1=pt[1])
 
 
 if __name__ == "__main__":
-    main()
+    # Lance depuis un interpreteur, sans arguments : les constantes
+    # ci-dessus font foi. Lance depuis un terminal avec des options,
+    # elles l'emportent.
+    main() if len(sys.argv) > 1 else run()
