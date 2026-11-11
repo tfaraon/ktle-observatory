@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-11-10T02:53:20Z",
+ "fetched_at": "2026-11-11T00:52:00Z",
  "demo": false,
  "stale": false,
  "errors": [],
@@ -1091,10 +1091,10 @@
     "group": "Aves"
    },
    "photo": {
-    "square": "https://inaturalist-open-data.s3.amazonaws.com/photos/152322352/square.jpg",
-    "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/152322352/medium.jpg",
-    "license": "CC-BY",
-    "attribution": "(c) Andrew Allen, some rights reserved (CC BY), uploaded by Andrew Allen"
+    "square": "https://inaturalist-open-data.s3.amazonaws.com/photos/418710718/square.jpg",
+    "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/418710718/medium.jpg",
+    "license": "CC-BY-NC-ND",
+    "attribution": "(c) mbdbirds, some rights reserved (CC BY-NC-ND), uploaded by mbdbirds"
    }
   },
   {
@@ -3258,7 +3258,7 @@
     "square": "https://inaturalist-open-data.s3.amazonaws.com/photos/169285482/square.jpeg",
     "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/169285482/medium.jpeg",
     "license": "CC-BY-NC",
-    "attribution": "(c) jenaoides, some rights reserved (CC BY-NC), uploaded by jenaoides"
+    "attribution": "(c) jenaoides, některá práva vyhrazena (CC BY-NC), nahrál/a jenaoides"
    }
   },
   {
