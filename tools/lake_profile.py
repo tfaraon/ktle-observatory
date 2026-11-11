@@ -26,6 +26,27 @@ s'accumule sur la rive sous le vent et se retire de la rive au vent.
 de niveau - setup a l'ouest a niveau + setup a l'est. Une valeur
 negative inverse le sens.
 
+Un profil deja extrait, au format CSV, dispense de tout cela : ni
+grille, ni emprise, ni geometrie de trace. Les colonnes sont reconnues
+par leur nom sans tenir compte de la casse, distance et elevation, ou
+bien x et y et une altitude, auquel cas l'abscisse curviligne est
+deduite. Le separateur est devine entre virgule, point-virgule et
+tabulation, et la virgule decimale des exports francophones est admise.
+
+    panels = run(csv="profil_nord.csv")
+    panels = run(csv=["sud.csv", "nord.csv"], level=-12.4)
+
+Les distances sont prises en metres, ou en kilometres si leur maximum
+ne depasse pas 500 ; csv_units="m" ou "km" leve le doute. Un transect
+de 103 km lu comme 103 m donnerait une sensibilite mille fois trop
+forte sans que le graphique ait l'air faux.
+
+Exportez les altitudes avec assez de decimales. Sur un lit dont des
+kilometres entiers tiennent dans quelques centimetres, une altitude
+arrondie au millimetre suffit a decaler la sensibilite de quelques
+pourcents, parce que des mailles se trouvent exactement au niveau
+teste.
+
 Depuis un interpreteur, Spyder ou un carnet, il n'y a rien a taper dans
 un terminal : les constantes LEVEL, SETUP, AT, DEM et OUT sont en tete
 de la seconde moitie du fichier, et lancer le module les utilise.
@@ -47,6 +68,8 @@ La ligne de commande reste disponible et ses options l'emportent :
     python tools/lake_profile.py
     python tools/lake_profile.py --level -13.5 --setup 0.15
     python tools/lake_profile.py --at 6803.9 --at 6863.9 --level -14.0
+    python tools/lake_profile.py --csv profil_nord.csv
+    python tools/lake_profile.py --csv sud.csv --csv nord.csv --csv-units km
     python tools/lake_profile.py --sweep
     python tools/lake_profile.py --dem mnt.tif --from 678465,6800871 \\
                                  --to 781465,6800871
@@ -146,6 +169,112 @@ def load_dem(path):
         else:
             y0 = t.f
         return Grid(z, t.c, y0, abs(t.a), abs(t.e), Path(path).name)
+
+
+# ── Profil deja extrait, au format CSV ──────────────────────
+
+DIST_NAMES = ("distance", "dist", "chainage", "chainage_m", "s", "length",
+              "abscisse", "abscissa", "station")
+ELEV_NAMES = ("elevation", "elev", "altitude", "z", "bed", "bathy",
+              "bathymetry", "height", "value", "band_1", "band1", "depth")
+
+
+def _number(txt):
+    """Un nombre, meme ecrit avec une virgule decimale.
+
+    Les exports francophones de QGIS et d'Excel ecrivent « -12,6 ». Lu
+    tel quel, le profil est vide et la cause n'est pas evidente.
+    """
+    t = (txt or "").strip().replace("\u00a0", "").replace(" ", "")
+    if not t:
+        return float("nan")
+    if "," in t and "." not in t:
+        t = t.replace(",", ".")
+    try:
+        return float(t)
+    except ValueError:
+        return float("nan")
+
+
+def read_profile_csv(path, distance_units="auto"):
+    """Un profil lu dans un CSV : abscisses en m, altitudes en m.
+
+    Les colonnes sont reconnues par leur nom, sans tenir compte de la
+    casse. A defaut d'une colonne de distance, une paire x, y suffit :
+    l'abscisse curviligne en est deduite. A defaut des deux, les deux
+    premieres colonnes numeriques sont prises dans l'ordre.
+
+    distance_units vaut m, km, ou auto. En auto, une distance dont le
+    maximum ne depasse pas 500 est tenue pour des kilometres : un
+    transect de 103 km lu comme 103 m donnerait une sensibilite mille
+    fois trop forte, et le graphique aurait l'air juste.
+    """
+    import csv as _csv
+
+    raw = Path(path).read_text(encoding="utf-8-sig", errors="replace")
+    lines = [ln for ln in raw.splitlines()
+             if ln.strip() and not ln.lstrip().startswith("#")]
+    if not lines:
+        raise ValueError(f"{path} : fichier vide")
+    try:
+        dialect = _csv.Sniffer().sniff(lines[0] + "\n" + (lines[1]
+                                       if len(lines) > 1 else ""),
+                                       delimiters=",;\t")
+        delim = dialect.delimiter
+    except _csv.Error:
+        delim = max(",;\t", key=lines[0].count)
+
+    rows = list(_csv.reader(lines, delimiter=delim))
+    head = [h.strip().strip('"').lower() for h in rows[0]]
+    has_header = any(not _number(h) == _number(h) for h in head)  # nan -> texte
+    body = rows[1:] if has_header else rows
+
+    def find(names):
+        for i, h in enumerate(head):
+            if h in names:
+                return i
+        for i, h in enumerate(head):
+            if any(h.startswith(n) for n in names):
+                return i
+        return None
+
+    di = find(DIST_NAMES) if has_header else None
+    zi = find(ELEV_NAMES) if has_header else None
+    xi = find(("x", "easting", "lon", "longitude")) if has_header else None
+    yi = find(("y", "northing", "lat", "latitude")) if has_header else None
+
+    cols = list(zip(*[[_number(v) for v in r] for r in body if r]))
+    numeric = [i for i, c in enumerate(cols)
+               if sum(v == v for v in c) > len(c) * 0.6]
+    if zi is None:
+        zi = numeric[-1] if numeric else 1
+    if di is None and xi is not None and yi is not None:
+        x = np.array(cols[xi]); y = np.array(cols[yi])
+        step = np.hypot(np.diff(x), np.diff(y))
+        dist = np.concatenate([[0.0], np.cumsum(step)])
+    else:
+        if di is None:
+            di = next((i for i in numeric if i != zi), 0)
+        dist = np.array(cols[di])
+    bed = np.array(cols[zi])
+
+    ok = np.isfinite(dist)
+    dist, bed = dist[ok], bed[ok]
+    order = np.argsort(dist)
+    dist, bed = dist[order], bed[order]
+
+    units = distance_units
+    if units == "auto":
+        units = "km" if np.nanmax(dist) <= 500 else "m"
+    if units == "km":
+        dist = dist * 1000.0
+
+    name = Path(path).stem.replace("_", " ")
+    print(f"  {Path(path).name} : {len(dist)} points, separateur "
+          f"{delim!r}, distances en {units}, "
+          f"{dist[-1]/1000:.1f} km, fond {np.nanmin(bed):.2f} a "
+          f"{np.nanmax(bed):.2f} m")
+    return dist, bed, name
 
 
 # ── Profil le long d'un transect ────────────────────────────
@@ -372,6 +501,8 @@ LEVEL = -12.6           # niveau d'eau au repos, en m AHD
 SETUP = 0.10            # amplitude du setup a chaque rive, en m
 DATUM_OFFSET = 0.0      # ajoute au niveau : EGM2008 vers AHD
 AT = list(DEFAULT_NORTHINGS)   # ordonnees UTM des transects ouest-est
+CSV = []                # profils deja extraits ; prioritaires sur AT
+CSV_UNITS = "auto"      # unite des distances du CSV : auto, m ou km
 DEM = None              # chemin d'un GeoTIFF, ou None pour la npz
 OUT = "lake-profiles.svg"
 
@@ -394,6 +525,13 @@ def transects(grid, at=None, p0=None, p1=None):
 
 
 def analyse(grid, line, level, setup):
+    """Echantillonne un trace sur le relief, puis le mesure."""
+    p0, p1, title = line
+    s, bed = profile(grid, p0, p1)
+    return analyse_arrays(s, bed, title, level, setup)
+
+
+def analyse_arrays(s, bed, title, level, setup):
     """Un profil et ses mesures, sans rien afficher ni ecrire.
 
     Rend un dictionnaire : s et bed sont les tableaux du trace, wl la
@@ -401,8 +539,7 @@ def analyse(grid, line, level, setup):
     par centimetre de montee uniforme, within la longueur de fond
     comprise dans la bande balayee par le vent.
     """
-    p0, p1, title = line
-    s, bed = profile(grid, p0, p1)
+    s, bed = np.asarray(s, dtype=float), np.asarray(bed, dtype=float)
     if not np.isfinite(bed).any():
         return None
     wl = surface(s, level, setup)
@@ -471,7 +608,8 @@ def sweep(grid, lines, lo=-15.0, hi=-10.0, step=0.2):
 
 
 def run(level=None, setup=None, at=None, dem=None, out=None,
-        datum_offset=None, p0=None, p1=None, write=True, quiet=False):
+        datum_offset=None, p0=None, p1=None, csv=None, csv_units=None,
+        write=True, quiet=False):
     """Trace les profils et rend leurs mesures.
 
     Appelee sans argument, elle utilise les constantes en tete de
@@ -487,12 +625,25 @@ def run(level=None, setup=None, at=None, dem=None, out=None,
     dem = DEM if dem is None else dem
     level = level + (DATUM_OFFSET if datum_offset is None else datum_offset)
 
-    grid = open_grid(dem)
-    lines = transects(grid, at if at is not None else AT, p0, p1)
+    csv = CSV if csv is None else csv
+    if isinstance(csv, (str, Path)):
+        csv = [csv]
+    csv_units = CSV_UNITS if csv_units is None else csv_units
+
+    if csv:
+        # Un profil deja extrait se suffit a lui-meme : ni grille, ni
+        # emprise, ni geometrie de trace a reconstituer.
+        source = ", ".join(Path(c).name for c in csv)
+        lines = [read_profile_csv(c, csv_units) for c in csv]
+    else:
+        grid = open_grid(dem)
+        source = grid.label
+        lines = transects(grid, at if at is not None else AT, p0, p1)
 
     panels = []
     for line in lines:
-        panel = analyse(grid, line, level, setup)
+        panel = (analyse_arrays(line[0], line[1], line[2], level, setup)
+                 if csv else analyse(grid, line, level, setup))
         if panel is None:
             if not quiet:
                 print(f"  {line[2]} : aucune donnee sur ce trace, ignore")
@@ -509,7 +660,7 @@ def run(level=None, setup=None, at=None, dem=None, out=None,
         zspan = max(np.ptp(p["bed"][np.isfinite(p["bed"])])
                     for p in panels) + 1.5
         exag = (smax / 1548.0) / (zspan / 300.0)
-        Path(out).write_text(draw(panels, level, setup, exag, grid.label),
+        Path(out).write_text(draw(panels, level, setup, exag, source),
                              encoding="utf-8")
         if not quiet:
             print(f"\n{out} ecrit ({len(panels)} profil(s))")
@@ -561,6 +712,10 @@ def main(argv=None):
     ap.add_argument("--from", dest="p0")
     ap.add_argument("--to", dest="p1")
     ap.add_argument("--dem")
+    ap.add_argument("--csv", action="append",
+                    help="profil deja extrait ; repeter pour plusieurs")
+    ap.add_argument("--csv-units", default=CSV_UNITS,
+                    choices=("auto", "m", "km"))
     ap.add_argument("--sweep", action="store_true")
     ap.add_argument("--out", default=OUT)
     a = ap.parse_args(argv)
@@ -582,7 +737,8 @@ def main(argv=None):
         return
 
     run(level=a.level, setup=a.setup, at=a.at, dem=a.dem, out=a.out,
-        datum_offset=a.datum_offset, p0=pt[0], p1=pt[1])
+        datum_offset=a.datum_offset, p0=pt[0], p1=pt[1], csv=a.csv,
+        csv_units=a.csv_units)
 
 
 if __name__ == "__main__":
