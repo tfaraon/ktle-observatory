@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-11-11T00:52:00Z",
+ "fetched_at": "2026-11-12T01:59:25Z",
  "demo": false,
  "stale": false,
  "errors": [],
@@ -14,9 +14,9 @@
  },
  "attribution": "Observations and photos from iNaturalist, each photo under the licence chosen by its observer.",
  "totals": {
-  "observations": 2759,
+  "observations": 2760,
   "species": 591,
-  "observers": 316
+  "observers": 317
  },
  "top_species": 12,
  "recent": [
@@ -4667,6 +4667,23 @@
   },
   {
    "count": 2,
+   "taxon_id": 208592,
+   "url": "https://www.inaturalist.org/taxa/208592",
+   "taxon": {
+    "name": "Diatenes aglossoides",
+    "common": null,
+    "rank": "species",
+    "group": "Insecta"
+   },
+   "photo": {
+    "square": "https://inaturalist-open-data.s3.amazonaws.com/photos/266219/square.jpg",
+    "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/266219/medium.jpg",
+    "license": "CC-BY",
+    "attribution": "(c) Donald Hobern, some rights reserved (CC BY)"
+   }
+  },
+  {
+   "count": 2,
    "taxon_id": 208621,
    "url": "https://www.inaturalist.org/taxa/208621",
    "taxon": {
@@ -5478,23 +5495,6 @@
     "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/262503066/medium.jpeg",
     "license": "CC-BY-NC",
     "attribution": "(c) geoffbyrne, some rights reserved (CC BY-NC)"
-   }
-  },
-  {
-   "count": 2,
-   "taxon_id": 940720,
-   "url": "https://www.inaturalist.org/taxa/940720",
-   "taxon": {
-    "name": "Dodonaea microzyga",
-    "common": "brilliant hop-bush",
-    "rank": "species",
-    "group": "Plantae"
-   },
-   "photo": {
-    "square": "https://inaturalist-open-data.s3.amazonaws.com/photos/51690135/square.jpeg",
-    "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/51690135/medium.jpeg",
-    "license": "CC-BY-NC",
-    "attribution": "(c) Pete Woodall, some rights reserved (CC BY-NC), uploaded by Pete Woodall"
    }
   }
  ]
