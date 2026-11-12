@@ -218,5 +218,24 @@ assert all("files" not in s for s in slim["scenarios"]), \
 assert all("params" in s and "key" in s for s in slim["scenarios"])
 
 ex.ROOT = _real_root
+
+# ── Tout script de la page doit etre exporte ─────────────────
+#
+# export_static.py nomme les fichiers du frontend un par un, alors que
+# deploy/publish.sh les copie tous : un module ajoute a index.html et
+# oublie dans cette liste donne un site qui se charge a moitie, sans
+# aucune erreur au moment de l'export. Le symptome est un onglet vide.
+import re                                        # noqa: E402
+
+source = (_real_root / "pipeline" / "export_static.py").read_text(encoding="utf-8")
+listed = set(re.findall(r'"([\w.]+\.js)"', source))
+page = (_real_root / "frontend" / "index.html").read_text(encoding="utf-8")
+wanted = {m for m in re.findall(r'<script src="([\w.]+\.js)"', page)}
+missing = sorted(wanted - listed)
+assert not missing, f"scripts de index.html absents de l'export statique : {missing}"
+for name in sorted(wanted):
+    assert (_real_root / "frontend" / name).exists(), f"{name} manque dans frontend/"
+
 print("OK — export statique : structure, bornes communes, reconstruction "
-      "des flèches au mètre près, images transparentes et JSON conforme.")
+      f"des flèches au mètre près, images transparentes, JSON conforme et "
+      f"{len(wanted)} scripts de la page tous exportés.")

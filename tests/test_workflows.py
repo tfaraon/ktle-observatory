@@ -138,6 +138,20 @@ for folder in re.findall(r"site/data/(\w+_maps)", "\n".join(texts.values())):
     assert f"site/data/{folder}/*.png" in attrs, f"{folder} sans règle de fusion"
 assert "state/*.json" in attrs, "l'état versionné doit avoir une règle de fusion"
 
+# ── Caches que le workflow doit pouvoir commiter ─────────────
+#
+# data/*.json est ignore : un cache ajoute la sans exception serait
+# calcule une fois, jamais versionne, et chaque execution repartirait de
+# zero — ou, pour les saisons, sauterait l'etape indefiniment.
+import subprocess                                  # noqa: E402
+
+for text in texts.values():
+    for cached in re.findall(r"git add -?f? ?(data/\w+\.json)", text):
+        ignored = subprocess.run(["git", "check-ignore", "-q", cached],
+                                 cwd=ROOT).returncode == 0
+        assert not ignored, (
+            f"{cached} est commite par un workflow mais ignore par .gitignore")
+
 # ── Contextes autorises dans « env » au niveau du job ────────
 # Le contexte « runner » n'existe pas encore quand GitHub evalue
 # jobs.<id>.env : un ${{ runner.temp }} a cet endroit rend le fichier

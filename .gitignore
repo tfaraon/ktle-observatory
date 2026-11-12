@@ -5,6 +5,12 @@ data/*.json
 data/*.log
 data/compact.nc
 !data/.gitkeep
+# Exception : le cache des moyennes mensuelles de pluie. Il n'est pas
+# regenerable a bon compte — le reconstituer demande de retelecharger un
+# siecle de grilles SILO, soit plus de quinze cents fichiers — alors
+# qu'il ne pese qu'un nombre par mois. Il est donc versionne, et c'est
+# lui qui permet au workflow de ne chercher que les mois nouveaux.
+!data/season_cache.json
 
 # Site statique exporte : ~86 Mo regeneres a chaque fois. A publier
 # via le workflow Pages plutot qu'a versionner (retirer cette ligne si

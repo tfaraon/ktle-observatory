@@ -383,6 +383,13 @@ rainfall:
   revisit_days: 3        # jours recents retelecharges, SILO pouvant les reviser
   image_width: 540       # largeur des images de la carte, en pixels
 
+# Pluie saisonniere de longue periode, grilles mensuelles SILO.
+# Le premier passage cherche un siecle de mois et prend du temps ; le
+# cache (data/season_cache.json) est versionne, donc une seule fois.
+seasons:
+  first: 1900            # SILO commence en 1889, les pluviometres sont rares avant 1950
+  revisit_months: 2      # mois recents repris, SILO pouvant les reviser
+
 # Stations de jaugeage, Water Data Online (Bureau of Meteorology)
 rivers:
   stations: auto         # « auto » : stations actives du bassin ; ou une liste de numeros

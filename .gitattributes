@@ -14,6 +14,11 @@ site/data/ebird.json      merge=keepnew
 site/data/inaturalist.json  merge=keepnew
 site/data/rainfall.json    merge=keepnew
 site/data/rivers.json      merge=keepnew
+site/data/basin_seasons.json  merge=keepnew
+# Le cache des moyennes mensuelles, lui, est versionne hors de site/ :
+# il s'allonge d'un mois a la fois et peut etre complete aussi bien a la
+# main que par le workflow, d'ou la meme regle.
+data/season_cache.json    merge=keepnew
 # Attention : la macro « binary » desactive la fusion et annulerait
 # merge=keepnew ; on pose donc ses effets utiles un par un.
 site/data/rain_maps/*.png    -diff -text merge=keepnew

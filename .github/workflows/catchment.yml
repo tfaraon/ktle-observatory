@@ -35,9 +35,21 @@ jobs:
           cd pipeline
           python fetch_rainfall.py || echo "Pluie : échec, données précédentes conservées"
           python fetch_rivers.py || echo "Rivières : échec, données précédentes conservées"
+          # Pluie saisonnière : seulement si le cache versionné est là. Sans
+          # lui le script chercherait un siècle de grilles mensuelles, soit
+          # plus de quinze cents fichiers sur un coureur ; ce premier
+          # passage se fait à la main, une fois, sur une machine.
+          if [ -f ../data/season_cache.json ]; then
+            python basin_seasons.py --quiet \
+              || echo "Saisons : échec, données précédentes conservées"
+          else
+            echo "Saisons : data/season_cache.json absent, étape sautée."
+            echo "Premier passage à lancer à la main : python pipeline/basin_seasons.py"
+          fi
           cd ..
           if [ -d site/data ]; then
             cp -f data/rainfall.json data/rivers.json site/data/ 2>/dev/null || true
+            cp -f data/basin_seasons.json site/data/ 2>/dev/null || true
             mkdir -p site/data/rain_maps && rm -f site/data/rain_maps/*.png
             cp -f data/rain_maps/*.png site/data/rain_maps/ 2>/dev/null || true
           fi
@@ -46,5 +58,9 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add -f site/data/rainfall.json site/data/rivers.json site/data/rain_maps 2>/dev/null || true
+          git add -f site/data/basin_seasons.json 2>/dev/null || true
+          # Le cache des moyennes mensuelles est versionné : il grandit d'un
+          # nombre par mois et évite de tout recalculer au passage suivant.
+          git add data/season_cache.json 2>/dev/null || true
           git diff --staged --quiet || git commit -m "Catchment rain and rivers refresh"
           git push

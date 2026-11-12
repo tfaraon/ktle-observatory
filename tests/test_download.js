@@ -194,5 +194,61 @@ const emptyArea = D.areaCSV({ series: [] });
 assert(emptyArea.text.includes("Rai"));
 assert(emptyArea.text.includes("date,area_km2"));
 
+// ── Pluie saisonnière sur le bassin ─────────────────────────
+//
+// Ce fichier-là sert surtout à être repris dans une figure des années
+// plus tard : la définition des saisons et la réserve sur les premières
+// décennies doivent voyager avec les colonnes.
+
+const sea = {
+  source: "SILO monthly rainfall grids, Queensland Government, CC BY 4.0",
+  licence: "CC BY 4.0",
+  url: "https://www.longpaddock.qld.gov.au/silo/",
+  basin: { outline: "official", weighting: "cosine of latitude" },
+  period: { first: 1900, last: 2026 },
+  sparse_before: 1950,
+  norms: { from: 1900, to: 2025, warm_mm: 131.7, cool_mm: 51.2, total_mm: 182.9 },
+  warnings: ["1974-03: HTTP 500"],
+  series: [
+    { year: 1974, warm_mm: 300.1, cool_mm: 60.2, total_mm: 360.3,
+      warm_months: 6, cool_months: 6, complete: true },
+    { year: 2026, warm_mm: null, cool_mm: 20.0, total_mm: null,
+      warm_months: 0, cool_months: 6, complete: false },
+  ],
+};
+
+const sf = D.seasonsCSV(sea);
+assert(/^ktle_basin_seasons_\d{4}-\d{2}-\d{2}\.csv$/.test(sf.name), sf.name);
+
+const sHead = sf.text.split("\n").filter((l) => l.startsWith("#"));
+assert(sHead.some((l) => l.includes("CC BY 4.0")), "licence absente");
+assert(sHead.some((l) => l.includes("longpaddock")), "source non traçable");
+// Sans la convention d'étiquetage, une saison chaude est ambiguë d'un an
+assert(sHead.some((l) => l.includes("Oct 1974 - Mar 1975")),
+  "convention d'étiquetage de la saison chaude absente");
+assert(sHead.some((l) => l.includes("cosine of latitude")), "pondération absente");
+assert(sHead.some((l) => l.includes("1950")), "réserve sur les pluviomètres rares");
+assert(sHead.some((l) => l.includes("182.9")), "moyenne de longue période absente");
+assert(sHead.some((l) => l.includes("HTTP 500")), "avertissement non repris");
+assert(!sHead.some((l) => l.includes("demonstration")), "faux avertissement démo");
+
+const sBody = sf.text.split("\n").filter((l) => l && !l.startsWith("#"));
+assert.strictEqual(sBody[0],
+  "year,warm_mm,cool_mm,total_mm,warm_months,cool_months,complete");
+assert.strictEqual(sBody[1], "1974,300.1,60.2,360.3,6,6,yes");
+// Une saison tronquée doit être identifiable, et ne pas inventer de total
+assert.strictEqual(sBody[2], "2026,,20,,0,6,no");
+assert(!sf.text.includes("null"), "des null ont fui dans le fichier");
+
+// Les données de démonstration doivent se dénoncer
+const demoSea = D.seasonsCSV(Object.assign({ demo: true }, sea));
+assert(demoSea.text.includes("WARNING: synthetic demonstration data"));
+
+// Une série vide reste un fichier valide
+const emptySea = D.seasonsCSV({ series: [] });
+assert(emptySea.text.includes("year,warm_mm"));
+assert(emptySea.text.includes("SILO"), "source absente du fichier vide");
+
 console.log("OK — export de la surface en eau : citation, DOI, réserve sur "
-  + "les passages partiels et valeurs manquantes validés.");
+  + "les passages partiels et valeurs manquantes validés ; export saisonnier : "
+  + "licence, convention des saisons, pondération et saisons tronquées.");

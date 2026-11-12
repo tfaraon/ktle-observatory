@@ -20,7 +20,7 @@ const METHODS_HTML = `
     describes what the site actually computes, including where the
     approximations lie.</p>
 
-    <h3>Water surface elevation from SWOT</h3>
+    <h3 id="me-swot">Water surface elevation from SWOT</h3>
 
     <p>Levels come from the SWOT mission's <em>L2 HR Raster</em>
     product, distributed by NASA PO.DAAC. The KaRIn interferometer
@@ -67,7 +67,7 @@ const METHODS_HTML = `
     Note also that a dry lake yields no valid elevation at all &mdash;
     early gaps reflect a dry basin, not a sensor failure.</p>
 
-    <h3>Water extent</h3>
+    <h3 id="me-extent">Water extent</h3>
 
     <p>SWOT measures one quantity reliably: the <strong>elevation</strong>
     of the water surface. Its pixel-by-pixel water classification is a
@@ -100,7 +100,7 @@ const METHODS_HTML = `
     estimate is correspondingly loose; the calibration reports that
     plateau instead of hiding it.</p>
 
-    <h3>Surface water area</h3>
+    <h3 id="me-area">Surface water area</h3>
 
     <p>Water area follows the method of <strong>Rai, Cohen, Armon and
     Marx (2026)</strong>, <em>Volumetric analysis of a playa lake using
@@ -157,7 +157,7 @@ const METHODS_HTML = `
     drawn as open circles: an incomplete pass would otherwise read as a
     drying lake, an artefact the authors report for October 2024.</p>
 
-    <h3>Hydrodynamic model</h3>
+    <h3 id="me-model">Hydrodynamic model</h3>
 
     <p>Simulations use <strong>Delft3D-FLOW coupled with
     SWAN</strong>, on a curvilinear grid covering the lake. The flow
@@ -173,7 +173,7 @@ const METHODS_HTML = `
     state</strong>, not a time series: the model is driven to
     equilibrium under fixed forcing.</p>
 
-    <h3>Matching observations to a scenario</h3>
+    <h3 id="me-matching">Matching observations to a scenario</h3>
 
     <p>Current conditions are converted into model parameters &mdash;
     wind speed from km/h to m/s, wind direction in the nautical
@@ -202,7 +202,7 @@ const METHODS_HTML = `
     <em>which</em> scenario applies; it does not advance time inside a
     simulation.</p>
 
-    <h3>Displaying the model fields</h3>
+    <h3 id="me-fields">Displaying the model fields</h3>
 
     <p>Model output is in projected metres (MGA zone&nbsp;53) whereas
     the map works in degrees, so each field is resampled onto a regular
@@ -228,7 +228,7 @@ const METHODS_HTML = `
     that distinction a calm lake, where currents are genuinely zero,
     would be indistinguishable from a dry one.</p>
 
-    <h3>Weather observations</h3>
+    <h3 id="me-weather">Weather observations</h3>
 
     <p>Wind, temperature, humidity, pressure and rainfall come from
     three Bureau of Meteorology stations surrounding the lake:
@@ -257,7 +257,7 @@ const METHODS_HTML = `
     station, so matched scenarios likely understate the true forcing
     over the lake.</p>
 
-    <h3>Satellite imagery</h3>
+    <h3 id="me-imagery">Satellite imagery</h3>
 
     <p>Background imagery is served by NASA GIBS. The default
     combination is MODIS bands&nbsp;7&ndash;2&ndash;1: shortwave
@@ -267,7 +267,7 @@ const METHODS_HTML = `
     shallow turbid water and salt are easily confused. Native
     resolution is 250&nbsp;m.</p>
 
-    <h3>Downloading the data</h3>
+    <h3 id="me-download">Downloading the data</h3>
 
     <p>Each panel offers a CSV export: the full SWOT series for both
     sites, the local weather archive for all three stations, and the
@@ -281,7 +281,7 @@ const METHODS_HTML = `
     image is held, so the arrows are exported instead &mdash; coarser,
     but they carry direction as well as magnitude.</p>
 
-    <h3>Reproducibility</h3>
+    <h3 id="me-repro">Reproducibility</h3>
 
     <p>Every figure on this site is regenerated from the raw data by a
     documented pipeline: SWOT download and extraction, weather

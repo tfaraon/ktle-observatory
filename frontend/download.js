@@ -130,6 +130,52 @@
     };
   }
 
+  // ── Seasonal rainfall over the basin ─────────────────────
+  //
+  // Un fichier de contexte climatique sert surtout a etre repris dans
+  // une figure, des annees plus tard : l'en-tete porte donc la
+  // definition des saisons et la ponderation, sans quoi les colonnes
+  // ne veulent plus rien dire.
+
+  const SEASONS_COLUMNS = ["year", "warm_mm", "cool_mm", "total_mm",
+                           "warm_months", "cool_months", "complete"];
+
+  function seasonsRows(sea) {
+    return (sea.series || []).map((r) => [
+      r.year, r.warm_mm, r.cool_mm, r.total_mm,
+      r.warm_months, r.cool_months, r.complete ? "yes" : "no"]);
+  }
+
+  function seasonsCSV(sea) {
+    const n = sea.norms || {}, p = sea.period || {};
+    const meta = [
+      "Kati Thanda-Lake Eyre observatory - seasonal rainfall over the Lake Eyre Basin",
+      "Source: " + (sea.source || "SILO monthly rainfall grids, Queensland Government"),
+      "Licence: " + (sea.licence || "CC BY 4.0") + " - " + (sea.url || ""),
+      "Basin average in mm, weighted by the cosine of latitude; "
+        + "basin outline: " + ((sea.basin || {}).outline || "unknown"),
+      "Warm season: October to March, labelled by the year of its October "
+        + "(the 1974 warm season runs Oct 1974 - Mar 1975)",
+      "Cool season: April to September of the labelled year",
+      "Rows with complete=no are missing months and their totals understate the season",
+    ];
+    if (n.total_mm) {
+      meta.push(`Long-term mean over complete years ${n.from}-${n.to}: `
+        + `${n.total_mm} mm/year (warm ${n.warm_mm} mm, cool ${n.cool_mm} mm)`);
+    }
+    if (sea.sparse_before && p.first < sea.sparse_before) {
+      meta.push(`Caution: before ${sea.sparse_before} rain gauges in the basin `
+        + "were very sparse and these grids interpolate over long distances");
+    }
+    if (sea.demo) meta.push("WARNING: synthetic demonstration data");
+    (sea.warnings || []).forEach((w) => meta.push("Note: " + w));
+    meta.push("Generated: " + new Date().toISOString());
+    return {
+      name: `ktle_basin_seasons_${stamp()}.csv`,
+      text: toCSV(SEASONS_COLUMNS, seasonsRows(sea), meta),
+    };
+  }
+
   // ── Model layer ──────────────────────────────────────────
 
   function layerMeta(d, scenario) {
@@ -197,9 +243,9 @@
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 
-  const api = { toCSV, escapeCell, wseCSV, weatherCSV, areaCSV, layerCSV,
-                wseRows, weatherRows, areaRows, WEATHER_COLUMNS,
-                AREA_CITATION, slug, save };
+  const api = { toCSV, escapeCell, wseCSV, weatherCSV, areaCSV, seasonsCSV,
+                layerCSV, wseRows, weatherRows, areaRows, seasonsRows,
+                WEATHER_COLUMNS, SEASONS_COLUMNS, AREA_CITATION, slug, save };
 
   if (typeof module === "object" && module.exports) {
     module.exports = api;

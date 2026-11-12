@@ -29,7 +29,6 @@
     staticMode: false, // no server: pre-rendered layers
     manifest: null, staticIndex: null, paramGrid: null,
     staticArrows: null, staticArrowsKey: null,
-    methodsLoaded: false,
     loadedPages: {},
     ebird: null,
     birdsLayer: null,
@@ -1873,6 +1872,8 @@
          () => Boolean(state.weather));
     bind("dl-area", () => Download.areaCSV(state.area),
          () => Boolean(state.area));
+    bind("dl-seasons", () => Download.seasonsCSV(state.seasons),
+         () => Boolean(state.seasons && (state.seasons.series || []).length));
     bind("dl-area2", () => Download.areaCSV(state.area),
          () => Boolean(state.area));
 
@@ -1981,6 +1982,13 @@
       html: () => (typeof GROUP_HTML === "string" ? GROUP_HTML : null),
       anchors: /^gr-/,
     },
+    // Methods etait injectee par une casse speciale de showTab, donc
+    // sans routage par ancre : #me-model ouvrait l'accueil. Les notes
+    // de methode des onglets de Science renvoient vers ces ancres.
+    methods: {
+      html: () => (typeof METHODS_HTML === "string" ? METHODS_HTML : null),
+      anchors: /^me-/,
+    },
   };
 
   function lazyPage(name) {
@@ -2032,14 +2040,6 @@
       p.hidden = p.id !== "tab-" + name;
     });
 
-    if (name === "methods" && !state.methodsLoaded) {
-      const box = $("tab-methods");
-      // METHODS_HTML vient de methods.js, chargé avant ce fichier
-      box.innerHTML = typeof METHODS_HTML === "string" ? METHODS_HTML
-        : '<article class="panel"><div class="prose-body">'
-          + "<p>Methods documentation unavailable.</p></div></article>";
-      state.methodsLoaded = true;
-    }
     lazyPage(name);
 
     // Leaflet et Plotly calculent leurs dimensions au moment du rendu :
@@ -2873,6 +2873,30 @@
     initRainMap();
   }
 
+  // ── A century of wet and dry seasons ─────────────────────
+  //
+  // Une crue ne veut rien dire seule : il faut le siecle derriere. La
+  // mise en forme vit dans seasons.js, verifiable sans navigateur ; il
+  // ne reste ici que le DOM.
+
+  function showSeasons() {
+    const sea = state.seasons, el = $("seasons-chart");
+    if (!sea || !el || typeof Plotly === "undefined" || typeof Seasons === "undefined") return;
+    const view = state.seasonsView || "stack";
+    Plotly.newPlot(el, Seasons.traces(sea, view), Seasons.layout(sea, view),
+                   { displayModeBar: false, responsive: true });
+  }
+
+  function renderSeasons() {
+    const sea = state.seasons, block = $("seasons-block");
+    if (!block || typeof Seasons === "undefined") return;
+    block.hidden = !sea || !((sea.series || []).length);
+    if (block.hidden) return;
+    $("seasons-lede").textContent = Seasons.summary(sea);
+    $("seasons-note").textContent = Seasons.notes(sea);
+    showSeasons();
+  }
+
   function renderRiverFlow() {
     const rivers = state.rivers;
     if (!$("flow-now")) return;
@@ -2928,6 +2952,11 @@
       $("rain-day").hidden = state.rrView !== "daily";
       showRain();
     }));
+    document.querySelectorAll("[data-seasons]").forEach((b) => b.addEventListener("click", () => {
+      state.seasonsView = b.dataset.seasons;
+      document.querySelectorAll("[data-seasons]").forEach((x) => x.classList.toggle("active", x === b));
+      showSeasons();
+    }));
     const day = $("rain-day");
     if (day) day.addEventListener("input", showRain);
     const body = $("flow-stations");
@@ -2943,10 +2972,11 @@
     loadWeather().then(() => { if (withScenario) loadScenario(null); });
     loadEbird().then((d) => { state.ebird = d; renderBirds(d); renderHome(); renderGroupBlocks(); });
     loadInat().then((d) => { state.inat = d; renderInat(d); renderGroupBlocks(); });
-    Promise.all([loadJson("/api/rainfall", "rainfall.json"), loadJson("/api/rivers", "rivers.json")])
-      .then(([rain, rivers]) => {
-        state.rain = rain; state.rivers = rivers;
-        renderRainfall(); renderRiverFlow(); renderTravel();
+    Promise.all([loadJson("/api/rainfall", "rainfall.json"), loadJson("/api/rivers", "rivers.json"),
+                 loadJson("/api/basin_seasons", "basin_seasons.json")])
+      .then(([rain, rivers, seasons]) => {
+        state.rain = rain; state.rivers = rivers; state.seasons = seasons;
+        renderRainfall(); renderSeasons(); renderRiverFlow(); renderTravel();
       });
   }
 

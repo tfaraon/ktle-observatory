@@ -1736,6 +1736,12 @@ nav.tabs, .subbar { max-width: calc(var(--page) - 56px); padding-left: 0; paddin
 .rr-block h3 { font-family: var(--font-display); font-stretch: 110%; font-weight: 600; font-size: 1.3rem; margin: 0 0 10px; }
 .rr-note { font-family: var(--font-read); color: var(--dune); font-size: 0.95rem; margin: 0 0 8px; }
 .rr-chart { min-height: 60px; }
+.rr-chart-tall { min-height: 340px; }
+.rr-lede { font-family: var(--font-read); margin: 0 0 12px; max-width: 62ch; }
+/* Les boutons de periode a gauche, le telechargement a droite ; ils
+   passent l'un sous l'autre sur un telephone. */
+.rr-chart-head { display: flex; flex-wrap: wrap; align-items: center;
+  justify-content: space-between; gap: 10px; margin-bottom: 10px; }
 .rr-table { width: 100%; border-collapse: collapse; font-family: var(--font-display); font-size: 0.9rem; margin-top: 12px; }
 .rr-table th { text-align: left; font-weight: 600; font-size: 0.82rem; background: var(--grid); padding: 8px 10px; }
 .rr-table td { padding: 8px 10px; border-bottom: 1px solid var(--grid); vertical-align: top; font-variant-numeric: tabular-nums; }

@@ -94,6 +94,20 @@
 
     <section id="tab-satellite" class="tab-panel" role="tabpanel" hidden>
 
+    <aside class="panel method-note">
+      <p>Water surface elevation comes from the SWOT mission&rsquo;s <em>L2 HR
+      Raster</em> product, averaged over a 13&nbsp;&times;&nbsp;13 pixel window at
+      each extraction site. Water extent is derived from that measured level and
+      the model bathymetry rather than read from the radar&rsquo;s own water
+      classification, which over a playa confuses wet salt crust with very
+      shallow water. Background imagery is served by NASA GIBS at 250&nbsp;m.</p>
+      <p class="method-links">Full method:
+        <a href="#me-swot">water surface elevation</a>,
+        <a href="#me-extent">water extent</a>,
+        <a href="#me-area">surface water area</a>,
+        <a href="#me-imagery">satellite imagery</a>.</p>
+    </aside>
+
 <section class="panel empty-state" hidden>
       <h2>No data to display</h2>
       <p>The file <code>data/swot_wse.json</code> has not been generated yet.</p>
@@ -170,21 +184,6 @@
         <div id="chart" class="chart"></div>
         <p class="chart-note">Each point is a SWOT observation (L2 HR Raster) extracted at the selected site. Without an observation there is no point: sampling follows the satellite pass cycle. Water area, where available, follows the method of Rai et al. (2026); open circles mark passes that covered only part of the lake.</p>
       </div>
-<div class="chart-card">
-        <div class="panel-head head-row">
-          <div>
-            <h2 id="chart-title">SWOT water surface elevation</h2>
-          </div>
-          <span class="head-actions">
-            <button type="button" id="dl-wse" class="dl-btn"
-                    title="All sites, all observations, as CSV">Water levels</button>
-            <button type="button" id="dl-area" class="dl-btn" hidden
-                    title="Surface water area, method of Rai et al. (2026)">Water area</button>
-          </span>
-        </div>
-        <div id="chart" class="chart"></div>
-        <p class="chart-note">Each point is a SWOT observation (L2 HR Raster) extracted at the selected site. Without an observation there is no point: sampling follows the satellite pass cycle. Water area, where available, follows the method of Rai et al. (2026); open circles mark passes that covered only part of the lake.</p>
-      </div>
 <article class="panel chart-card" id="area-card" hidden>
         <div class="panel-head head-row">
           <div>
@@ -200,6 +199,18 @@
     </section>
 
     <section id="tab-hydrodynamics" class="tab-panel" role="tabpanel" hidden>
+
+    <aside class="panel method-note">
+      <p>Flow and wave fields come from Delft3D-FLOW coupled with SWAN on a
+      curvilinear grid, three-dimensional with ten vertical layers. The site
+      runs no model of its own: it holds a database of 790 steady-state
+      scenarios, sampled over wind speed, wind direction, water level and
+      salinity, and shows the one nearest the conditions you select.</p>
+      <p class="method-links">Full method:
+        <a href="#me-model">hydrodynamic model</a>,
+        <a href="#me-matching">matching observations to a scenario</a>,
+        <a href="#me-fields">displaying the model fields</a>.</p>
+    </aside>
 
 <section class="panel empty-state" hidden>
       <h2>No data to display</h2>
@@ -444,6 +455,20 @@
         <h3>Rain over the basin, day by day</h3>
         <div id="rain-chart" class="rr-chart"></div>
       </section>
+      <section class="rr-block" id="seasons-block" hidden>
+        <h3>A century of wet and dry seasons</h3>
+        <p id="seasons-lede" class="rr-lede"></p>
+        <div class="rr-chart-head">
+          <div class="seg" role="group" aria-label="Seasonal rainfall display">
+            <button type="button" class="seg-btn active" data-seasons="stack">Both seasons</button>
+            <button type="button" class="seg-btn" data-seasons="warm">Warm only</button>
+            <button type="button" class="seg-btn" data-seasons="anomaly">Departure from mean</button>
+          </div>
+          <button type="button" class="dl-btn" id="dl-seasons">Download CSV</button>
+        </div>
+        <div id="seasons-chart" class="rr-chart rr-chart-tall"></div>
+        <p id="seasons-note" class="rr-note"></p>
+      </section>
       <p id="rain-empty" class="birds-empty" hidden>No rainfall has been fetched yet. Run
         <code>python pipeline/fetch_rainfall.py</code>.</p>
       <p class="birds-attribution">Rainfall: <a href="https://www.longpaddock.qld.gov.au/silo/" target="_blank"
@@ -635,6 +660,9 @@
           follows a flood down the Channel Country from the gauges, and
           <a href="#river-flow">River flow</a> shows what the rivers are
           doing now.</p>
+          <p class="method-links">The <a href="#methods">Methods</a> page
+          documents what the site computes today, including where the
+          approximations lie.</p>
         </div>
       </article>
     </section>
@@ -656,6 +684,7 @@
   <script src="inaturalist.js"></script>
   <script src="catchment_live.js"></script>
   <script src="travel.js"></script>
+  <script src="seasons.js"></script>
   <script src="floods.js"></script>
   <script src="rain_to_lake.js"></script>
   <script src="lake_page.js"></script>

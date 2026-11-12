@@ -181,6 +181,17 @@ def api_rainfall():
     return jsonify(json.loads(f.read_text(encoding="utf-8")))
 
 
+@app.get("/api/basin_seasons")
+def api_basin_seasons():
+    """Pluie saisonniere de longue periode, par pipeline/basin_seasons.py."""
+    f = ROOT / "data" / "basin_seasons.json"
+    if not f.exists():
+        return jsonify({"error": "no_data",
+                        "message": "No seasonal rainfall yet: run "
+                                   "pipeline/basin_seasons.py"}), 404
+    return jsonify(json.loads(f.read_text(encoding="utf-8")))
+
+
 @app.get("/api/rivers")
 def api_rivers():
     """Stations de jaugeage, produites par pipeline/fetch_rivers.py."""

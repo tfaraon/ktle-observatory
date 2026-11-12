@@ -455,6 +455,20 @@
         <h3>Rain over the basin, day by day</h3>
         <div id="rain-chart" class="rr-chart"></div>
       </section>
+      <section class="rr-block" id="seasons-block" hidden>
+        <h3>A century of wet and dry seasons</h3>
+        <p id="seasons-lede" class="rr-lede"></p>
+        <div class="rr-chart-head">
+          <div class="seg" role="group" aria-label="Seasonal rainfall display">
+            <button type="button" class="seg-btn active" data-seasons="stack">Both seasons</button>
+            <button type="button" class="seg-btn" data-seasons="warm">Warm only</button>
+            <button type="button" class="seg-btn" data-seasons="anomaly">Departure from mean</button>
+          </div>
+          <button type="button" class="dl-btn" id="dl-seasons">Download CSV</button>
+        </div>
+        <div id="seasons-chart" class="rr-chart rr-chart-tall"></div>
+        <p id="seasons-note" class="rr-note"></p>
+      </section>
       <p id="rain-empty" class="birds-empty" hidden>No rainfall has been fetched yet. Run
         <code>python pipeline/fetch_rainfall.py</code>.</p>
       <p class="birds-attribution">Rainfall: <a href="https://www.longpaddock.qld.gov.au/silo/" target="_blank"
@@ -670,6 +684,7 @@
   <script src="inaturalist.js"></script>
   <script src="catchment_live.js"></script>
   <script src="travel.js"></script>
+  <script src="seasons.js"></script>
   <script src="floods.js"></script>
   <script src="rain_to_lake.js"></script>
   <script src="lake_page.js"></script>

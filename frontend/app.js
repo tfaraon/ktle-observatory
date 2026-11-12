@@ -1872,6 +1872,8 @@
          () => Boolean(state.weather));
     bind("dl-area", () => Download.areaCSV(state.area),
          () => Boolean(state.area));
+    bind("dl-seasons", () => Download.seasonsCSV(state.seasons),
+         () => Boolean(state.seasons && (state.seasons.series || []).length));
     bind("dl-area2", () => Download.areaCSV(state.area),
          () => Boolean(state.area));
 
@@ -2871,6 +2873,30 @@
     initRainMap();
   }
 
+  // ── A century of wet and dry seasons ─────────────────────
+  //
+  // Une crue ne veut rien dire seule : il faut le siecle derriere. La
+  // mise en forme vit dans seasons.js, verifiable sans navigateur ; il
+  // ne reste ici que le DOM.
+
+  function showSeasons() {
+    const sea = state.seasons, el = $("seasons-chart");
+    if (!sea || !el || typeof Plotly === "undefined" || typeof Seasons === "undefined") return;
+    const view = state.seasonsView || "stack";
+    Plotly.newPlot(el, Seasons.traces(sea, view), Seasons.layout(sea, view),
+                   { displayModeBar: false, responsive: true });
+  }
+
+  function renderSeasons() {
+    const sea = state.seasons, block = $("seasons-block");
+    if (!block || typeof Seasons === "undefined") return;
+    block.hidden = !sea || !((sea.series || []).length);
+    if (block.hidden) return;
+    $("seasons-lede").textContent = Seasons.summary(sea);
+    $("seasons-note").textContent = Seasons.notes(sea);
+    showSeasons();
+  }
+
   function renderRiverFlow() {
     const rivers = state.rivers;
     if (!$("flow-now")) return;
@@ -2926,6 +2952,11 @@
       $("rain-day").hidden = state.rrView !== "daily";
       showRain();
     }));
+    document.querySelectorAll("[data-seasons]").forEach((b) => b.addEventListener("click", () => {
+      state.seasonsView = b.dataset.seasons;
+      document.querySelectorAll("[data-seasons]").forEach((x) => x.classList.toggle("active", x === b));
+      showSeasons();
+    }));
     const day = $("rain-day");
     if (day) day.addEventListener("input", showRain);
     const body = $("flow-stations");
@@ -2941,10 +2972,11 @@
     loadWeather().then(() => { if (withScenario) loadScenario(null); });
     loadEbird().then((d) => { state.ebird = d; renderBirds(d); renderHome(); renderGroupBlocks(); });
     loadInat().then((d) => { state.inat = d; renderInat(d); renderGroupBlocks(); });
-    Promise.all([loadJson("/api/rainfall", "rainfall.json"), loadJson("/api/rivers", "rivers.json")])
-      .then(([rain, rivers]) => {
-        state.rain = rain; state.rivers = rivers;
-        renderRainfall(); renderRiverFlow(); renderTravel();
+    Promise.all([loadJson("/api/rainfall", "rainfall.json"), loadJson("/api/rivers", "rivers.json"),
+                 loadJson("/api/basin_seasons", "basin_seasons.json")])
+      .then(([rain, rivers, seasons]) => {
+        state.rain = rain; state.rivers = rivers; state.seasons = seasons;
+        renderRainfall(); renderSeasons(); renderRiverFlow(); renderTravel();
       });
   }
 
