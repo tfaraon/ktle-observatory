@@ -140,6 +140,19 @@ with sync_playwright() as p:
     check("la hauteur des cartes tient a une classe",
           pg.evaluate("() => document.querySelectorAll('.map-pane').length") == 2)
 
+    # Un identifiant en double ne casse rien visiblement : getElementById
+    # rend le premier, le second reste mort. C'est arrive en dupliquant
+    # la carte du graphique SWOT lors de la scission des panneaux.
+    dup = pg.evaluate("""() => {
+      const seen = {}, bad = [];
+      document.querySelectorAll('[id]').forEach(e => {
+        seen[e.id] = (seen[e.id] || 0) + 1;
+        if (seen[e.id] === 2) bad.push(e.id);
+      });
+      return bad;
+    }""")
+    check("aucun identifiant en double dans la page", not dup, dup)
+
     check("deux conteneurs de carte distincts",
           pg.evaluate("() => document.querySelectorAll('#map-sat, #map-hydro').length") == 2)
     check("plus de conteneur partage",
