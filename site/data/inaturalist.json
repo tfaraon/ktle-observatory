@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-11-13T01:26:48Z",
+ "fetched_at": "2026-11-14T00:59:57Z",
  "demo": false,
  "stale": false,
  "errors": [],
@@ -2018,10 +2018,10 @@
     "group": "Aves"
    },
    "photo": {
-    "square": "https://inaturalist-open-data.s3.amazonaws.com/photos/193493434/square.jpg",
-    "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/193493434/medium.jpg",
+    "square": "https://inaturalist-open-data.s3.amazonaws.com/photos/218461984/square.jpg",
+    "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/218461984/medium.jpg",
     "license": "CC-BY-NC",
-    "attribution": "(c) rivendel, some rights reserved (CC BY-NC)"
+    "attribution": "(c) Tom Hunt, some rights reserved (CC BY-NC), uploaded by Tom Hunt"
    }
   },
   {
