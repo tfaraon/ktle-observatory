@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-11-14T00:59:57Z",
+ "fetched_at": "2026-11-15T00:12:37Z",
  "demo": false,
  "stale": false,
  "errors": [],
@@ -234,14 +234,14 @@
    "id": 413242161,
    "url": "https://www.inaturalist.org/observations/413242161",
    "observed_on": "2026-10-28",
-   "quality": "needs_id",
+   "quality": "research",
    "taxon": {
     "name": "Acacia stenophylla",
     "common": "shoestring acacia",
     "rank": "species",
     "group": "Plantae"
    },
-   "guess": "Shoestring Acacia",
+   "guess": "shoestring acacia",
    "observer": "warrencameron",
    "obscured": false,
    "coords": [
