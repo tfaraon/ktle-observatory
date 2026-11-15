@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Cartes de pluie pour QGIS (tools/rain_maps.py), sans reseau.
+Extraction des grilles de pluie (tools/rain_maps.py), sans reseau.
 
 Ce qui peut se tromper ici est silencieux : un GeoTIFF sans systeme de
 coordonnees s'ouvre quand meme et se pose a cote du bassin ; un
@@ -30,7 +30,8 @@ checks = []
 def check(label, ok, detail=""):
     checks.append((label, bool(ok)))
     if not ok:
-        print(f"ECHEC — {label}" + (f" : {detail}" if detail else ""))
+        print(f"ECHEC — {label}"
+              + (f" : {detail}" if detail is not None and detail != "" else ""))
 
 
 # Grille continentale de reference, au pas SILO
@@ -47,7 +48,7 @@ rm.GRIDS = tmp / "grids"
 br.CACHE = tmp / "dl"
 
 # Champ synthetique : 10 mm par mois partout, sauf 2025 deux fois plus
-# arrose, pour que l'ecart et le rapport aient une valeur connue.
+# arrose, pour que les moyennes aient une valeur connue d'avance.
 served = []
 
 
@@ -101,7 +102,8 @@ check("fichier de calage : vise le centre du premier pixel",
       abs(tfw[4] - (136.0 + STEP / 2)) < 1e-9
       and abs(tfw[5] - (-22.0 - STEP / 2)) < 1e-9, tfw[4:])
 check("fichier de calage d'accord avec le GeoTIFF",
-      abs(tfw[4] - lon[0]) < 1e-9 and abs(tfw[5] - lat[0]) < 1e-9, (tfw[4:], lon[0], lat[0]))
+      abs(tfw[4] - lon[0]) < 1e-9 and abs(tfw[5] - lat[0]) < 1e-9,
+      (tfw[4:], lon[0], lat[0]))
 check("projection ecrite a cote",
       "WGS_1984" in (tmp / "probe.prj").read_text())
 
@@ -129,17 +131,28 @@ check("le decoupage couvre tout le bassin",
       (clon.min(), clon.max(), clat.min(), clat.max()))
 
 
+# ── Lecture des periodes ────────────────────────────────────
+
+check("periode sur deux bornes", rm.parse_period("1972-2025") == (1972, 2025))
+check("annee seule", rm.parse_period("2025") == (2025, 2025))
+try:
+    rm.parse_period("1972-2000-2025")
+    check("periode illisible refusee", False)
+except ValueError:
+    check("periode illisible refusee", True)
+
+
 # ── Passage complet ─────────────────────────────────────────
 
 out = tmp / "maps"
-files = rm.run(basin="essai.shp", first=2020, last=2025, year=2025,
+files = rm.run(basin="essai.shp", periods=[(2020, 2025), (2025, 2025)],
                out=out, quiet=True)
-names = {p.name for p in files}
-check("les quatre cartes sont ecrites",
-      {"rain_mean_2020-2025.tif", "rain_2025.tif",
-       "rain_anomaly_2025.tif", "rain_ratio_2025.tif"} <= names, sorted(names))
-check("les deux styles sont ecrits",
-      {"style_totals.qml", "style_anomaly.qml"} <= names, sorted(names))
+names = [p.name for p in files]
+check("un raster par periode demandee",
+      names == ["rain_2020-2025.tif", "rain_2025.tif"], names)
+check("rien d'autre n'est ecrit",
+      not list(out.glob("*.qml")) and len(list(out.glob("*.tif"))) == 2,
+      [p.name for p in out.iterdir()])
 
 
 def grid_of(name):
@@ -147,22 +160,16 @@ def grid_of(name):
     return np.where(g <= rm.NODATA + 1, np.nan, g)
 
 
-mean = grid_of("rain_mean_2020-2025.tif")
+mean = grid_of("rain_2020-2025.tif")
 single = grid_of("rain_2025.tif")
-anom = grid_of("rain_anomaly_2025.tif")
-ratio = grid_of("rain_ratio_2025.tif")
+inside_cells = np.isfinite(mean)
 
 # Cinq annees a 120 mm et une a 240 : la moyenne vaut 140
-inside_cells = np.isfinite(mean)
 check("moyenne annuelle juste",
       np.allclose(mean[inside_cells], 140.0), np.nanmin(mean))
-check("total de l'annee juste", np.allclose(single[inside_cells], 240.0),
-      np.nanmin(single))
-check("ecart a la moyenne juste", np.allclose(anom[inside_cells], 100.0),
-      np.nanmin(anom))
-check("part de la normale juste",
-      np.allclose(ratio[inside_cells], 240 / 140 * 100, atol=0.01),
-      np.nanmin(ratio))
+# Une periode d'un an rend le total de cette annee
+check("periode d'un an : total de l'annee",
+      np.allclose(single[inside_cells], 240.0), np.nanmin(single))
 
 # ── Masque ──
 lonm, latm, _ = rm.read_any(out / "rain_2025.tif")
@@ -177,9 +184,9 @@ check("la marge est bien presente dans le raster", outside.any(), outside.sum())
 
 # Sans masquage, tout le rectangle porte des valeurs
 out2 = tmp / "maps_full"
-rm.run(basin="essai.shp", first=2024, last=2025, year=2025, out=out2,
-       clip=False, quiet=True)
-_, _, full = rm.read_any(out2 / "rain_2025.tif")
+rm.run(basin="essai.shp", periods=[(2024, 2025)], out=out2, clip=False,
+       quiet=True)
+_, _, full = rm.read_any(out2 / "rain_2024-2025.tif")
 check("sans masquage le rectangle entier est rempli",
       np.all(full > rm.NODATA + 1), (full <= rm.NODATA + 1).sum())
 
@@ -187,16 +194,21 @@ check("sans masquage le rectangle entier est rempli",
 # ── Cache ───────────────────────────────────────────────────
 
 before = len(served)
-rm.run(basin="essai.shp", first=2020, last=2025, year=2025,
-       out=tmp / "again", quiet=True)
+rm.run(basin="essai.shp", periods=[(2020, 2025)], out=tmp / "again", quiet=True)
 check("le cache evite tout retelechargement", len(served) == before,
       len(served) - before)
+
+# Deux periodes qui se recouvrent ne doivent pas tout relire deux fois
+before = len(served)
+rm.run(basin="essai.shp", periods=[(2020, 2025), (2022, 2025), (2025, 2025)],
+       out=tmp / "overlap", quiet=True)
+check("des periodes qui se recouvrent se partagent les grilles",
+      len(served) == before, len(served) - before)
 
 # Une emprise differente ne doit pas s'empiler sur les annees en cache
 rm.PAD = 1.0
 before = len(served)
-rm.run(basin="essai.shp", first=2025, last=2025, year=2025,
-       out=tmp / "wide", quiet=True)
+rm.run(basin="essai.shp", periods=[(2025, 2025)], out=tmp / "wide", quiet=True)
 check("une emprise elargie force le recalcul", len(served) > before,
       len(served) - before)
 rm.PAD = 0.25
@@ -204,15 +216,42 @@ rm.PAD = 0.25
 
 # ── Mois manquants ──────────────────────────────────────────
 
-wanted = 12
-total = np.full((3, 3), 100.0)
-count = np.array([[12, 11, 10], [12, 12, 12], [6, 12, 12]], "int32")
-kept = rm.enough(total, count, wanted, min_cover=0.9)
-check("une maille a 12 mois est gardee", np.isfinite(kept[0, 0]))
-check("une maille a 11 mois est gardee", np.isfinite(kept[0, 1]))
-# 10 mois sur 12, c'est 83 % : sous le seuil, la maille doit disparaitre
-check("une maille trop trouee devient vide", np.isnan(kept[0, 2]), kept[0, 2])
-check("une maille a moitie vide devient vide", np.isnan(kept[2, 0]))
+# Une annee entiere absente doit vider les mailles, pas les sous-estimer
+rm.GRIDS = tmp / "holes"
+br.CACHE = tmp / "dl2"
+missing = {2022}
+
+
+def holey_fetch(url, dest, timeout=120):
+    if int(Path(url).name[:4]) in missing:
+        raise OSError("mois absent")
+    fake_fetch(url, dest)
+
+
+br.fetch = holey_fetch
+outh = tmp / "holey"
+rm.run(basin="essai.shp", periods=[(2020, 2025)], out=outh, quiet=True)
+_, _, gh = rm.read_any(outh / "rain_2020-2025.tif")
+gh = np.where(gh <= rm.NODATA + 1, np.nan, gh)
+# Cinq annees sur six, soit 83 % des mois : sous le seuil de 90 %
+check("une annee manquante vide les mailles plutot que de les sous-estimer",
+      np.all(np.isnan(gh)), int(np.isfinite(gh).sum()))
+
+rm.MIN_COVER = 0.8
+rm.GRIDS = tmp / "holes2"
+rm.run(basin="essai.shp", periods=[(2020, 2025)], out=tmp / "holey2", quiet=True)
+_, _, g2 = rm.read_any(tmp / "holey2" / "rain_2020-2025.tif")
+g2 = np.where(g2 <= rm.NODATA + 1, np.nan, g2)
+v2 = g2[np.isfinite(g2)]
+# 2020, 2021, 2023 et 2024 a 120 mm, 2025 a 240 : 720 mm sur la periode.
+# La moyenne divise par les six annees demandees et non par les cinq
+# lues, sinon l'annee manquante remonterait la moyenne au lieu de la
+# laisser telle quelle.
+check("un seuil abaisse laisse passer, en divisant par la periode entiere",
+      bool(v2.size) and np.allclose(v2, 120.0),
+      float(v2[0]) if v2.size else "vide")
+rm.MIN_COVER = 0.9
+br.fetch = fake_fetch
 
 
 # ── Saisons ─────────────────────────────────────────────────
@@ -224,17 +263,18 @@ check("saison fraiche dans l'annee",
       rm.months_of("cool") == [(0, m) for m in range(4, 10)])
 check("sans saison, les douze mois", len(rm.months_of("")) == 12)
 
+rm.GRIDS = tmp / "grids"
 outs = tmp / "warm"
-fw = rm.run(basin="essai.shp", first=2020, last=2024, year=2024,
-            season="warm", out=outs, quiet=True)
+fw = rm.run(basin="essai.shp", periods=[(2024, 2024)], season="warm",
+            out=outs, quiet=True)
 check("le nom de fichier porte la saison",
-      any("warm" in p.name for p in fw), [p.name for p in fw])
-sw = grid_of_warm = None
+      [p.name for p in fw] == ["rain_2024_warm.tif"], [p.name for p in fw])
 _, _, g = rm.read_any(outs / "rain_2024_warm.tif")
 g = np.where(g <= rm.NODATA + 1, np.nan, g)
 # Oct-dec 2024 a 10 mm et jan-mars 2025 a 20 : 30 + 60 = 90
 check("la saison chaude prend bien les mois de l'annee suivante",
       np.allclose(g[np.isfinite(g)], 90.0), np.nanmin(g))
+
 
 # ── Garde-fous d'appel ──────────────────────────────────────
 
@@ -257,5 +297,6 @@ if bad:
     print(f"\n{len(bad)}/{len(checks)} verifications en echec")
     sys.exit(1)
 print(f"OK — {len(checks)} verifications : GeoTIFF georeference pour QGIS "
-      "(EPSG:4326, accrochage au coin, sans-donnee), decoupage, moyennes et "
-      "ecarts justes, masque du bassin, cache, mois manquants, saisons.")
+      "(EPSG:4326, accrochage au coin, sans-donnee, calage de secours), "
+      "decoupage, moyennes justes, masque du bassin, cache partage entre "
+      "periodes, mois manquants, saisons.")

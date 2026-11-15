@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Cartes de pluie sur le bassin, pretes pour QGIS.
+Extraction des grilles de pluie SILO sur le bassin, en GeoTIFF.
+
+    python tools/rain_maps.py --basin Bassin.shp
+    python tools/rain_maps.py --basin Bassin.shp --period 1972-2025 --period 2025
+    python tools/rain_maps.py --basin Bassin.shp --season warm
 
 Depuis l'interpreteur :
 
@@ -9,41 +13,21 @@ Depuis l'interpreteur :
     >>> rm.BASIN = "/chemin/Bassin.shp"
     >>> rm.run()
 
-Depuis le terminal :
+Un GeoTIFF par periode demandee, en mm par an moyennes sur la periode.
+Pour une periode d'un an c'est donc le total de cette annee. Rien n'est
+calcule au-dela : la mise en page, les rampes de couleurs et les
+comparaisons se font dans QGIS.
 
-    python tools/rain_maps.py --basin Bassin.shp
-    python tools/rain_maps.py --basin Bassin.shp --season warm
+Chaque fichier declare EPSG:4326 et une valeur « sans donnee », avec un
+fichier de calage et un .prj a cote par precaution. L'exterieur du
+bassin est vide, donc QGIS le laisse transparent.
 
-Ce que basin_rainfall.py fait n'est pas ce qu'il faut ici : il reduit
-chaque grille a une moyenne sur le bassin et jette la grille. Une carte
-demande les champs eux-memes, donc ce script accumule les grilles
-mensuelles SILO maille par maille et ecrit des GeoTIFF.
-
-Il en sort quatre, pour une figure a deux ou trois panneaux :
-
-    rain_mean_1972-2025.tif    moyenne annuelle de la periode, en mm/an
-    rain_2025.tif              total de l'annee cartographiee, en mm
-    rain_anomaly_2025.tif      ecart a la moyenne, en mm
-    rain_ratio_2025.tif        part de la normale, en %
-
-Les deux derniers ne sont pas demandes mais c'est presque toujours eux
-qu'on finit par montrer : une carte de 2025 seule se lit mal sans
-savoir ce qu'une annee ordinaire donne au meme endroit.
-
-Chaque GeoTIFF declare EPSG:4326 et une valeur « sans donnee », donc
-QGIS les ouvre sans rien demander et laisse l'exterieur du bassin
-transparent. Deux fichiers de style .qml sont ecrits a cote : chargez-les
-par Proprietes > Symbologie > Style > Charger un style.
-
-Cout et cache. Une periode de 54 ans fait 648 grilles mensuelles. Elles
-sont decoupees sur l'emprise du bassin et gardees dans
-data/rain_grids/, une archive par annee, environ 2 Mo : changer de
-periode ou de saison ensuite ne retelecharge rien. Le premier passage
-prend le temps qu'il prend, et se reprend ou il s'est arrete.
+Les grilles decoupees sur l'emprise sont gardees dans data/rain_grids,
+une archive par annee : changer de periode ou de saison ensuite ne
+retelecharge rien. Le premier passage se reprend ou il s'est arrete.
 """
 
 import argparse
-import struct
 import sys
 from pathlib import Path
 
@@ -57,31 +41,34 @@ GRIDS = ROOT / "data" / "rain_grids"
 
 # ── Reglages ────────────────────────────────────────────────
 
-BASIN = ""              # .shp ou .geojson en WGS84 ; vide = demande
-FIRST, LAST = 1972, 2025        # periode de reference
-YEAR = 2025                     # annee a cartographier
-SEASON = ""                     # "", "warm" (oct-mars) ou "cool" (avr-sept)
-CLIP = True                     # masquer hors du bassin
-MIN_COVER = 0.9                 # part de mois exiges par maille
-PAD = 0.25                      # marge autour de l'emprise, en degres
-OUT = ""                        # dossier de sortie ; vide = ./rain_maps
+BASIN = ""                          # .shp ou .geojson en WGS84
+PERIODS = [(1972, 2025), (2025, 2025)]
+SEASON = ""                         # "", "warm" (oct-mars), "cool" (avr-sept)
+CLIP = True                         # vider hors du bassin
+MIN_COVER = 0.9                     # part de mois exiges par maille
+PAD = 0.25                          # marge autour de l'emprise, en degres
+OUT = ""                            # dossier de sortie ; vide = ./rain_maps
 
 NODATA = -9999.0
 
 
 # ── Ecriture GeoTIFF ────────────────────────────────────────
 #
-# Ecrit a la main plutot qu'avec rasterio : le reste de l'outil ne
-# depend d'aucune bibliotheque geospatiale, et il serait dommage qu'une
-# carte echoue sur une installation manquante. Les trois etiquettes qui
-# comptent sont l'echelle des pixels, le point d'accrochage, et le
-# repertoire de cles geographiques sans lequel QGIS reclame un systeme
-# de coordonnees a l'ouverture.
+# Ecrit a la main plutot qu'avec rasterio, pour que l'outil ne depende
+# d'aucune bibliotheque geospatiale. Les trois etiquettes qui comptent
+# sont l'echelle des pixels, le point d'accrochage, et le repertoire de
+# cles geographiques sans lequel QGIS reclame un systeme de coordonnees
+# a l'ouverture.
+
+WGS84_WKT = ('GEOGCS["GCS_WGS_1984",DATUM["D_WGS_1984",SPHEROID["WGS_1984",'
+             '6378137.0,298.257223563]],PRIMEM["Greenwich",0.0],'
+             'UNIT["Degree",0.0174532925199433]]')
+
 
 def write_tif(path, grid, west, north, step, nodata=None):
     # Les constantes du module se lisent a l'appel et non comme valeur
-    # par defaut : sinon elles seraient figees a l'import, et un
-    # reglage pose depuis l'interpreteur resterait sans effet.
+    # par defaut : sinon elles seraient figees a l'import, et un reglage
+    # pose depuis l'interpreteur resterait sans effet.
     nodata = NODATA if nodata is None else nodata
     from PIL import Image, TiffImagePlugin, TiffTags
 
@@ -104,19 +91,13 @@ def write_tif(path, grid, west, north, step, nodata=None):
     return path
 
 
-WGS84_WKT = ('GEOGCS["GCS_WGS_1984",DATUM["D_WGS_1984",SPHEROID["WGS_1984",'
-             '6378137.0,298.257223563]],PRIMEM["Greenwich",0.0],'
-             'UNIT["Degree",0.0174532925199433]]')
-
-
 def sidecars(path, west, north, step):
-    """Fichier de calage et .prj a cote du GeoTIFF.
+    """Calage et .prj a cote du GeoTIFF, par precaution.
 
-    Les etiquettes internes suffisent normalement. Ces deux fichiers
-    sont une precaution : ils sont ecrits a la main, n'ont pas pu etre
-    valides ici faute de GDAL, et si jamais les cles geographiques
-    etaient refusees, QGIS se rabat sur eux au lieu de reclamer un
-    systeme de coordonnees.
+    Les etiquettes internes suffisent normalement ; elles n'ont pas pu
+    etre validees avec GDAL faute de l'avoir sous la main. Si jamais les
+    cles geographiques etaient refusees, QGIS se rabat sur ces deux
+    fichiers au lieu de reclamer un systeme de coordonnees.
     """
     # Un fichier de calage vise le centre du premier pixel, non son coin
     path.with_suffix(".tfw").write_text(
@@ -155,11 +136,7 @@ def crop(lon, lat, z, box):
     return lon[ix], lat[iy], z[np.ix_(iy, ix)]
 
 
-def year_path(year, season=""):
-    return GRIDS / f"{year}{'-' + season if season else ''}.npz"
-
-
-def cache_year(year, rings, box, layout, pattern, quiet=False):
+def cache_year(year, box, layout, pattern, quiet=False):
     """Les douze mois d'une annee, decoupes, dans une archive.
 
     L'archive porte les bornes du decoupage : si l'emprise change, les
@@ -167,7 +144,7 @@ def cache_year(year, rings, box, layout, pattern, quiet=False):
     vaut mieux s'en apercevoir ici qu'en regardant une carte fausse.
     """
     GRIDS.mkdir(parents=True, exist_ok=True)
-    p = year_path(year)
+    p = GRIDS / f"{year}.npz"
     if p.exists():
         d = np.load(p)
         if np.allclose(d["box"], box):
@@ -220,6 +197,11 @@ def cache_year(year, rings, box, layout, pattern, quiet=False):
 # ── Accumulation ────────────────────────────────────────────
 
 def months_of(season):
+    """Les mois d'une saison, et de quelle annee les prendre.
+
+    La saison chaude va d'octobre a mars : ses trois derniers mois sont
+    dans l'annee suivante, d'ou le decalage.
+    """
     if season == "warm":
         return [(0, m) for m in (10, 11, 12)] + [(1, m) for m in (1, 2, 3)]
     if season == "cool":
@@ -227,28 +209,24 @@ def months_of(season):
     return [(0, m) for m in range(1, 13)]
 
 
-def period_total(years, rings, box, layout, pattern, season="", quiet=False):
-    """Somme par maille et nombre de mois valides, sur une liste d'annees.
-
-    La saison chaude mord sur l'annee suivante : l'annee Y a besoin des
-    grilles de Y et de Y+1, d'ou le decalage porte par months_of.
-    """
+def period_mean(first, last, box, layout, pattern, season="", cache=None,
+                quiet=False):
+    """Pluie moyenne par an sur une periode, maille par maille."""
+    cache = {} if cache is None else cache
     total = count = lon = lat = None
-    cache = {}
-
-    def grids(y):
-        if y not in cache:
-            cache[y] = cache_year(y, rings, box, layout, pattern, quiet)
-        return cache[y]
-
-    for y in years:
+    for y in range(first, last + 1):
         for shift, m in months_of(season):
-            try:
-                z, glon, glat = grids(y + shift)
-            except Exception as e:
-                if not quiet:
-                    print(f"  {y + shift} : {type(e).__name__}, annee ignoree")
+            yy = y + shift
+            if yy not in cache:
+                try:
+                    cache[yy] = cache_year(yy, box, layout, pattern, quiet)
+                except Exception as e:
+                    if not quiet:
+                        print(f"  {yy} : {type(e).__name__}, annee ignoree")
+                    cache[yy] = None
+            if cache[yy] is None:
                 continue
+            z, glon, glat = cache[yy]
             g = z[m - 1]
             if total is None:
                 total = np.zeros(g.shape, "float64")
@@ -262,146 +240,73 @@ def period_total(years, rings, box, layout, pattern, season="", quiet=False):
     if not quiet:
         print()
     if total is None:
-        raise RuntimeError("aucune grille lue")
-    return total, count, lon, lat
-
-
-def enough(total, count, wanted, min_cover=None):
-    """Somme par maille, ou « sans donnee » si trop de mois manquent."""
-    min_cover = MIN_COVER if min_cover is None else min_cover
-    out = np.where(count >= wanted * min_cover, total, np.nan)
-    return out.astype("float32")
+        raise RuntimeError(f"{first}-{last} : aucune grille lue")
+    nyears = last - first + 1
+    wanted = len(months_of(season)) * nyears
+    # Une maille trop trouee sort vide : comptee a zero elle rendrait la
+    # carte plus seche la ou il manque des mois, sans rien signaler.
+    mean = np.where(count >= wanted * MIN_COVER, total / nyears, np.nan)
+    return mean.astype("float32"), lon, lat
 
 
 # ── Passage complet ─────────────────────────────────────────
 
-def run(basin=None, first=None, last=None, year=None, season=None,
-        out=None, clip=None, quiet=False):
+def parse_period(text):
+    """« 1972-2025 » ou « 2025 »."""
+    bits = str(text).split("-")
+    if len(bits) == 1:
+        return int(bits[0]), int(bits[0])
+    if len(bits) == 2:
+        return int(bits[0]), int(bits[1])
+    raise ValueError(f"periode illisible : {text}")
+
+
+def run(basin=None, periods=None, season=None, out=None, clip=None, quiet=False):
     basin = basin or BASIN
     if not basin:
         raise ValueError("indiquez l'emprise : rm.BASIN = '/chemin/Bassin.shp'")
-    first = FIRST if first is None else first
-    last = LAST if last is None else last
-    year = YEAR if year is None else year
+    periods = [parse_period(p) if isinstance(p, str) else p
+               for p in (PERIODS if periods is None else periods)]
     season = SEASON if season is None else season
     clip = CLIP if clip is None else clip
     outdir = Path(out or OUT or (Path.cwd() / "rain_maps"))
     outdir.mkdir(parents=True, exist_ok=True)
     if season and season not in ("warm", "cool"):
         raise ValueError("season : '', 'warm' ou 'cool'")
-    if not first <= year <= last:
-        print(f"  note : {year} est hors de {first}-{last}, l'ecart a la "
-              "moyenne compare donc a une periode qui ne la contient pas")
 
     rings = br.load_basin(basin)
     box = window(rings)
+    last = max(p[1] for p in periods)
     layout, pattern = br.choose_layout(year=min(last, 2024))
-    per_year = len(months_of(season))
 
-    if not quiet:
-        print(f"periode {first}-{last}" + (f", saison {season}" if season else "")
-              + f" : {last - first + 1} annees")
-    ptotal, pcount, lon, lat = period_total(range(first, last + 1), rings, box,
-                                            layout, pattern, season, quiet)
-    if not quiet:
-        print(f"annee {year}")
-    ytotal, ycount, _, _ = period_total([year], rings, box, layout, pattern,
-                                        season, quiet)
-
-    nyears = last - first + 1
-    mean = enough(ptotal, pcount, per_year * nyears) / nyears
-    single = enough(ytotal, ycount, per_year)
-
-    mask = br.inside(rings, lon, lat) if clip else None
-    if mask is not None:
-        mean = np.where(mask, mean, np.nan)
-        single = np.where(mask, single, np.nan)
-
-    with np.errstate(invalid="ignore", divide="ignore"):
-        anomaly = (single - mean).astype("float32")
-        ratio = np.where(mean > 0, single / mean * 100.0, np.nan).astype("float32")
-
-    step = float(abs(lon[1] - lon[0]))
-    west = float(lon.min() - step / 2)
-    north = float(lat.max() + step / 2)
+    cache, mask, written = {}, None, []
     tag = f"_{season}" if season else ""
-    files = {
-        f"rain_mean_{first}-{last}{tag}.tif": (mean, "mm/an, moyenne"),
-        f"rain_{year}{tag}.tif": (single, f"mm, {year}"),
-        f"rain_anomaly_{year}{tag}.tif": (anomaly, "mm, ecart a la moyenne"),
-        f"rain_ratio_{year}{tag}.tif": (ratio, "% de la normale"),
-    }
-    written = []
-    for name, (grid, what) in files.items():
-        p = write_tif(outdir / name, grid, west, north, step)
+    for first, lastp in periods:
+        if not quiet:
+            print(f"{first}-{lastp}" + (f", saison {season}" if season else ""))
+        grid, lon, lat = period_mean(first, lastp, box, layout, pattern,
+                                     season, cache, quiet)
+        if clip:
+            if mask is None:
+                mask = br.inside(rings, lon, lat)
+            grid = np.where(mask, grid, np.nan)
+        step = float(abs(lon[1] - lon[0]))
+        name = (f"rain_{first}{tag}.tif" if first == lastp
+                else f"rain_{first}-{lastp}{tag}.tif")
+        p = write_tif(outdir / name, grid, float(lon.min() - step / 2),
+                      float(lat.max() + step / 2), step)
         written.append(p)
         if not quiet:
             v = grid[np.isfinite(grid)]
-            print(f"  {name:34} {what:26} "
-                  + (f"{v.min():7.1f} a {v.max():7.1f}" if v.size else "vide"))
-    written += write_styles(outdir, mean, anomaly)
+            print(f"  {name:28} "
+                  + (f"{v.min():7.1f} a {v.max():7.1f} mm/an" if v.size else "vide"))
     if not quiet:
-        print(f"\n{len(written)} fichiers dans {outdir}")
-        print("QGIS : glissez les .tif, puis Proprietes > Symbologie > "
-              "Style > Charger un style pour le .qml du meme nom.")
+        print(f"\n{len(written)} raster(s) dans {outdir}")
     return written
 
 
-# ── Styles QGIS ─────────────────────────────────────────────
-#
-# Une rampe par defaut en gris ne montre rien d'une carte de pluie. Deux
-# styles suffisent : une rampe sequentielle pour les totaux, une rampe
-# divergente centree sur zero pour l'ecart, sans quoi l'oeil place le
-# milieu de l'echelle n'importe ou.
-
-QML = """<!DOCTYPE qgis>
-<qgis version="3.34" styleCategories="Symbology">
-  <pipe>
-    <rasterrenderer type="singlebandpseudocolor" band="1" opacity="1"
-                    classificationMin="{lo}" classificationMax="{hi}">
-      <rastershader>
-        <colorrampshader colorRampType="INTERPOLATED" clip="0">
-{items}
-        </colorrampshader>
-      </rastershader>
-    </rasterrenderer>
-  </pipe>
-</qgis>
-"""
-
-SEQUENTIAL = ["#fff7ec", "#fee8c8", "#fdd49e", "#fdbb84", "#fc8d59",
-              "#4eb3d3", "#2b8cbe", "#0868ac", "#084081"]
-DIVERGING = ["#8c510a", "#bf812d", "#dfc27d", "#f6e8c3", "#f5f5f5",
-             "#c7eae5", "#80cdc1", "#35978f", "#01665e"]
-
-
-def write_styles(outdir, mean, anomaly):
-    def ramp(path, lo, hi, colours):
-        n = len(colours) - 1
-        items = "\n".join(
-            f'          <item value="{lo + (hi - lo) * i / n:.3f}" '
-            f'color="{c}" alpha="255" label="{lo + (hi - lo) * i / n:.0f}"/>'
-            for i, c in enumerate(colours))
-        path.write_text(QML.format(lo=f"{lo:.3f}", hi=f"{hi:.3f}", items=items),
-                        encoding="utf-8")
-        return path
-
-    out = []
-    v = mean[np.isfinite(mean)]
-    if v.size:
-        out.append(ramp(outdir / "style_totals.qml", 0.0,
-                        float(np.percentile(v, 99)), SEQUENTIAL))
-    a = anomaly[np.isfinite(anomaly)]
-    if a.size:
-        # Symetrique autour de zero : sans cela le blanc du milieu se
-        # pose sur une valeur quelconque et la carte ment
-        m = float(np.percentile(np.abs(a), 98)) or 1.0
-        out.append(ramp(outdir / "style_anomaly.qml", -m, m, DIVERGING))
-    return out
-
-
 def preview(path):
-    """Verification rapide d'un GeoTIFF ecrit : taille, bornes, valeurs."""
+    """Verification rapide d'un GeoTIFF : taille, bornes, valeurs."""
     lon, lat, z = read_any(Path(path))
     z = np.where(z <= NODATA + 1, np.nan, z)
     v = z[np.isfinite(z)]
@@ -414,19 +319,18 @@ def preview(path):
 
 
 def main(argv=None):
-    ap = argparse.ArgumentParser(description="Cartes de pluie pour QGIS")
+    ap = argparse.ArgumentParser(description="Grilles de pluie SILO en GeoTIFF")
     ap.add_argument("--basin", default=BASIN, help=".shp ou .geojson en WGS84")
-    ap.add_argument("--first", type=int, default=FIRST)
-    ap.add_argument("--last", type=int, default=LAST)
-    ap.add_argument("--year", type=int, default=YEAR)
+    ap.add_argument("--period", action="append", metavar="1972-2025",
+                    help="repetable ; defaut : 1972-2025 et 2025")
     ap.add_argument("--season", default=SEASON, choices=["", "warm", "cool"])
     ap.add_argument("--out", default=OUT)
     ap.add_argument("--no-clip", action="store_true",
                     help="garder le rectangle entier")
     ap.add_argument("--quiet", action="store_true")
     a = ap.parse_args(argv)
-    run(basin=a.basin, first=a.first, last=a.last, year=a.year,
-        season=a.season, out=a.out, clip=not a.no_clip, quiet=a.quiet)
+    run(basin=a.basin, periods=a.period, season=a.season, out=a.out,
+        clip=not a.no_clip, quiet=a.quiet)
 
 
 if __name__ == "__main__":
