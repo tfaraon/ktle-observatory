@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-03T23:20:39Z",
+ "generated_at": "2026-11-15T21:42:17Z",
  "method": "SWOT water level intersected with the Delft3D bathymetry; only the pool hydraulically connected to the low point is retained",
  "note": "SWOT measures elevation reliably; its per-pixel water classification is not robust over a salt playa, so the extent is derived from the level rather than read from the radar",
  "datum_note": "Bathymetry is AHD, SWOT levels are EGM2008 — scenarios.wlvl_offset applied: +0.00 m",
@@ -405,6 +405,24 @@
    "n_obs": 2,
    "n_cells": 13691,
    "map": "extent_maps/2026-10-15.png"
+  },
+  {
+   "date": "2026-11-05",
+   "level_m": -13.22,
+   "area_km2": 3222.5,
+   "volume_km3": 2.9513,
+   "n_obs": 2,
+   "n_cells": 12890,
+   "map": "extent_maps/2026-11-05.png"
+  },
+  {
+   "date": "2026-11-07",
+   "level_m": -13.294,
+   "area_km2": 3102.0,
+   "volume_km3": 2.7171,
+   "n_obs": 2,
+   "n_cells": 12408,
+   "map": "extent_maps/2026-11-07.png"
   }
  ]
 }

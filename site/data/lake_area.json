@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-03T23:20:34Z",
+  "generated_at": "2026-11-15T21:42:13Z",
   "method": "Rai et al. (2026) — adapted to the SWOT L2 HR Raster product",
   "citation": "Rai, A.K., Cohen, T.J., Armon, M. & Marx, S.K. (2026). Volumetric analysis of a playa lake using SWOT data: an improved understanding of the inflows to Kati Thanda-Lake Eyre. Journal of Hydrology 676, 135652.",
   "doi": "10.1016/j.jhydrol.2026.135652",
@@ -16,7 +16,7 @@
     "resolution": "100",
     "min_coverage": 0.15
   },
-  "n_granules": 424,
+  "n_granules": 428,
   "map_bounds": [
     [
       -29.139241138101408,
@@ -1222,6 +1222,30 @@
       "scene_area_km2": 6542.199,
       "overlap_cells": 82,
       "map": "area_maps/2026-10-17.png"
+    },
+    {
+      "area_km2": 6766.577,
+      "uncert_km2": 3.196,
+      "n_scenes": 2,
+      "n_cells": 702321,
+      "coverage": 22.273,
+      "partial": false,
+      "date": "2026-11-05",
+      "scene_area_km2": 6771.292,
+      "overlap_cells": 113,
+      "map": "area_maps/2026-11-05.png"
+    },
+    {
+      "area_km2": 6666.369,
+      "uncert_km2": 2.649,
+      "n_scenes": 2,
+      "n_cells": 687803,
+      "coverage": 22.073,
+      "partial": false,
+      "date": "2026-11-07",
+      "scene_area_km2": 6671.779,
+      "overlap_cells": 122,
+      "map": "area_maps/2026-11-07.png"
     }
   ]
 }

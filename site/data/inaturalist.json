@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-11-15T00:12:37Z",
+ "fetched_at": "2026-11-15T21:43:22Z",
  "demo": false,
  "stale": false,
  "errors": [],
@@ -14,12 +14,32 @@
  },
  "attribution": "Observations and photos from iNaturalist, each photo under the licence chosen by its observer.",
  "totals": {
-  "observations": 2763,
+  "observations": 2764,
   "species": 592,
-  "observers": 318
+  "observers": 319
  },
  "top_species": 12,
  "recent": [
+  {
+   "id": 414823350,
+   "url": "https://www.inaturalist.org/observations/414823350",
+   "observed_on": "2026-11-15",
+   "quality": "needs_id",
+   "taxon": {
+    "name": "Gryllacrididae",
+    "common": "Raspy Crickets",
+    "rank": "family",
+    "group": "Insecta"
+   },
+   "guess": "Raspy Crickets",
+   "observer": "myleshiggs",
+   "obscured": false,
+   "coords": [
+    -29.6486,
+    138.0604
+   ],
+   "photo": null
+  },
   {
    "id": 414288190,
    "url": "https://www.inaturalist.org/observations/414288190",
@@ -136,10 +156,10 @@
    "observed_on": "2026-11-02",
    "quality": "needs_id",
    "taxon": {
-    "name": null,
-    "common": null,
-    "rank": null,
-    "group": null
+    "name": "Plantae",
+    "common": "Plants",
+    "rank": "kingdom",
+    "group": "Plantae"
    },
    "guess": null,
    "observer": "tracymt",
@@ -571,31 +591,6 @@
    "photo": {
     "square": "https://inaturalist-open-data.s3.amazonaws.com/photos/754422915/square.jpg",
     "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/754422915/medium.jpg",
-    "license": "CC-BY-NC",
-    "attribution": "(c) antpitta3, some rights reserved (CC BY-NC)"
-   }
-  },
-  {
-   "id": 410223972,
-   "url": "https://www.inaturalist.org/observations/410223972",
-   "observed_on": "2026-10-16",
-   "quality": "needs_id",
-   "taxon": {
-    "name": "Rhodanthe floribunda",
-    "common": "Common White Sunray",
-    "rank": "species",
-    "group": "Plantae"
-   },
-   "guess": null,
-   "observer": "antpitta3",
-   "obscured": false,
-   "coords": [
-    -29.6024,
-    137.3581
-   ],
-   "photo": {
-    "square": "https://inaturalist-open-data.s3.amazonaws.com/photos/754422869/square.jpg",
-    "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/754422869/medium.jpg",
     "license": "CC-BY-NC",
     "attribution": "(c) antpitta3, some rights reserved (CC BY-NC)"
    }
@@ -2072,7 +2067,7 @@
     "square": "https://inaturalist-open-data.s3.amazonaws.com/photos/278807673/square.jpg",
     "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/278807673/medium.jpg",
     "license": "CC-BY-NC",
-    "attribution": "(c) Tony Palliser, some rights reserved (CC BY-NC), uploaded by Tony Palliser"
+    "attribution": "(c) Tony Palliser,  זכויות יוצרים חלקיות (CC BY-NC), הועלה על ידי Tony Palliser"
    }
   },
   {
