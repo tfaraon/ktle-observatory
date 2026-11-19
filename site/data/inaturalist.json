@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-11-18T02:33:56Z",
+ "fetched_at": "2026-11-19T01:58:47Z",
  "demo": false,
  "stale": false,
  "errors": [],
@@ -111,7 +111,7 @@
     "rank": "genus",
     "group": "Plantae"
    },
-   "guess": null,
+   "guess": "wattles",
    "observer": "tracymt",
    "obscured": false,
    "coords": [
