@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-11-19T01:58:47Z",
+ "fetched_at": "2026-11-20T01:53:03Z",
  "demo": false,
  "stale": false,
  "errors": [],
@@ -14,12 +14,32 @@
  },
  "attribution": "Observations and photos from iNaturalist, each photo under the licence chosen by its observer.",
  "totals": {
-  "observations": 2764,
-  "species": 592,
+  "observations": 2765,
+  "species": 593,
   "observers": 319
  },
  "top_species": 12,
  "recent": [
+  {
+   "id": 415686291,
+   "url": "https://www.inaturalist.org/observations/415686291",
+   "observed_on": "2026-11-19",
+   "quality": "needs_id",
+   "taxon": {
+    "name": "Chlorobalius leucoviridis",
+    "common": "Spotted Predatory Katydid",
+    "rank": "species",
+    "group": "Insecta"
+   },
+   "guess": "Spotted Predatory Katydid",
+   "observer": "myleshiggs",
+   "obscured": false,
+   "coords": [
+    -29.6496,
+    138.0606
+   ],
+   "photo": null
+  },
   {
    "id": 414823350,
    "url": "https://www.inaturalist.org/observations/414823350",
@@ -566,31 +586,6 @@
    "photo": {
     "square": "https://inaturalist-open-data.s3.amazonaws.com/photos/754422972/square.jpg",
     "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/754422972/medium.jpg",
-    "license": "CC-BY-NC",
-    "attribution": "(c) antpitta3, some rights reserved (CC BY-NC)"
-   }
-  },
-  {
-   "id": 410223992,
-   "url": "https://www.inaturalist.org/observations/410223992",
-   "observed_on": "2026-10-16",
-   "quality": "needs_id",
-   "taxon": {
-    "name": "Amaranthaceae",
-    "common": "Amaranth family",
-    "rank": "family",
-    "group": "Plantae"
-   },
-   "guess": null,
-   "observer": "antpitta3",
-   "obscured": false,
-   "coords": [
-    -29.6006,
-    137.358
-   ],
-   "photo": {
-    "square": "https://inaturalist-open-data.s3.amazonaws.com/photos/754422915/square.jpg",
-    "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/754422915/medium.jpg",
     "license": "CC-BY-NC",
     "attribution": "(c) antpitta3, some rights reserved (CC BY-NC)"
    }
@@ -2067,7 +2062,7 @@
     "square": "https://inaturalist-open-data.s3.amazonaws.com/photos/278807673/square.jpg",
     "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/278807673/medium.jpg",
     "license": "CC-BY-NC",
-    "attribution": "(c) Tony Palliser,  זכויות יוצרים חלקיות (CC BY-NC), הועלה על ידי Tony Palliser"
+    "attribution": "(c) Tony Palliser, some rights reserved (CC BY-NC), uploaded by Tony Palliser"
    }
   },
   {
