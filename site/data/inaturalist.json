@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-11-20T01:53:03Z",
+ "fetched_at": "2026-11-21T01:42:51Z",
  "demo": false,
  "stale": false,
  "errors": [],
@@ -14,7 +14,7 @@
  },
  "attribution": "Observations and photos from iNaturalist, each photo under the licence chosen by its observer.",
  "totals": {
-  "observations": 2765,
+  "observations": 2766,
   "species": 593,
   "observers": 319
  },
@@ -1173,6 +1173,18 @@
    }
   },
   {
+   "count": 14,
+   "taxon_id": 606545,
+   "url": "https://www.inaturalist.org/taxa/606545",
+   "taxon": {
+    "name": "Lotus cruentus",
+    "common": "Red Bird's-Foot Trefoil",
+    "rank": "species",
+    "group": "Plantae"
+   },
+   "photo": null
+  },
+  {
    "count": 13,
    "taxon_id": 88398,
    "url": "https://www.inaturalist.org/taxa/88398",
@@ -1188,18 +1200,6 @@
     "license": "CC-BY-NC",
     "attribution": "(c) Wayne Martin, some rights reserved (CC BY-NC), uploaded by Wayne Martin"
    }
-  },
-  {
-   "count": 13,
-   "taxon_id": 606545,
-   "url": "https://www.inaturalist.org/taxa/606545",
-   "taxon": {
-    "name": "Lotus cruentus",
-    "common": "Red Bird's-Foot Trefoil",
-    "rank": "species",
-    "group": "Plantae"
-   },
-   "photo": null
   },
   {
    "count": 13,
@@ -4618,7 +4618,7 @@
     "square": "https://inaturalist-open-data.s3.amazonaws.com/photos/335897180/square.jpg",
     "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/335897180/medium.jpg",
     "license": "CC-BY-NC",
-    "attribution": "(c) Bart Wursten, some rights reserved (CC BY-NC), uploaded by Bart Wursten"
+    "attribution": "(c) Bart Wursten, bazı hakları saklıdır (CC BY-NC), yükleyen: Bart Wursten"
    }
   },
   {
