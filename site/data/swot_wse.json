@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-15T21:42:08Z",
+  "generated_at": "2026-11-22T22:38:01Z",
   "demo": false,
   "lake": {
     "name": "Kati Thanda – Lake Eyre",
@@ -13,9 +13,9 @@
   "source": {
     "n_granules": 753,
     "last_granule_date": "2026-11-07T00:48:41",
-    "new_this_run": 8,
-    "downloaded": 8,
-    "found_in_window": 32,
+    "new_this_run": 0,
+    "downloaded": 0,
+    "found_in_window": 24,
     "last_remote_granule_date": "2026-11-07T00:48:41"
   },
   "sites": [
