@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-23T02:53:31+00:00",
+ "generated": "2026-11-24T06:08:06+00:00",
  "source": "SILO monthly rainfall grids, Queensland Government, CC BY 4.0",
  "licence": "CC BY 4.0",
  "url": "https://www.longpaddock.qld.gov.au/silo/",
@@ -1206,11 +1206,11 @@
   },
   {
    "year": 2026,
-   "warm_mm": 50.8,
+   "warm_mm": 50.9,
    "warm_months": 1,
    "cool_mm": 91.4,
    "cool_months": 6,
-   "total_mm": 142.2,
+   "total_mm": 142.3,
    "complete": false
   }
  ],
