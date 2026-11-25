@@ -185,10 +185,34 @@ assert pushers <= watched, (
 assert watched <= {f.get("name") for f in flows.values()}, (
     f"« workflow_run » nomme un workflow inexistant : "
     f"{sorted(watched - {f.get('name') for f in flows.values()})}")
-# Ne pas republier apres une chaine en echec
-job = pages["jobs"]["deploy"]
-assert "workflow_run.conclusion" in str(job.get("if", "")), \
-    "pages.yml publie même après une chaîne en échec"
+# Ne pas republier apres une chaine en echec. La garde vivait sur le
+# travail « deploy » quand il n'y en avait qu'un ; elle est passee sur
+# « build » lorsque le workflow a ete scinde en deux. Verifier
+# l'intention plutot que le nom du travail : il suffit qu'un travail
+# porte la garde et qu'aucun autre ne puisse s'executer sans lui, un
+# travail saute entrainant tous ceux qui en dependent.
+jobs = pages["jobs"]
+gated = {n for n, j in jobs.items()
+         if "workflow_run.conclusion" in str(j.get("if", ""))}
+assert gated, "pages.yml publie même après une chaîne en échec"
+
+
+def depends_on_gate(name, seen=None):
+    seen = seen or set()
+    if name in gated:
+        return True
+    if name in seen:
+        return False
+    seen.add(name)
+    needs = jobs[name].get("needs")
+    needs = [needs] if isinstance(needs, str) else list(needs or [])
+    return any(depends_on_gate(n, seen) for n in needs if n in jobs)
+
+
+for name in jobs:
+    assert depends_on_gate(name), (
+        f"le travail « {name} » de pages.yml publie sans dependre "
+        "d'un travail garde contre une chaîne en échec")
 # Un deploiement en cours ne doit pas etre interrompu par le suivant
 assert pages["concurrency"]["cancel-in-progress"] is False, \
     "une publication interrompue laisse le site dans l'état précédent"

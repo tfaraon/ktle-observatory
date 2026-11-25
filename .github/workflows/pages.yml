@@ -46,21 +46,39 @@ concurrency:
   # deploiement a mi-course laisserait le site dans l'etat precedent.
   cancel-in-progress: false
 
+# Deux travaux et non un seul, contrairement a ce qui tenait ici
+# auparavant. Le televersement et le deploiement se suivaient alors a
+# deux dixiemes de seconde, et deploy-pages interrogeait l'API des
+# artefacts avant qu'elle ait pris connaissance de celui qui venait
+# d'etre finalise : « No artifacts named github-pages were found »,
+# alors que le journal de l'etape precedente annonce l'artefact
+# televerse. Quatre deploiements sur vingt-cinq tombaient ainsi, au
+# hasard. L'artefact pese 150 Mo, ce qui n'aide pas.
+#
+# La frontiere entre deux travaux impose l'attribution d'un nouveau
+# coureur, soit plusieurs secondes, et c'est la structure que GitHub
+# documente pour Pages. Le travail de deploiement ne recupere plus le
+# depot non plus : il ne consomme que l'artefact.
 jobs:
-  deploy:
+  build:
     # Rien a publier si la chaine qui vient de finir a echoue : on
     # garderait le site tel quel plutot que de republier a l'identique.
     if: >-
       github.event_name != 'workflow_run' ||
       github.event.workflow_run.conclusion == 'success'
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
       - uses: actions/upload-pages-artifact@v5
         with:
           path: site
+
+  deploy:
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
       - id: deployment
         uses: actions/deploy-pages@v5
