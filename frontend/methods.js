@@ -14,91 +14,97 @@ const METHODS_HTML = `
     bathymetry, on which the hydrodynamic scenarios are run.</figcaption></figure>
   <div class="prose-body">
 
-    <p class="lede">This observatory places satellite altimetry, ground
-    weather observations and a pre-computed hydrodynamic model side by
-    side for Kati Thanda&nbsp;&ndash; Lake Eyre. Everything below
-    describes what the site actually computes, including where the
-    approximations lie.</p>
+    <p class="lede">This observatory brings together three sources for
+    Kati Thanda&nbsp;&ndash; Lake Eyre: satellite altimetry, weather
+    observations from the stations surrounding the lake, and a
+    pre-computed hydrodynamic model. We describe below the processing
+    applied to each, the assumptions on which it rests, and the terms
+    we have neglected.</p>
 
     <h3 id="me-swot">Water surface elevation from SWOT</h3>
 
     <p>Levels come from the SWOT mission's <em>L2 HR Raster</em>
     product, distributed by NASA PO.DAAC. The KaRIn interferometer
-    measures water surface elevation over a 120&nbsp;km swath, which
-    means a lake the size of Kati Thanda is imaged in a single pass
-    rather than along a one-dimensional ground track as with
-    conventional nadir altimeters.</p>
+    measures water surface elevation over a swath 120&nbsp;km wide. A
+    water-body the size of Kati Thanda is therefore imaged within a
+    single pass, whereas a conventional nadir altimeter samples it
+    along a one-dimensional ground track.</p>
 
-    <p>Granules covering the lake are downloaded through
-    <code>earthaccess</code> and processed with a purpose-built
+    <p>We download the granules covering the lake through
+    <code>earthaccess</code> and process them with a purpose-built
     toolbox. At each extraction site, elevation is averaged over a
-    13&nbsp;&times;&nbsp;13 pixel window (<code>buffer_size&nbsp;=&nbsp;6</code>)
-    centred on the point, which suppresses speckle without smoothing
-    across the shoreline. Only pixels flagged <code>wse_qual</code>
-    0&ndash;2 are retained. Two further filters run per pass,
-    resolution and tile: values outside [&minus;16,&nbsp;6]&nbsp;m are
-    discarded, then an interquartile-range test removes residual
-    outliers. Groups of fewer than four observations are left
-    untouched, since a quartile estimate would be meaningless.</p>
+    13&nbsp;&times;&nbsp;13 pixel window
+    (<code>buffer_size&nbsp;=&nbsp;6</code>) centred on the point. This
+    window is wide enough to suppress speckle and narrow enough not to
+    smooth the signal across the shoreline. We retain only pixels
+    flagged <code>wse_qual</code> 0&ndash;2. Two further filters are
+    applied per pass, resolution and tile: values outside
+    [&minus;16,&nbsp;6]&nbsp;m are discarded, then an
+    interquartile-range test removes the residual outliers. Groups of
+    fewer than four observations are left untouched, since a quartile
+    estimate is meaningless at that size.</p>
 
     <p class="caveat">Elevations are referenced to the
     <strong>EGM2008 geoid</strong>, the model SWOT distributes.
-    Australian bathymetries and the contours the hydrodynamic model is
-    built on use the <strong>Australian Height Datum</strong>, reached
-    through AUSGeoid2020 &mdash; the two are not interchangeable, and
-    comparing a SWOT level to a model level without reconciling them
-    introduces a systematic bias. The <code>wlvl_offset</code> setting
-    exists for this; it is currently zero and should be established
-    before any published comparison. Rai and colleagues found their
-    elevations 0.45&ndash;0.55&nbsp;m above field DGPS surveys and
-    applied a uniform 0.5&nbsp;m correction, which gives an order of
-    magnitude rather than a value to adopt.</p>
+    Australian bathymetries and the contours on which the hydrodynamic
+    model is built use the <strong>Australian Height Datum</strong>,
+    reached through AUSGeoid2020. The two datums are not
+    interchangeable, and comparing a SWOT level with a model level
+    without reconciling them introduces a systematic bias. The
+    <code>wlvl_offset</code> setting exists for this reconciliation. It
+    is currently set to zero, and we consider that it should be
+    established before any published comparison. Rai and colleagues
+    found their elevations 0.45&ndash;0.55&nbsp;m above field DGPS
+    surveys and applied a uniform 0.5&nbsp;m correction. This value
+    gives an order of magnitude for the bias at this lake; it is not a
+    correction to adopt here.</p>
 
-    <p> Two sites are extracted: <strong>Belt Bay</strong>
-    (137.028&nbsp;&deg;E, 28.893&nbsp;&deg;S), which contains the
-    lowest point of the lake and serves as the level reference, and
-    <strong>Madigan Gulf</strong> (137.560&nbsp;&deg;E), about
-    52&nbsp;km further east.</p>
+    <p> Two sites are extracted. <strong>Belt Bay</strong>
+    (137.028&nbsp;&deg;E, 28.893&nbsp;&deg;S) contains the lowest point
+    of the lake and serves as the level reference.
+    <strong>Madigan Gulf</strong> (137.560&nbsp;&deg;E) lies
+    <em>ca.</em> 52&nbsp;km further east.</p>
 
-    <p class="caveat">The series is irregular by construction: a point
+    <p class="caveat">The series is irregular by construction. A point
     exists only where a SWOT pass covered the site and returned valid
-    pixels. Gaps are not missing data but absence of observation, so
-    the chart deliberately shows points rather than a joined line.
-    Note also that a dry lake yields no valid elevation at all &mdash;
-    early gaps reflect a dry basin, not a sensor failure.</p>
+    pixels, so a gap records the absence of an observation and not a
+    missing value. For this reason the chart shows points and not a
+    joined line. A dry lake returns no valid elevation at all, which
+    accounts for the early gaps in the record.</p>
 
     <h3 id="me-extent">Water extent</h3>
 
-    <p>SWOT measures one quantity reliably: the <strong>elevation</strong>
-    of the water surface. Its pixel-by-pixel water classification is a
-    different matter over a playa, where wet salt crust and very shallow
-    water return almost the same backscatter to KaRIn
-    (roughly 0&ndash;15&nbsp;dB); read directly, it carries speckle,
-    layover and the geometry of the swath.</p>
+    <p>The quantity SWOT measures reliably is the
+    <strong>elevation</strong> of the water surface. Its pixel-by-pixel
+    water classification behaves differently over a playa, where wet
+    salt crust and very shallow water return almost the same
+    backscatter to KaRIn, <em>ca.</em> 0&ndash;15&nbsp;dB. Read
+    directly, this classification carries speckle, layover and the
+    geometry of the swath.</p>
 
-    <p>The extent shown here is therefore <em>derived</em> from the
-    level rather than read from the radar: the cells of the model
-    bathymetry lying below the observed water surface. The outline is
-    continuous and inherits the resolution of the bathymetry instead of
-    the noise of the instrument, and depth and volume follow from the
-    same intersection.</p>
+    <p>We therefore <em>derive</em> the extent from the level rather
+    than read it from the radar. The flooded domain is the set of cells
+    of the model bathymetry lying below the observed water surface. In
+    other words, the outline we display inherits the resolution of the
+    bathymetry and not the noise of the instrument, and depth and
+    volume follow from the same intersection.</p>
 
-    <p>Only the pool <strong>hydraulically connected</strong> to the low
-    point is kept. A hollow lying below the same level but cut off by a
-    sill is not flooded, and the lake genuinely fragments into
-    sub-basins as it dries &mdash; a behaviour a simple threshold would
-    miss.</p>
+    <p>We keep only the pool <strong>hydraulically connected</strong>
+    to the low point. A hollow lying below the same level but cut off
+    by a sill is not flooded, and the lake does fragment into
+    sub-basins as it dries. A simple threshold on elevation would not
+    reproduce this behaviour.</p>
 
-    <p class="caveat">The bathymetry is AHD and SWOT levels are EGM2008,
-    so the intersection is only as good as
-    <code>scenarios.wlvl_offset</code>. That offset is established from
-    the data rather than assumed: Sentinel-2 SWIR imagery gives an
-    optical shoreline, which by definition sits at the true water
-    level, and the level best reproducing it — compared with the SWOT
-    reading for the same date — yields the offset empirically. Where
-    the shore slopes gently, several levels fit equally well and the
-    estimate is correspondingly loose; the calibration reports that
-    plateau instead of hiding it.</p>
+    <p class="caveat">The bathymetry is referenced to AHD and the SWOT
+    levels to EGM2008, so the intersection is only as good as
+    <code>scenarios.wlvl_offset</code>. We establish this offset from
+    the data. Sentinel-2 SWIR imagery provides an optical shoreline,
+    which by definition lies at the true water level; the model level
+    that best reproduces this shoreline, compared with the SWOT reading
+    for the same date, gives the offset. Where the shore slopes gently,
+    several levels fit equally well and the estimate is correspondingly
+    loose. The calibration reports this plateau rather than a single
+    value.</p>
 
     <h3 id="me-area">Surface water area</h3>
 
@@ -106,62 +112,63 @@ const METHODS_HTML = `
     Marx (2026)</strong>, <em>Volumetric analysis of a playa lake using
     SWOT data: an improved understanding of the inflows to Kati
     Thanda&ndash;Lake Eyre</em>, Journal of Hydrology 676, 135652,
-    <a href="https://doi.org/10.1016/j.jhydrol.2026.135652">doi:10.1016/j.jhydrol.2026.135652</a> &mdash; the same
-    lake, and the first study to estimate its storage from SWOT without
-    a hypsometric curve. Cells are retained where the water fraction
-    reaches 0.1 and the area quality flag is good or suspect; a 5&nbsp;&times;&nbsp;5 median filter then removes isolated
+    <a href="https://doi.org/10.1016/j.jhydrol.2026.135652">doi:10.1016/j.jhydrol.2026.135652</a>.
+    These authors work on the same lake, and theirs is the first study
+    to estimate its storage from SWOT without a hypsometric curve.
+    Cells are retained where the water fraction reaches 0.1 and the
+    area quality flag is good or suspect. A
+    5&nbsp;&times;&nbsp;5 median filter then removes the isolated
     detections, and the retained cell areas are summed.</p>
 
-    <p class="caveat">One threshold from the published method does not
-    transfer. Working on the pixel cloud, the authors keep water
-    fractions between 0.1 and 0.99. On the gridded Raster product the
-    same upper bound cuts through the middle of the open-water
-    distribution, whose fraction is 1.0 give or take noise, discarding
-    roughly 60&nbsp;% of it at random and leaving a dither: one cell in
-    two or three retained, in bands following the swath. No upper bound
-    is applied here.</p>
+    <p class="caveat">Working on the pixel cloud, these authors keep
+    water fractions between 0.1 and 0.99. We find that this upper bound
+    does not transfer to the gridded Raster product, where the
+    open-water distribution lies at a fraction of 1.0 give or take
+    noise. The bound then cuts through the middle of that distribution
+    and discards <em>ca.</em> 60&nbsp;% of it at random, leaving a
+    dither of one cell in two or three, in bands following the swath.
+    We apply no upper bound here.</p>
 
-    <p>The median filter matters more than it might seem. Over a salt
-    crust, speckle scatters false detections across the dry playa; on a
-    synthetic test that seeded 1&nbsp;706 such cells, the filter removed
-    1&nbsp;687 of them and brought the area error from
-    +2.2&nbsp;% to nil.</p>
+    <p>Over a salt crust, speckle scatters false detections across the
+    dry playa. On a synthetic test seeded with 1&nbsp;706 such cells,
+    the median filter removed 1&nbsp;687 of them and brought the area
+    error from +2.2&nbsp;% to nil.</p>
 
-    <p class="caveat">One departure from the published method deserves
-    stating. Rai and colleagues constrain SWOT with an optical water
-    mask from Sentinel-3 OLCI, because wet salt crust and very shallow
-    water return almost the same backscatter to KaRIn
-    (roughly 0&ndash;15&nbsp;dB) and cannot be told apart from radar
-    alone. That mask is not part of this pipeline; the Delft3D model
-    domain is used instead, which excludes detections outside the lake
-    but does not separate shallow water from saturated salt within it.
-    The area reported here is therefore an upper bound, and less
-    accurate than the ~15&nbsp;% error the paper achieves with the
-    fusion. Adding Sentinel-3 would be the single most useful
-    improvement.</p>
+    <p class="caveat">Rai and colleagues constrain SWOT with an optical
+    water mask from Sentinel-3 OLCI, because wet salt crust and very
+    shallow water return almost the same backscatter to KaRIn,
+    <em>ca.</em> 0&ndash;15&nbsp;dB, and cannot be separated from radar
+    alone. This mask is not part of the present pipeline. We use the
+    Delft3D model domain in its place, which excludes the detections
+    lying outside the lake but does not separate shallow water from
+    saturated salt within it. The area we report is therefore an upper
+    bound, and is less accurate than the ~15&nbsp;% error the paper
+    achieves with the fusion. Introducing Sentinel-3 would be the
+    single most useful improvement to this pipeline.</p>
 
     <p>The area series has its own panel, and the retained water mask
-    is kept for each pass: the <em>SWOT water</em> layer draws it over
-    the map, with a date selector. Opacity follows the water fraction of
-    each cell, so a half-flooded margin reads paler than open water
-    &mdash; a distinction a binary mask would hide.</p>
+    is kept for each pass. The <em>SWOT water</em> layer draws this
+    mask over the map, with a date selector. Opacity follows the water
+    fraction of each cell, so that a half-flooded margin reads paler
+    than open water. A binary mask would not convey this gradation.</p>
 
     <p class="caveat">Two SWOT passes cover the lake and can fall on
-    the same day. Their footprints overlap, so the area is computed on a
-    merged grid rather than by adding scenes together: each cell takes
-    the mean of the passes that saw it as water. Adding them would count
-    the same water twice, and nothing on the chart would betray it.</p>
+    the same day. Their footprints overlap, so the area is computed on
+    a merged grid in which each cell takes the mean of the passes that
+    saw it as water. Adding the scenes together would count the same
+    water twice, and nothing on the chart would betray it.</p>
 
     <p class="caveat">A SWOT pass does not always cover the whole lake.
     Passes observing less than 15&nbsp;% of the domain are flagged and
-    drawn as open circles: an incomplete pass would otherwise read as a
-    drying lake, an artefact the authors report for October 2024.</p>
+    drawn as open circles. Left unmarked, an incomplete pass reads as a
+    drying lake, an artefact the same authors report for October
+    2024.</p>
 
     <h3 id="me-model">Hydrodynamic model</h3>
 
     <p>Simulations use <strong>Delft3D-FLOW coupled with
     SWAN</strong>, on a curvilinear grid covering the lake. The flow
-    model is three-dimensional, with ten vertical layers; the wave
+    model is three-dimensional, with ten vertical layers. The wave
     model supplies significant wave height, mean period, mean
     direction and wavelength.</p>
 
@@ -170,63 +177,64 @@ const METHODS_HTML = `
     (1&ndash;35&nbsp;m/s), wind direction (eight compass points), water
     level (&minus;14 to &minus;6.5&nbsp;m) and salinity
     (0&ndash;250&nbsp;g/L). Each run is a <strong>steady
-    state</strong>, not a time series: the model is driven to
-    equilibrium under fixed forcing.</p>
+    state</strong> and not a time series: the model is driven to
+    equilibrium under a fixed forcing.</p>
 
-    <h3 id="me-matching">Matching observations to a scenario</h3>
+    <h3 id="me-matching">Selecting a scenario from the observations</h3>
 
-    <p>Current conditions are converted into model parameters &mdash;
-    wind speed from km/h to m/s, wind direction in the nautical
-    convention, water level from the SWOT reference &mdash; and the
-    nearest scenario is selected. Distance is normalised by the range
-    of each parameter, and wind direction is treated as circular, so
-    350&deg; matches 0&deg; rather than 315&deg;. Weights arbitrate
-    which parameter to sacrifice: wind speed and direction drive wave
-    generation, whereas salinity acts only through density.</p>
+    <p>Current conditions are converted into model parameters (wind
+    speed from km/h to m/s, wind direction in the nautical convention,
+    water level from the SWOT reference), and the nearest scenario is
+    selected. Distance is normalised by the range of each parameter,
+    and wind direction is treated as circular, so that 350&deg; matches
+    0&deg; and not 315&deg;. Weights arbitrate which parameter to
+    sacrifice: wind speed and direction drive wave generation, whereas
+    salinity acts only through density.</p>
 
-    <p>Water level is treated asymmetrically: only scenarios at or
-    <em>below</em> the observed level are eligible. Selecting a higher
-    one would simulate more water than there is, and on a shallow lake
-    that error compounds &mdash; at &minus;12.9&nbsp;m over a bed near
-    &minus;15.2&nbsp;m, moving up to &minus;12.0&nbsp;m adds nearly
-    40&nbsp;% to the depth, which changes wave dissipation, current
-    speeds and set-up. Rounding down keeps the error on the
-    conservative side.</p>
+    <p>We treat water level asymmetrically, in that only scenarios at
+    or <em>below</em> the observed level are eligible. Selecting a
+    higher one would simulate more water than is present, and on a
+    shallow lake this error compounds. At &minus;12.9&nbsp;m over a bed
+    near &minus;15.2&nbsp;m, moving up to &minus;12.0&nbsp;m adds
+    nearly 40&nbsp;% to the depth, and with it the wave dissipation,
+    the current speeds and the set-up. Rounding down keeps the error on
+    the conservative side.</p>
 
-    <p class="caveat">A Latin hypercube of 790 runs covers roughly
-    3&nbsp;% of the parameter space, so the nearest scenario is a
-    compromise, not a match. The site reports the offset on every
-    parameter, and marks in amber any condition falling outside the
-    simulated range &mdash; a strong wind, or a level below the lowest
-    modelled. Moving back through the timeline changes
-    <em>which</em> scenario applies; it does not advance time inside a
+    <p class="caveat">A Latin hypercube of 790 runs covers
+    <em>ca.</em> 3&nbsp;% of the parameter space, so the selected
+    scenario is a compromise and not a match. The site reports the
+    offset on every parameter, and marks in amber any condition falling
+    outside the simulated range, such as a strong wind or a level below
+    the lowest modelled. Moving back through the timeline changes
+    <em>which</em> scenario applies; it does not advance time within a
     simulation.</p>
 
-    <h3 id="me-fields">Displaying the model fields</h3>
+    <h3 id="me-fields">Display of the model fields</h3>
 
-    <p>Model output is in projected metres (MGA zone&nbsp;53) whereas
-    the map works in degrees, so each field is resampled onto a regular
-    geographic grid before display. Velocity components are stored in
-    the grid's own axes: they are rotated to map axes, and corrected
-    for meridian convergence (about 1.2&deg; here) so that arrows point
-    to true bearings. Wave arrows follow the SWAN convention, in which
+    <p>Model output is expressed in projected metres (MGA
+    zone&nbsp;53) whereas the map works in degrees, so each field is
+    resampled onto a regular geographic grid before display. Velocity
+    components are stored in the axes of the computational grid. They
+    are rotated to map axes and corrected for meridian convergence,
+    <em>ca.</em> 1.2&deg; here, so that the arrows point to true
+    bearings. Wave arrows follow the SWAN convention, in which
     <code>dir</code> is the direction waves come <em>from</em>; the
-    arrows drawn show propagation.</p>
+    arrows we draw show propagation.</p>
 
-    <p>Colour bounds are fitted to each scenario by default, using the
-    99th percentile rather than the maximum: a few edge cells, often
-    interpolation artefacts along the shore, would otherwise compress
-    the whole palette and leave a calm lake uniformly dark. The
-    <em>Fixed scale</em> button switches to bounds shared by every
-    scenario, which makes colours comparable along the timeline at the
-    cost of legibility on quiet days. Hovering the map reads the value
-    under the cursor.</p>
+    <p>Colour bounds are fitted to each scenario by default and taken
+    at the 99th percentile. A few edge cells, often interpolation
+    artefacts along the shore, would otherwise compress the whole
+    palette and leave a calm lake uniformly dark. The <em>Fixed
+    scale</em> button switches to bounds shared by every scenario, so
+    that colours become comparable along the timeline, at the cost of
+    legibility on quiet days. Hovering the map reads the value under
+    the cursor.</p>
 
-    <p>The wet extent of the lake is taken from a field that vanishes
-    only outside water &mdash; water level for flow, depth for waves
-    &mdash; rather than from the displayed quantity itself. Without
-    that distinction a calm lake, where currents are genuinely zero,
-    would be indistinguishable from a dry one.</p>
+    <p>We take the wet extent of the lake from a field that vanishes
+    only outside water, water level for flow and depth for waves, and
+    not from the displayed quantity itself. Without this distinction a
+    calm lake, where currents are genuinely zero, would be
+    indistinguishable from a dry one.</p>
 
     <h3 id="me-weather">Weather observations</h3>
 
@@ -234,16 +242,16 @@ const METHODS_HTML = `
     three Bureau of Meteorology stations surrounding the lake:
     <strong>Marree Airport</strong>, <strong>Oodnadatta</strong> and
     <strong>Moomba Airport</strong>. Wind speed is a ten-minute mean,
-    reported roughly every half hour. A rolling 48-hour archive is
-    maintained locally, which also drives the timeline.</p>
+    reported <em>ca.</em> every half hour. A rolling 48-hour archive is
+    maintained locally, and it also drives the timeline.</p>
 
     <p>The wind roses show the direction the wind blows
     <em>from</em>, in sixteen sectors, stacked by speed band. Day and
-    night are separated using the <strong>actual solar elevation</strong>
-    at the lake rather than clock hours, because the point of the split
-    is physical: by day, convective mixing brings momentum down from
-    aloft and the wind is stronger and gustier; at night the surface
-    layer decouples, and the wind often falls away or veers.</p>
+    night are separated on the <strong>actual solar elevation</strong>
+    at the lake and not on clock hours, the split being a physical one.
+    By day, convective mixing brings momentum down from aloft and the
+    wind is stronger and gustier. At night the surface layer decouples,
+    and the wind often falls away or veers.</p>
 
     <p class="caveat">The archive builds up over time. Only the most
     recent 72&nbsp;hours can be recovered from the Bureau in one call,
@@ -251,35 +259,34 @@ const METHODS_HTML = `
     accumulate. The note under the selector states how much the archive
     currently spans.</p>
 
-    <p class="caveat">All three stations sit on land, tens of
-    kilometres from the modelled water. Over a smooth, unobstructed
+    <p class="caveat">All three stations stand on land, tens of
+    kilometres from the modelled water. Over a smooth and unobstructed
     salt surface the wind is typically stronger than at an inland
-    station, so matched scenarios likely understate the true forcing
-    over the lake.</p>
+    station, so the matched scenarios most likely understate the true
+    forcing over the lake.</p>
 
     <h3 id="me-imagery">Satellite imagery</h3>
 
     <p>Background imagery is served by NASA GIBS. The default
-    combination is MODIS bands&nbsp;7&ndash;2&ndash;1: shortwave
-    infrared is strongly absorbed by water, which therefore appears
-    very dark, while salt crust and bare ground stay bright. The
-    shoreline reads far more clearly than in true colour, where
-    shallow turbid water and salt are easily confused. Native
-    resolution is 250&nbsp;m.</p>
+    combination is MODIS bands&nbsp;7&ndash;2&ndash;1. Water absorbs
+    shortwave infrared strongly and appears very dark, while salt crust
+    and bare ground remain bright. The shoreline reads far more clearly
+    than in true colour, where shallow turbid water and salt are easily
+    confused. Native resolution is 250&nbsp;m.</p>
 
-    <h3 id="me-download">Downloading the data</h3>
+    <h3 id="me-download">Data download</h3>
 
     <p>Each panel offers a CSV export: the full SWOT series for both
-    sites, the local weather archive for all three stations, and the
+    sites, the local weather archive for the three stations, and the
     model field currently displayed. Files are written in the browser
     and carry a commented header giving the source, the datum and the
-    processing applied, so a downloaded series remains interpretable
-    on its own.</p>
+    processing applied, so that a downloaded series remains
+    interpretable on its own.</p>
 
     <p>For the model layer, the full grid is exported where the field
-    values are available; on the static site only the pre-rendered
-    image is held, so the arrows are exported instead &mdash; coarser,
-    but they carry direction as well as magnitude.</p>
+    values are available. On the static site only the pre-rendered
+    image is held, so the arrows are exported instead. They are
+    coarser, but they carry direction as well as magnitude.</p>
 
     <h3 id="me-repro">Reproducibility</h3>
 
