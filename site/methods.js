@@ -30,34 +30,46 @@ const METHODS_HTML = `
     single pass, whereas a conventional nadir altimeter samples it
     along a one-dimensional ground track.</p>
 
-    <p>We download the granules covering the lake through
-    <code>earthaccess</code> and process them with a purpose-built
-    toolbox. At each extraction site, elevation is averaged over a
-    13&nbsp;&times;&nbsp;13 pixel window
-    (<code>buffer_size&nbsp;=&nbsp;6</code>) centred on the point. This
-    window is wide enough to suppress speckle and narrow enough not to
-    smooth the signal across the shoreline. We retain only pixels
-    flagged <code>wse_qual</code> 0&ndash;2. Two further filters are
-    applied per pass, resolution and tile: values outside
-    [&minus;16,&nbsp;6]&nbsp;m are discarded, then an
+    <p>A station is a longitude and a latitude. We download the
+    granules covering the lake through <code>earthaccess</code>, locate
+    in each one the cell of the product grid nearest the station, and
+    average the finite elevations over a square window of
+    (2<em>r</em>&nbsp;+&nbsp;1) cells on a side, with
+    <em>r</em>&nbsp;=&nbsp;6 (<code>buffer_size&nbsp;=&nbsp;6</code>),
+    that is 169 cells. The setting counts cells and not metres, so the
+    same window spans 1.30&nbsp;km on the 100&nbsp;m grid and
+    3.25&nbsp;km on the 250&nbsp;m grid.</p>
+
+    <p>The quality class is read at the station cell, and it decides
+    whether the window is admitted. Every finite elevation of an
+    admitted window then contributes, whatever its own class. We retain
+    classes 0 to 2 (<code>wse_qual_filter</code>). Estimates are then
+    screened per group of pass, resolution and tile: values outside
+    [&minus;16,&nbsp;6]&nbsp;m are discarded, and an
     interquartile-range test removes the residual outliers. Groups of
     fewer than four observations are left untouched, since a quartile
     estimate is meaningless at that size.</p>
 
-    <p class="caveat">Elevations are referenced to the
-    <strong>EGM2008 geoid</strong>, the model SWOT distributes.
-    Australian bathymetries and the contours on which the hydrodynamic
-    model is built use the <strong>Australian Height Datum</strong>,
-    reached through AUSGeoid2020. The two datums are not
-    interchangeable, and comparing a SWOT level with a model level
-    without reconciling them introduces a systematic bias. The
-    <code>wlvl_offset</code> setting exists for this reconciliation. It
-    is currently set to zero, and we consider that it should be
-    established before any published comparison. Rai and colleagues
-    found their elevations 0.45&ndash;0.55&nbsp;m above field DGPS
-    surveys and applied a uniform 0.5&nbsp;m correction. This value
-    gives an order of magnitude for the bias at this lake; it is not a
-    correction to adopt here.</p>
+    <p class="caveat">Screening at the central cell has a consequence
+    worth stating. A neighbour carrying a poor class still enters the
+    mean once the station cell has passed. In the controlled example
+    distributed with the extraction toolbox, a neighbour raised
+    9&nbsp;m above the prescribed surface displaced the window mean by
+    9/169&nbsp;=&nbsp;0.053&nbsp;m where the window held 169 cells, and
+    by 9/25&nbsp;=&nbsp;0.36&nbsp;m where a 1300&nbsp;m request on the
+    250&nbsp;m grid held only 25: the fewer the cells, the more a
+    single bad neighbour weighs. Screening each contributing cell
+    instead removes that neighbour, and it also recovers dates on which
+    the station cell failed while neighbouring cells still held water.
+    At Madigan Gulf, over the 22 eligible overpasses of 2025 at
+    100&nbsp;m spacing, the station cell alone yielded 10 estimates and
+    a 1300&nbsp;m window with per-cell screening yielded 20.</p>
+
+    <p class="caveat"><code>filter_resolution</code> is left unset, so
+    a series can hold estimates from both grids. The window then covers
+    different ground from one point to the next, and the series as
+    published records neither the resolution of each estimate nor the
+    fraction of the window that contributed to it.</p>
 
     <p> Two sites are extracted. <strong>Belt Bay</strong>
     (137.028&nbsp;&deg;E, 28.893&nbsp;&deg;S) contains the lowest point
@@ -65,12 +77,49 @@ const METHODS_HTML = `
     <strong>Madigan Gulf</strong> (137.560&nbsp;&deg;E) lies
     <em>ca.</em> 52&nbsp;km further east.</p>
 
+    <p class="caveat">Where the shore retreats, the cells that supply
+    an estimate need not lie at the station. At Belt Bay on 12 May
+    2025, a single cell about 505&nbsp;m away supplied the whole
+    estimate; on 22 June, 24 cells contributed with their centroid
+    629&nbsp;m away. An accepted date therefore establishes that water
+    was measurable somewhere in the window, and not that the station
+    itself was wet. The converse holds too: an empty window can mean an
+    exposed bed, missing coverage or a retrieval failure, and the three
+    cannot be separated from the series alone. This matters when the
+    series is used to date inundation, or to compare modelled and
+    observed levels at a shoreline cell.</p>
+
+    <p class="caveat">Full coverage does not make a large excursion
+    hydrological. On 5 August 2025 all 169 cells contributed at Belt
+    Bay and the window returned &minus;2.29&nbsp;m, with
+    &minus;2.91&nbsp;m on 27 October. Both passed the spatial screening
+    and both were removed by the temporal rule. The available data do
+    not identify their cause.</p>
+
     <p class="caveat">The series is irregular by construction. A point
-    exists only where a SWOT pass covered the site and returned valid
-    pixels, so a gap records the absence of an observation and not a
-    missing value. For this reason the chart shows points and not a
-    joined line. A dry lake returns no valid elevation at all, which
-    accounts for the early gaps in the record.</p>
+    exists only where a SWOT pass covered the site and returned an
+    accepted estimate, so a gap records the absence of an observation
+    and not a missing value. For this reason the chart shows points and
+    not a joined line.</p>
+
+    <p class="caveat">The counts above concern availability. Field
+    accuracy remains unquantified. Establishing it requires independent
+    elevation measurements during filling and recession, from a gauge
+    or an altimeter with a known vertical reference, with coincident
+    optical imagery to establish whether the station and its
+    surroundings were wet on the dates compared. The dispersion of
+    neighbouring cells is not a substitute for such a measurement.</p>
+
+    <p class="caveat">The effects described in this section are
+    measured at these same two stations by Faraon (in preparation),
+    <em>Technical note: extracting local water levels from SWOT raster
+    observations in ephemeral lakes</em>. The series published here is
+    not produced by the method that note recommends: it comes from the
+    earlier extraction path, which screens at the central cell and
+    reports no contributing fraction. Moving to per-cell screening
+    would change the dates retained, and therefore the series, so the
+    change belongs with a re-extraction of the whole archive rather
+    than with an edit to this page.</p>
 
     <h3 id="me-extent">Water extent</h3>
 
