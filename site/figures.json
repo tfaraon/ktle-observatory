@@ -1,5 +1,5 @@
 {
-  "_comment": "Images du site, par emplacement. Une entrée ne porte « file » qu'une fois l'image présente dans frontend/img/ : tant qu'elle manque, la page affiche un cadre nommant le fichier attendu. tools/fetch_figures.py télécharge les vues satellite et complète ce fichier. Les figures des livres et articles cités sont sous droit d'auteur et ne peuvent pas y être ajoutées.",
+  "_comment": "Images du site, par emplacement. Une entrée ne porte « file » qu'une fois l'image présente dans frontend/img/ : tant qu'elle manque, la page affiche un cadre nommant le fichier attendu. tools/fetch_figures.py télécharge les vues satellite et complète ce fichier. Les figures des livres et articles cités sont sous droit d'auteur et ne peuvent pas y être ajoutées. « show_placeholders » commande ce cadre, et il ne s'affiche de toute facon que sur une machine de developpement : un drapeau oublie ici ne peut pas montrer un chemin de fichier interne a un visiteur.",
   "figures": {
     "lake-from-space": {
       "credit": "NASA Worldview, MODIS Terra",

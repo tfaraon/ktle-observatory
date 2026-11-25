@@ -3086,7 +3086,15 @@
     try {
       const res = await fetch("figures.json", { cache: "no-store" });
       const doc = res.ok ? await res.json() : {};
-      state.showPlaceholders = doc.show_placeholders !== false;
+      // Le cadre nommant le fichier attendu est une aide au travail, pas
+      // quelque chose qu'un visiteur doit voir : il a ete publie une fois,
+      // affichant « Image to come » et un chemin interne sur la page
+      // Methodes, Meteo et Debits. Il ne depend donc plus du seul drapeau
+      // du manifeste, qu'il faut penser a remettre avant de publier, mais
+      // aussi du lieu d'execution.
+      const dev = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname)
+        || location.protocol === "file:";
+      state.showPlaceholders = dev && doc.show_placeholders !== false;
       state.figures = doc.figures || {};
     } catch (_) {
       state.figures = {};
