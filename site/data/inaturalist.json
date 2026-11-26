@@ -1,5 +1,5 @@
 {
- "fetched_at": "2026-11-25T03:42:26Z",
+ "fetched_at": "2026-11-26T03:02:48Z",
  "demo": false,
  "stale": false,
  "errors": [],
@@ -3113,12 +3113,7 @@
     "rank": "species",
     "group": "Insecta"
    },
-   "photo": {
-    "square": "https://inaturalist-open-data.s3.amazonaws.com/photos/23166410/square.jpeg",
-    "medium": "https://inaturalist-open-data.s3.amazonaws.com/photos/23166410/medium.jpeg",
-    "license": "CC-BY-NC-SA",
-    "attribution": "(c) Reiner Richter, some rights reserved (CC BY-NC-SA), uploaded by Reiner Richter"
-   }
+   "photo": null
   },
   {
    "count": 4,
